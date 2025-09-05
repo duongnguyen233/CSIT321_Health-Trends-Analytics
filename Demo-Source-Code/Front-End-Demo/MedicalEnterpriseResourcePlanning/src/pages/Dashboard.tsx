@@ -10,6 +10,8 @@ import {
   Divider,
 } from "@mui/material";
 import { Search, Bell } from "lucide-react";
+import SimpleChart from '../components/SimpleChart'
+import SimplePieChart from '../components/SimplePieChart'
 
 export default function Dashboard() {
   return (
@@ -300,6 +302,69 @@ export default function Dashboard() {
                 <Typography>{appointment.time}</Typography>
               </Box>
             ))}
+          </Card>
+        </Grid>
+      </Grid>
+      {/* Duong add saample charts */}
+      <Grid container spacing={3}>
+        {/* Bar Chart */}
+        <Grid item xs={12} md={4}>
+          <Card
+            sx={{
+              p: 3,
+              borderRadius: "16px",
+              backgroundColor: "white",
+              color: "white",
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Users (Bar)
+            </Typography>
+            <SimpleChart
+              metric="users"
+              chartType="bar"
+              locale="de-DE"
+              fractionDigits={1}
+            />
+          </Card>
+        </Grid>
+
+        {/* Line Chart */}
+        <Grid item xs={12} md={4}>
+          <Card
+            sx={{
+              p: 3,
+              borderRadius: "16px",
+              backgroundColor: "white",
+              color: "white",
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Users (Line)
+            </Typography>
+            <SimpleChart
+              metric="users"
+              chartType="line"
+              locale="de-DE"
+              fractionDigits={1}
+            />
+          </Card>
+        </Grid>
+
+        {/* Pie Chart */}
+        <Grid item xs={12} md={4}>
+          <Card
+            sx={{
+              p: 3,
+              borderRadius: "16px",
+              backgroundColor: "white",
+              color: "white",
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Distribution
+            </Typography>
+            <SimplePieChart />
           </Card>
         </Grid>
       </Grid>
