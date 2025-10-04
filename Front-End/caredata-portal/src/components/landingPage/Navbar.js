@@ -17,11 +17,11 @@ export default function Navbar() {
 
           {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#" className={`${link} font-semibold`}>Home</a>
-            <a href="#" className={link}>Upload CSV</a>
-            <a href="#" className={link}>Questionnaire Form</a>
-            <a href="#" className={link}>My Data</a>
-            <a href="#" className="text-base text-gray-500 hover:text-gray-700 underline">
+            <a href="/" className={`${link} font-semibold`}>Home</a>
+            <a href="/" className={link}>Upload CSV</a>
+            <a href="/" className={link}>Questionnaire Form</a>
+            <a href="/" className={link}>My Data</a>
+            <a href="/" className="text-base text-gray-500 hover:text-gray-700 underline">
               Register
             </a>
             <Button
@@ -48,11 +48,11 @@ export default function Navbar() {
         {/* Mobile Dropdown */}
         {open && (
           <div className="md:hidden border-t border-gray-300 py-5 space-y-4">
-            <a href="#" className={link}>Home</a>
-            <a href="#" className={link}>Upload CSV</a>
-            <a href="#" className={link}>Questionnaire Form</a>
-            <a href="#" className={link}>My Data</a>
-            <a href="#" className="text-gray-500 hover:text-gray-700 underline">
+            <a href="/" className={link}>Home</a>
+            <a href="/" className={link}>Upload CSV</a>
+            <a href="/" className={link}>Questionnaire Form</a>
+            <a href="/" className={link}>My Data</a>
+            <a href="/" className="text-gray-500 hover:text-gray-700 underline">
               Register
             </a>
             <Button
