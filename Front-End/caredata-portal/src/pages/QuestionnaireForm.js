@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Navbar from "../components/landingPage/Navbar";
 import Sidebar from "../components/questionnaire/Sidebar";
 import ProgressBar from "../components/questionnaire/ProgressBar";
@@ -6,11 +6,26 @@ import DomainCard from "../components/questionnaire/DomainCard";
 
 export default function QuestionnaireForm() {
   const [openDomain, setOpenDomain] = useState(1);
+  const domainRefs = useRef({});
+
+  // Scroll to domain when opened
+  useEffect(() => {
+  const section = domainRefs.current[openDomain];
+
+  // Only scroll for domains 4 and above
+  if (section && openDomain >= 4) {
+    const yOffset = -100; // adjust this value to control scroll position
+    const y =
+      section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    window.scrollTo({ top: y, behavior: "smooth" });
+  }
+}, [openDomain]);
 
   const handleToggle = (id) => {
     setOpenDomain(openDomain === id ? null : id);
   };
 
+  // --- Domains configuration ---
   const domains = [
     {
       id: 1,
@@ -38,8 +53,7 @@ export default function QuestionnaireForm() {
     {
       id: 3,
       title: "Domain 3: Unplanned Weight Loss – Significant",
-      description:
-        "Tracking significant unplanned weight loss (≥5% in 30 days or ≥10% in 180 days)",
+      description: "Tracking significant unplanned weight loss (≥5% in 30 days or ≥10% in 180 days)",
       fields: [
         { label: "Number of residents with significant unplanned weight loss *", type: "number" },
         { label: "Assessment period end date *", type: "date" },
@@ -160,17 +174,19 @@ export default function QuestionnaireForm() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-24">
       <Navbar />
 
-      <div className="flex max-w-7xl mx-auto mt-6 gap-6 px-6">
-        <Sidebar activeDomain={openDomain} onSelectDomain={setOpenDomain} />
+      <div className="flex flex-col lg:flex-row max-w-7xl mx-auto mt-4 gap-6 px-4 sm:px-6">
+        <div className="flex-shrink-0">
+          <Sidebar activeDomain={openDomain} onSelectDomain={setOpenDomain} />
+        </div>
 
-        <main className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-          <h1 className="text-2xl font-semibold mb-2 text-gray-900">
+        <main className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+          <h1 className="text-xl sm:text-2xl font-semibold mb-2 text-gray-900">
             Quality Indicator Questionnaire
           </h1>
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 mb-4 text-sm sm:text-base">
             Complete assessment across all 13 Quality Indicator domains to monitor care standards and outcomes.
           </p>
 
@@ -182,32 +198,28 @@ export default function QuestionnaireForm() {
 
           <div className="mt-8 space-y-6">
             {domains.map((domain) => (
-              <DomainCard
-                key={domain.id}
-                id={domain.id}
-                title={domain.title}
-                description={domain.description}
-                open={openDomain === domain.id}
-                onToggle={() => handleToggle(domain.id)}
-                fields={domain.fields}
-              />
+              <div key={domain.id} ref={(el) => (domainRefs.current[domain.id] = el)}>
+                <DomainCard
+                  id={domain.id}
+                  title={domain.title}
+                  description={domain.description}
+                  open={openDomain === domain.id}
+                  onToggle={() => handleToggle(domain.id)}
+                  fields={domain.fields}
+                />
+              </div>
             ))}
           </div>
 
-          {/* --- Buttons Section --- */}
-          <div className="flex justify-center items-center gap-4 mt-10 border-t pt-6">
-            <button
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-100 transition"
-            >
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-10 border-t pt-6">
+            <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-100 transition">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               Save Draft
             </button>
 
-            <button
-              className="flex items-center gap-2 px-5 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition"
-            >
+            <button className="flex items-center gap-2 px-5 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4l16 8-16 8V4z" />
               </svg>
@@ -215,7 +227,6 @@ export default function QuestionnaireForm() {
             </button>
           </div>
 
-          {/* --- Data Collection Guidelines --- */}
           <div className="mt-10 bg-gray-50 border border-gray-200 rounded-lg p-5 text-sm text-gray-700">
             <h3 className="font-semibold mb-2">Data Collection Guidelines:</h3>
             <ul className="list-disc list-inside space-y-1">

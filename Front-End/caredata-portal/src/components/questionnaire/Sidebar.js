@@ -18,7 +18,7 @@ export default function Sidebar({ activeDomain, onSelectDomain }) {
   ];
 
   return (
-    <aside className="sticky top-24 self-start bg-white rounded-xl shadow-md border border-gray-200 px-6 py-6 w-fit">
+    <aside className="bg-white rounded-xl shadow-md border border-gray-200 px-8 py-8 w-max">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Domains</h2>
 
       <nav className="flex flex-col space-y-3">
@@ -26,9 +26,9 @@ export default function Sidebar({ activeDomain, onSelectDomain }) {
           <button
             key={domain.id}
             onClick={() => onSelectDomain(domain.id)}
-            className={`text-left px-4 py-3 rounded-lg transition-all duration-200 whitespace-nowrap truncate ${
+            className={`px-5 py-3 rounded-lg text-left transition-all duration-200 whitespace-nowrap ${
               activeDomain === domain.id
-                ? "bg-gray-800 text-white shadow-md scale-[1.02]"
+                ? "bg-gray-800 text-white shadow-md"
                 : "text-gray-800 hover:bg-gray-100"
             }`}
           >
