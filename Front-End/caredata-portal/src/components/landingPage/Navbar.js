@@ -1,69 +1,66 @@
-import { useState } from "react";
-import Button from "../common/Button";
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
+  const location = useLocation();
 
-  const link = "text-base font-medium text-gray-700 hover:text-gray-900";
+  const navItems = [
+    { name: "Home", path: "/" },
+    { name: "Questionnaire Form", path: "/questionnaire" },
+    { name: "About", path: "/about" },
+    { name: "Contact", path: "/contact" },
+  ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-gray-200/95 backdrop-blur border-b border-gray-300 shadow-sm">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="h-20 flex items-center justify-between">
-          {/* Logo */}
-          <a href="/" className="text-xl font-bold text-gray-900">
+    <nav className="bg-white shadow-sm border-b border-gray-200">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-8 py-4">
+        {/* Left: Logo */}
+        <div className="flex items-center gap-3">
+          <img
+            src="/favicon.ico"
+            alt="CareData Logo"
+            className="w-9 h-9"
+          />
+          <span className="text-2xl font-bold text-gray-800 tracking-tight">
             CareData Portal
-          </a>
-
-          {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-8">
-            <a href="/" className={`${link} font-semibold`}>Home</a>
-            <a href="/" className={link}>Upload CSV</a>
-            <a href="/" className={link}>Questionnaire Form</a>
-            <a href="/" className={link}>My Data</a>
-            <a href="/" className="text-base text-gray-500 hover:text-gray-700 underline">
-              Register
-            </a>
-            <Button
-              variant="secondary"
-              size="md"
-              className="bg-gray-800 text-white hover:bg-gray-900"
-            >
-              Log In
-            </Button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-3 rounded-md hover:bg-gray-100"
-            onClick={() => setOpen(!open)}
-          >
-            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+          </span>
         </div>
 
-        {/* Mobile Dropdown */}
-        {open && (
-          <div className="md:hidden border-t border-gray-300 py-5 space-y-4">
-            <a href="/" className={link}>Home</a>
-            <a href="/" className={link}>Upload CSV</a>
-            <a href="/" className={link}>Questionnaire Form</a>
-            <a href="/" className={link}>My Data</a>
-            <a href="/" className="text-gray-500 hover:text-gray-700 underline">
-              Register
-            </a>
-            <Button
-              variant="secondary"
-              size="md"
-              className="bg-gray-800 text-white w-full hover:bg-gray-900"
-            >
-              Log In
-            </Button>
-          </div>
-        )}
+        {/* Center: Navigation Links */}
+        <div className="flex items-center gap-4">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`px-5 py-2 rounded-lg text-base font-medium transition-all duration-200 ${
+                  isActive
+                    ? "bg-blue-50 text-blue-700 shadow-md"
+                    : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                }`}
+              >
+                {item.name}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Right: Auth Buttons */}
+        <div className="flex items-center gap-3">
+          <Link
+            to="/login"
+            className="text-gray-700 hover:text-blue-600 font-medium transition-all"
+          >
+            Login
+          </Link>
+          <Link
+            to="/register"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:bg-blue-700 transition-all"
+          >
+            Register
+          </Link>
+        </div>
       </div>
     </nav>
   );
