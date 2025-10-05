@@ -1,43 +1,51 @@
-import React from "react";
-
 export default function Sidebar({ activeDomain, onSelectDomain }) {
   const domains = [
-    { id: 1, title: "Pressure Injuries" },
-    { id: 2, title: "Restrictive Practices" },
-    { id: 3, title: "Unplanned Weight Loss – Significant" },
-    { id: 4, title: "Unplanned Weight Loss – Consecutive" },
-    { id: 5, title: "Falls and Major Injury" },
-    { id: 6, title: "Medication – Polypharmacy" },
-    { id: 7, title: "Medication – Antipsychotics" },
-    { id: 8, title: "Activities of Daily Living (ADLs)" },
-    { id: 9, title: "Incontinence Care (IAD)" },
-    { id: 10, title: "Hospitalisation" },
-    { id: 11, title: "Workforce" },
-    { id: 12, title: "Consumer Experience (QCE-ACC)" },
-    { id: 13, title: "Quality of Life (QOL-ACC)" },
+    "Domain 1: Pressure Injuries",
+    "Domain 2: Restrictive Practices",
+    "Domain 3: Unplanned Weight Loss – Significant",
+    "Domain 4: Unplanned Weight Loss – Consecutive",
+    "Domain 5: Falls and Major Injury",
+    "Domain 6: Medication – Polypharmacy",
+    "Domain 7: Medication – Antipsychotics",
+    "Domain 8: Activities of Daily Living (ADLs)",
+    "Domain 9: Incontinence Care (IAD)",
+    "Domain 10: Hospitalisation",
+    "Domain 11: Workforce",
+    "Domain 12: Consumer Experience (QCE-ACC)",
+    "Domain 13: Quality of Life (QOL-ACC)",
   ];
 
   return (
-    <aside className="bg-white rounded-xl shadow-md border border-gray-200 px-8 py-8 w-max">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Domains</h2>
-
-      <nav className="flex flex-col space-y-3">
-        {domains.map((domain) => (
-          <button
-            key={domain.id}
-            onClick={() => onSelectDomain(domain.id)}
-            className={`px-5 py-3 rounded-lg text-left transition-all duration-200 whitespace-nowrap ${
-              activeDomain === domain.id
+    <aside
+      className="
+        bg-white border border-gray-200 rounded-xl shadow-sm
+        p-4 overflow-y-auto
+        min-w-[240px] sm:min-w-[260px] md:min-w-[280px] lg:min-w-[320px] xl:min-w-[360px]
+        max-w-full
+        max-h-[85vh]
+      "
+    >
+      <h2 className="text-lg font-semibold mb-4 text-gray-800 whitespace-nowrap">
+        Domains Menu
+      </h2>
+      <ul className="space-y-1">
+        {domains.map((domain, index) => (
+          <li
+            key={index}
+            onClick={() => onSelectDomain(index + 1)}
+            className={`
+              cursor-pointer rounded-md px-3 py-2
+              text-sm md:text-base font-medium
+              whitespace-nowrap
+              ${activeDomain === index + 1
                 ? "bg-gray-800 text-white shadow-md"
-                : "text-gray-800 hover:bg-gray-100"
-            }`}
+                : "text-gray-700 hover:bg-gray-100"}
+            `}
           >
-            <span className="text-base font-semibold">
-              Domain {domain.id}: {domain.title}
-            </span>
-          </button>
+            {domain}
+          </li>
         ))}
-      </nav>
+      </ul>
     </aside>
   );
 }
