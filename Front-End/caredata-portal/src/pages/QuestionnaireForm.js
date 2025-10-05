@@ -9,18 +9,14 @@ export default function QuestionnaireForm() {
   const [openDomain, setOpenDomain] = useState(1);
   const domainRefs = useRef({});
 
-  // Scroll to domain when opened
   useEffect(() => {
-  const section = domainRefs.current[openDomain];
-
-  // Only scroll for domains 4 and above
-  if (section && openDomain >= 4) {
-    const yOffset = -100; // adjust this value to control scroll position
-    const y =
-      section.getBoundingClientRect().top + window.pageYOffset + yOffset;
-    window.scrollTo({ top: y, behavior: "smooth" });
-  }
-}, [openDomain]);
+    const section = domainRefs.current[openDomain];
+    if (section && openDomain >= 4) {
+      const yOffset = -100;
+      const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }, [openDomain]);
 
   const handleToggle = (id) => {
     setOpenDomain(openDomain === id ? null : id);
@@ -33,10 +29,10 @@ export default function QuestionnaireForm() {
       title: "Domain 1: Pressure Injuries",
       description: "Assessment of pressure injury incidents and prevention measures",
       fields: [
-        { label: "Number of residents with new or worsened pressure injuries *", type: "number" },
-        { label: "Assessment period end date *", type: "date" },
-        { label: "Total number of residents", type: "number" },
-        { label: "Describe current pressure injury prevention measures", type: "textarea" },
+        { label: "Number of residents with new or worsened pressure injuries", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Total number of residents", type: "number", required: true },
+        { label: "Describe current pressure injury prevention measures", type: "textarea", required: false },
       ],
     },
     {
@@ -44,11 +40,11 @@ export default function QuestionnaireForm() {
       title: "Domain 2: Restrictive Practices",
       description: "Monitoring of restrictive practice usage and alternatives",
       fields: [
-        { label: "Number of restrictive practice incidents *", type: "number" },
-        { label: "Assessment period end date *", type: "date" },
-        { label: "Number of physical restraint uses", type: "number" },
-        { label: "Number of chemical restraint uses", type: "number" },
-        { label: "Describe alternative strategies being used", type: "textarea" },
+        { label: "Number of restrictive practice incidents", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Number of physical restraint uses", type: "number", required: true },
+        { label: "Number of chemical restraint uses", type: "number", required: true },
+        { label: "Describe alternative strategies being used", type: "textarea", required: false },
       ],
     },
     {
@@ -56,10 +52,10 @@ export default function QuestionnaireForm() {
       title: "Domain 3: Unplanned Weight Loss – Significant",
       description: "Tracking significant unplanned weight loss (≥5% in 30 days or ≥10% in 180 days)",
       fields: [
-        { label: "Number of residents with significant unplanned weight loss *", type: "number" },
-        { label: "Assessment period end date *", type: "date" },
-        { label: "Weight monitoring frequency (days)", type: "number" },
-        { label: "Describe nutritional interventions in place", type: "textarea" },
+        { label: "Number of residents with significant unplanned weight loss", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Weight monitoring frequency (days)", type: "number", required: true },
+        { label: "Describe nutritional interventions in place", type: "textarea", required: false },
       ],
     },
     {
@@ -67,10 +63,10 @@ export default function QuestionnaireForm() {
       title: "Domain 4: Unplanned Weight Loss – Consecutive",
       description: "Tracking consecutive unplanned weight loss over multiple periods",
       fields: [
-        { label: "Number of residents with consecutive weight loss *", type: "number" },
-        { label: "Assessment period end date *", type: "date" },
-        { label: "Number of consecutive periods tracked", type: "number" },
-        { label: "Assessment of intervention effectiveness", type: "textarea" },
+        { label: "Number of residents with consecutive weight loss", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Number of consecutive periods tracked", type: "number", required: true },
+        { label: "Assessment of intervention effectiveness", type: "textarea", required: false },
       ],
     },
     {
@@ -78,10 +74,10 @@ export default function QuestionnaireForm() {
       title: "Domain 5: Falls and Major Injury",
       description: "Monitoring falls incidents and resulting major injuries",
       fields: [
-        { label: "Total number of falls *", type: "number" },
-        { label: "Number of falls resulting in major injury *", type: "number" },
-        { label: "Assessment period end date *", type: "date" },
-        { label: "Describe fall prevention program", type: "textarea" },
+        { label: "Total number of falls", type: "number", required: true },
+        { label: "Number of falls resulting in major injury", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Describe fall prevention program", type: "textarea", required: false },
       ],
     },
     {
@@ -89,10 +85,10 @@ export default function QuestionnaireForm() {
       title: "Domain 6: Medication – Polypharmacy",
       description: "Assessment of residents receiving multiple medications",
       fields: [
-        { label: "Number of residents with polypharmacy (≥9 medications) *", type: "number" },
-        { label: "Assessment period end date *", type: "date" },
-        { label: "Medication review frequency (days)", type: "number" },
-        { label: "Describe deprescribing initiatives", type: "textarea" },
+        { label: "Number of residents with polypharmacy (≥9 medications)", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Medication review frequency (days)", type: "number", required: true },
+        { label: "Describe deprescribing initiatives", type: "textarea", required: false },
       ],
     },
     {
@@ -100,10 +96,10 @@ export default function QuestionnaireForm() {
       title: "Domain 7: Medication – Antipsychotics",
       description: "Monitoring antipsychotic medication usage",
       fields: [
-        { label: "Number of residents receiving antipsychotics *", type: "number" },
-        { label: "Assessment period end date *", type: "date" },
-        { label: "Number receiving behavioral interventions first", type: "number" },
-        { label: "Describe gradual dose reduction attempts", type: "textarea" },
+        { label: "Number of residents receiving antipsychotics", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Number receiving behavioral interventions first", type: "number", required: true },
+        { label: "Describe gradual dose reduction attempts", type: "textarea", required: false },
       ],
     },
     {
@@ -111,10 +107,10 @@ export default function QuestionnaireForm() {
       title: "Domain 8: Activities of Daily Living (ADLs)",
       description: "Assessment of ADL performance and support needs",
       fields: [
-        { label: "Number of residents with ADL decline *", type: "number" },
-        { label: "Assessment period end date *", type: "date" },
-        { label: "Number receiving rehabilitation services", type: "number" },
-        { label: "Describe ADL support strategies", type: "textarea" },
+        { label: "Number of residents with ADL decline", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Number receiving rehabilitation services", type: "number", required: true },
+        { label: "Describe ADL support strategies", type: "textarea", required: false },
       ],
     },
     {
@@ -122,10 +118,10 @@ export default function QuestionnaireForm() {
       title: "Domain 9: Incontinence Care (IAD)",
       description: "Management of incontinence-associated dermatitis",
       fields: [
-        { label: "Number of residents with incontinence-associated dermatitis *", type: "number" },
-        { label: "Assessment period end date *", type: "date" },
-        { label: "Number in continence management program", type: "number" },
-        { label: "Describe skin care protocols", type: "textarea" },
+        { label: "Number of residents with incontinence-associated dermatitis", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Number in continence management program", type: "number", required: true },
+        { label: "Describe skin care protocols", type: "textarea", required: false },
       ],
     },
     {
@@ -133,10 +129,10 @@ export default function QuestionnaireForm() {
       title: "Domain 10: Hospitalisation",
       description: "Tracking hospitalization rates and causes",
       fields: [
-        { label: "Number of hospitalizations *", type: "number" },
-        { label: "Assessment period end date *", type: "date" },
-        { label: "Number of potentially preventable hospitalizations", type: "number" },
-        { label: "Describe hospitalization reduction strategies", type: "textarea" },
+        { label: "Number of hospitalizations", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Number of potentially preventable hospitalizations", type: "number", required: true },
+        { label: "Describe hospitalization reduction strategies", type: "textarea", required: false },
       ],
     },
     {
@@ -144,10 +140,10 @@ export default function QuestionnaireForm() {
       title: "Domain 11: Workforce",
       description: "Staff turnover and workforce stability measures",
       fields: [
-        { label: "Staff turnover rate (%) *", type: "number" },
-        { label: "Assessment period end date *", type: "date" },
-        { label: "Number of staff retention initiatives", type: "number" },
-        { label: "Describe workforce development programs", type: "textarea" },
+        { label: "Staff turnover rate (%)", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Number of staff retention initiatives", type: "number", required: true },
+        { label: "Describe workforce development programs", type: "textarea", required: false },
       ],
     },
     {
@@ -155,10 +151,10 @@ export default function QuestionnaireForm() {
       title: "Domain 12: Consumer Experience (QCE-ACC)",
       description: "Consumer experience assessment scores",
       fields: [
-        { label: "Overall consumer satisfaction score (0-100) *", type: "number" },
-        { label: "Assessment period end date *", type: "date" },
-        { label: "Survey response rate (%)", type: "number" },
-        { label: "Describe actions taken based on consumer feedback", type: "textarea" },
+        { label: "Overall consumer satisfaction score (0-100)", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Survey response rate (%)", type: "number", required: true },
+        { label: "Describe actions taken based on consumer feedback", type: "textarea", required: false },
       ],
     },
     {
@@ -166,10 +162,21 @@ export default function QuestionnaireForm() {
       title: "Domain 13: Quality of Life (QOL-ACC)",
       description: "Quality of life assessment and measures",
       fields: [
-        { label: "Overall quality of life score (0-100) *", type: "number" },
-        { label: "Assessment period end date *", type: "date" },
-        { label: "Number of lifestyle and wellness programs", type: "number" },
-        { label: "Describe quality of life improvement initiatives", type: "textarea" },
+        { label: "Overall quality of life score (0-100)", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Number of lifestyle and wellness programs", type: "number", required: true },
+        { label: "Describe quality of life improvement initiatives", type: "textarea", required: false },
+      ],
+    },
+    {
+      id: 14,
+      title: "Domain 14: Allied Health Interventions",
+      description: "Tracking allied health service usage and outcomes",
+      fields: [
+        { label: "Number of allied health interventions", type: "number", required: true },
+        { label: "Assessment period end date", type: "date", required: true },
+        { label: "Overall quality of allied health services", type: "number", required: true },
+        { label: "Describe allied health impact", type: "textarea", required: false },
       ],
     },
   ];
@@ -178,7 +185,7 @@ export default function QuestionnaireForm() {
     <div className="min-h-screen bg-gray-50 pt-24">
       <Navbar />
 
-      <div className="flex flex-col lg:flex-row max-w-7xl mx-auto mt-4 gap-6 px-4 sm:px-6  pb-10">
+      <div className="flex flex-col lg:flex-row max-w-7xl mx-auto mt-4 gap-6 px-4 sm:px-6 pb-10">
         <div className="flex-shrink-0">
           <Sidebar activeDomain={openDomain} onSelectDomain={setOpenDomain} />
         </div>
@@ -188,14 +195,14 @@ export default function QuestionnaireForm() {
             Quality Indicator Questionnaire
           </h1>
           <p className="text-gray-600 mb-4 text-sm sm:text-base">
-            Complete assessment across all 13 Quality Indicator domains to monitor care standards and outcomes.
+            Complete assessment across all 14 Quality Indicator domains to monitor care standards and outcomes.
           </p>
 
           <div className="bg-gray-50 p-4 rounded-lg text-gray-700 text-sm border border-gray-200 mb-6">
-            Please complete all required fields marked with an asterisk (*). Numeric fields accept numbers only.
+            Please complete all required fields marked with an asterisk (*). Optional fields do not affect completion.
           </div>
 
-          <ProgressBar completed={0} total={13} />
+          <ProgressBar completed={0} total={14} />
 
           <div className="mt-8 space-y-6">
             {domains.map((domain) => (
@@ -226,16 +233,6 @@ export default function QuestionnaireForm() {
               </svg>
               Review & Submit
             </button>
-          </div>
-
-          <div className="mt-10 bg-gray-50 border border-gray-200 rounded-lg p-5 text-sm text-gray-700">
-            <h3 className="font-semibold mb-2">Data Collection Guidelines:</h3>
-            <ul className="list-disc list-inside space-y-1">
-              <li>All counts should reflect the most recent assessment period</li>
-              <li>Use consistent measurement periods across all domains</li>
-              <li>Ensure data accuracy before submission</li>
-              <li>Contact support if you need assistance with any indicators</li>
-            </ul>
           </div>
         </main>
       </div>
