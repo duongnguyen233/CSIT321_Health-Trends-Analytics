@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import Navbar from "../components/landingPage/Navbar";
+import Navbar from "../components/common/Navbar";
+import Footer from "../components/common/Footer";
 import Sidebar from "../components/questionnaire/Sidebar";
 import ProgressBar from "../components/questionnaire/ProgressBar";
 import DomainCard from "../components/questionnaire/DomainCard";
@@ -177,7 +178,7 @@ export default function QuestionnaireForm() {
     <div className="min-h-screen bg-gray-50 pt-24">
       <Navbar />
 
-      <div className="flex flex-col lg:flex-row max-w-7xl mx-auto mt-4 gap-6 px-4 sm:px-6">
+      <div className="flex flex-col lg:flex-row max-w-7xl mx-auto mt-4 gap-6 px-4 sm:px-6  pb-10">
         <div className="flex-shrink-0">
           <Sidebar activeDomain={openDomain} onSelectDomain={setOpenDomain} />
         </div>
@@ -238,6 +239,8 @@ export default function QuestionnaireForm() {
           </div>
         </main>
       </div>
+
+      <Footer />
     </div>
   );
 }

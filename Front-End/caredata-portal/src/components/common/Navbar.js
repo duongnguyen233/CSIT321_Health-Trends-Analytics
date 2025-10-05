@@ -5,11 +5,12 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
+  // ✅ Updated paths
   const navItems = [
     { name: "Home", path: "/" },
+    { name: "Upload CSV", path: "/upload-csv" },
     { name: "Questionnaire Form", path: "/questionnaire" },
-    { name: "About", path: "/about" },
-    { name: "Contact", path: "/contact" },
+    { name: "My Data", path: "/my-data" },
   ];
 
   return (
@@ -49,15 +50,25 @@ export default function Navbar() {
               </Link>
             );
           })}
+
+          {/* Login / Register Buttons */}
           <Link
             to="/login"
-            className="text-gray-700 hover:text-blue-600 font-medium"
+            className={`text-gray-700 font-medium px-4 py-2 rounded-md transition ${
+              location.pathname === "/login"
+                ? "bg-blue-50 text-blue-700 shadow-sm"
+                : "hover:text-blue-600"
+            }`}
           >
             Login
           </Link>
           <Link
             to="/register"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:bg-blue-700"
+            className={`px-4 py-2 rounded-md font-medium shadow-md transition ${
+              location.pathname === "/register"
+                ? "bg-blue-700 text-white"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
           >
             Register
           </Link>
@@ -88,14 +99,22 @@ export default function Navbar() {
           <Link
             to="/login"
             onClick={() => setIsOpen(false)}
-            className="block w-full text-left px-3 py-2 text-gray-700 hover:text-blue-600"
+            className={`block w-full text-left px-3 py-2 rounded-md font-medium ${
+              location.pathname === "/login"
+                ? "bg-blue-50 text-blue-700 shadow-sm"
+                : "text-gray-700 hover:text-blue-600"
+            }`}
           >
             Login
           </Link>
           <Link
             to="/register"
             onClick={() => setIsOpen(false)}
-            className="block w-full text-left px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className={`block w-full text-left px-3 py-2 rounded-md font-medium ${
+              location.pathname === "/register"
+                ? "bg-blue-700 text-white"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
           >
             Register
           </Link>

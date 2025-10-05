@@ -26,7 +26,7 @@ export default function Sidebar({ activeDomain, onSelectDomain }) {
       "
     >
       <h2 className="text-lg font-semibold mb-4 text-gray-800 whitespace-nowrap">
-        Domains Menu
+        Quality Indicator Domains
       </h2>
       <ul className="space-y-1">
         {domains.map((domain, index) => (
