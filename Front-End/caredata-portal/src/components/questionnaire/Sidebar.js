@@ -13,6 +13,7 @@ export default function Sidebar({ activeDomain, onSelectDomain }) {
     "Domain 11: Workforce",
     "Domain 12: Consumer Experience (QCE-ACC)",
     "Domain 13: Quality of Life (QOL-ACC)",
+    "Domain 14: Allied Health",
   ];
 
   return (
