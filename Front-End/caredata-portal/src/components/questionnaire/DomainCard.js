@@ -5,7 +5,6 @@ export default function DomainCard({ id, title, description, open, onToggle, fie
   const [status, setStatus] = useState("Not Started");
   const [formData, setFormData] = useState({});
 
-  // Handle input change
   const handleChange = (fieldLabel, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -13,16 +12,32 @@ export default function DomainCard({ id, title, description, open, onToggle, fie
     }));
   };
 
-  // Update status dynamically
+  // Treat fields as required unless explicitly required === false
+  const isRequired = (f) => f.required !== false;
+
+  // Render label with red * for required; if legacy labels contain '*', strip trailing * first
+  const renderLabel = (label, required) => {
+    const clean = String(label).replace(/\s*\*+$/, "");
+    return (
+      <>
+        {clean}
+        {required && <span className="text-red-600"> *</span>}
+      </>
+    );
+  };
+
   useEffect(() => {
-    const allFieldsFilled = fields.every((f) => {
-      const value = formData[f.label];
-      return value && value.trim() !== "";
+    const requiredFields = fields.filter(isRequired);
+    const anyTouched = Object.keys(formData).length > 0;
+
+    const allRequiredFilled = requiredFields.every((f) => {
+      const v = formData[f.label];
+      return v !== undefined && String(v).trim() !== "";
     });
 
-    if (allFieldsFilled && Object.keys(formData).length > 0) {
+    if (allRequiredFilled && (anyTouched || requiredFields.length > 0)) {
       setStatus("Completed");
-    } else if (Object.keys(formData).length > 0) {
+    } else if (anyTouched) {
       setStatus("In Progress");
     } else {
       setStatus("Not Started");
@@ -65,31 +80,40 @@ export default function DomainCard({ id, title, description, open, onToggle, fie
       {/* Collapsible content */}
       {open && (
         <div className="mt-4 space-y-4">
-          {fields.map((field, i) => (
-            <div key={i}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {field.label}
-              </label>
-              {field.type === "textarea" ? (
-                <textarea
-                  className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-gray-300"
-                  rows={3}
-                  value={formData[field.label] || ""}
-                  onChange={(e) => handleChange(field.label, e.target.value)}
-                />
-              ) : (
-                <input
-                  type={field.type}
-                  className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-gray-300"
-                  value={formData[field.label] || ""}
-                  onChange={(e) => handleChange(field.label, e.target.value)}
-                />
-              )}
-              {field.type === "number" && (
-                <p className="text-xs text-gray-400 mt-1">Minimum: 0</p>
-              )}
-            </div>
-          ))}
+          {fields.map((field, i) => {
+            const required = isRequired(field);
+            const val = formData[field.label] || "";
+
+            return (
+              <div key={i}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {renderLabel(field.label, required)}
+                </label>
+
+                {field.type === "textarea" ? (
+                  <textarea
+                    className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-gray-300"
+                    rows={3}
+                    value={val}
+                    onChange={(e) => handleChange(field.label, e.target.value)}
+                    placeholder={required ? "Required" : "Optional"}
+                  />
+                ) : (
+                  <input
+                    type={field.type}
+                    className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-gray-300"
+                    value={val}
+                    onChange={(e) => handleChange(field.label, e.target.value)}
+                    placeholder={required ? "Required" : "Optional"}
+                  />
+                )}
+
+                {field.type === "number" && (
+                  <p className="text-xs text-gray-400 mt-1">Minimum: 0</p>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
