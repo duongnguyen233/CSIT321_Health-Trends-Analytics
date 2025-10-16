@@ -1,70 +1,146 @@
-# Getting Started with Create React App
+🏥 CareData Portal
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Smart Health Quality Indicator & Reporting Platform
+(Aligned with Australian Government Health API Standards)
 
-## Available Scripts
+Developed by Team W08 – University of Wollongong
 
-In the project directory, you can run:
+📘 Overview
 
-### `npm start`
+CareData Portal is a modern web-based system that simplifies the collection, management, and reporting of Quality Indicator (QI) data for aged-care and healthcare facilities.
+It helps organizations monitor performance, visualize insights, and generate AI-based recommendations that align with Australian Government Health API standards.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The project supports data exchange principles inspired by the Australian Government Health Developer Portal
+, promoting secure interoperability and FHIR-compliant data practices.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+🧱 Project Structure
 
-### `npm test`
+CareData-Portal/
+├── Back-End/ # REST API and analytics services
+│ ├── src/
+│ ├── routes/
+│ └── package.json
+│
+├── Front-End/ # React + Tailwind UI for questionnaire & analytics
+│ ├── src/
+│ │ ├── components/
+│ │ ├── pages/
+│ │ └── App.js
+│ └── package.json
+│
+└── Demo-Source-Code/ # Lightweight examples for front/back-end integration
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+⚙️ Tech Stack
+Layer	Technologies
+Front-End	React + Vite + Tailwind CSS + Recharts
+Back-End	Node.js (Express) or Python (FastAPI / Django)
+Database	PostgreSQL / Supabase
+Deployment	AWS S3 + CloudFront (Frontend), Render / Railway (Backend)
+Interoperability	FHIR / Australian Government Health API
 
-### `npm run build`
+🚀 Getting Started
+1️⃣ Clone the Repository
+git clone https://github.com/duongnguyen233/CareData-Portal.git
+cd CareData-Portal
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2️⃣ Back-End Setup
+cd Back-End
+npm install
+npm run dev
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Runs on http://localhost:5000
 
-### `npm run eject`
+3️⃣ Front-End Setup
+cd ../Front-End
+npm install
+npm run dev
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Runs on http://localhost:3000
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+🧠 Key Features
+🩺 Health Data Management
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Collects and stores data across 14 Quality Indicator domains
 
-## Learn More
+Each domain includes structured fields and validation
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+📊 Analytics Dashboard
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Radar, Bar, and Line charts to visualize performance
 
-### Code Splitting
+Auto-generated reports based on real-time data
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+🤖 AI-Assisted Insights
 
-### Analyzing the Bundle Size
+Predictive analytics for early issue detection
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Provides improvement recommendations for each domain
 
-### Making a Progressive Web App
+🔒 Compliance & Integration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Built with FHIR-aligned data structures
 
-### Advanced Configuration
+Compatible with Australian Government Health API system
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Follows privacy and security best practices
 
-### Deployment
+🏛️ Compliance & Standards
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+The CareData Portal is developed under principles aligned with:
 
-### `npm run build` fails to minify
+Australian Digital Health Agency (ADHA) interoperability framework
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Health Interoperability Framework (HIF)
+
+Privacy Act 1988 (Cth) (handling of sensitive health data)
+
+FHIR (Fast Healthcare Interoperability Resources) standards
+
+Built to align with the Australian Government Health Developer Portal
+ guidelines.
+
+👥 Team W08 – University of Wollongong
+
+Tuan Duong Nguyen (Dylan)
+
+Ngoc Nhi Nguyen (Nelly)
+
+Hazza Mohamed Omar Mohamed Alhashmi
+
+Dang Bao Nguyen (Wayne)
+
+Binh Minh Dau
+
+📜 License
+
+This project was developed as part of CSIT321 – Health Trends Analytics,
+University of Wollongong (UOW).
+
+© 2025 Team W08 — All rights reserved.
+For educational and research use only.
+
+🧩 Future Enhancements
+
+Integration with My Health Record API
+
+Real-time synchronization using FHIR endpoints
+
+Enhanced role-based access control
+
+Custom analytics dashboard for healthcare organizations
+
+Cloud-deployed reporting API for large-scale data analytics
+
+🩵 Government-Grade Reliability
+
+CareData Portal is designed with a focus on:
+
+Data transparency
+
+Health interoperability compliance
+
+Standardized government integration APIs
+
+Our mission is to bridge healthcare data collection and national interoperability through modern technology — empowering aged-care and healthcare providers to improve quality, safety, and patient outcomes.
