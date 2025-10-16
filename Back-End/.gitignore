@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environment
+.env
+venv/
+.env.*
+.venv/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+
+# Byte-compiled files
+*.log
+
+# Build
+build/
+dist/
+
+# Local databases
+*.db
+*.sqlite3
