@@ -1,44 +1,32 @@
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 export default function MyDataPage() {
+  const navigate = useNavigate();
+
   const [data] = useState([
-    {
-      id: 1,
-      domain: "Pressure Injuries",
-      indicator: "New or worsened injuries",
-      completion: "Completed",
-      lastUpdated: "2025-09-15",
-    },
-    {
-      id: 2,
-      domain: "Restrictive Practices",
-      indicator: "Physical and chemical restraint uses",
-      completion: "In Progress",
-      lastUpdated: "2025-09-20",
-    },
-    {
-      id: 3,
-      domain: "Unplanned Weight Loss – Significant",
-      indicator: "≥5% loss in 30 days",
-      completion: "Completed",
-      lastUpdated: "2025-09-25",
-    },
-    {
-      id: 4,
-      domain: "Medication – Polypharmacy",
-      indicator: "≥9 medications per resident",
-      completion: "Not Started",
-      lastUpdated: "—",
-    },
+    { id: 1, domain: "Pressure Injuries", completion: "Completed", lastUpdated: "2025-09-15" },
+    { id: 2, domain: "Restrictive Practices", completion: "In Progress", lastUpdated: "2025-09-20" },
+    { id: 3, domain: "Unplanned Weight Loss – Significant", completion: "Completed", lastUpdated: "2025-09-25" },
+    { id: 4, domain: "Unplanned Weight Loss – Consecutive", completion: "Not Started", lastUpdated: "—" },
+    { id: 5, domain: "Falls and Major Injury", completion: "Completed", lastUpdated: "2025-09-27" },
+    { id: 6, domain: "Medication – Polypharmacy", completion: "In Progress", lastUpdated: "2025-09-28" },
+    { id: 7, domain: "Medication – Antipsychotics", completion: "Completed", lastUpdated: "2025-09-29" },
+    { id: 8, domain: "Activities of Daily Living (ADLs)", completion: "In Progress", lastUpdated: "2025-09-29" },
+    { id: 9, domain: "Incontinence Care (IAD)", completion: "Not Started", lastUpdated: "—" },
+    { id: 10, domain: "Hospitalisation", completion: "Completed", lastUpdated: "2025-09-30" },
+    { id: 11, domain: "Workforce", completion: "Completed", lastUpdated: "2025-09-30" },
+    { id: 12, domain: "Consumer Experience (QCE-ACC)", completion: "In Progress", lastUpdated: "2025-09-30" },
+    { id: 13, domain: "Quality of Life (QOL-ACC)", completion: "Completed", lastUpdated: "2025-10-01" },
+    { id: 14, domain: "Allied Health Interventions", completion: "Completed", lastUpdated: "2025-10-01" },
   ]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar />
+      <Navbar active="My Data" />
 
-      {/* Main Section */}
       <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 flex justify-center">
         <div className="bg-white w-full max-w-6xl rounded-2xl shadow p-8 border border-gray-200">
           <h1 className="text-3xl font-semibold text-gray-900 mb-3 text-center">
@@ -48,13 +36,12 @@ export default function MyDataPage() {
             View and manage the data you’ve submitted from your Quality Indicator Questionnaire.
           </p>
 
-          {/* Table Section */}
+          {/* Data Table */}
           <div className="overflow-x-auto">
             <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden">
               <thead className="bg-gray-100 border-b">
                 <tr>
                   <th className="text-left text-gray-700 font-semibold py-3 px-4">Domain</th>
-                  <th className="text-left text-gray-700 font-semibold py-3 px-4">Indicator</th>
                   <th className="text-left text-gray-700 font-semibold py-3 px-4">Completion</th>
                   <th className="text-left text-gray-700 font-semibold py-3 px-4">Last Updated</th>
                   <th className="text-center text-gray-700 font-semibold py-3 px-4">Actions</th>
@@ -62,12 +49,8 @@ export default function MyDataPage() {
               </thead>
               <tbody>
                 {data.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="border-b hover:bg-gray-50 transition"
-                  >
+                  <tr key={row.id} className="border-b hover:bg-gray-50 transition">
                     <td className="py-3 px-4 font-medium text-gray-900">{row.domain}</td>
-                    <td className="py-3 px-4 text-gray-700">{row.indicator}</td>
                     <td>
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -83,7 +66,14 @@ export default function MyDataPage() {
                     </td>
                     <td className="py-3 px-4 text-gray-600">{row.lastUpdated}</td>
                     <td className="text-center py-3 px-4">
-                      <button className="text-blue-600 hover:text-blue-800 font-medium">
+                      <button
+                        onClick={() =>
+                          navigate(`/domain/${row.id}`, {
+                            state: { completion: row.completion },
+                          })
+                        }
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
                         View Details
                       </button>
                     </td>
@@ -99,19 +89,19 @@ export default function MyDataPage() {
             <ul className="text-gray-700 list-disc list-inside space-y-1 text-sm">
               <li>
                 Total domains completed:{" "}
-                <span className="font-semibold text-green-700">2 / 13</span>
+                <span className="font-semibold text-blue-700">8 / 14</span>
               </li>
               <li>
                 In progress:{" "}
-                <span className="font-semibold text-yellow-700">1</span>
+                <span className="font-semibold text-yellow-700">4</span>
               </li>
               <li>
                 Not started:{" "}
-                <span className="font-semibold text-gray-600">10</span>
+                <span className="font-semibold text-gray-600">2</span>
               </li>
               <li>
                 Last submission update:{" "}
-                <span className="font-semibold">September 25, 2025</span>
+                <span className="font-semibold">October 1, 2025</span>
               </li>
             </ul>
           </div>
@@ -121,13 +111,14 @@ export default function MyDataPage() {
             <button className="bg-white border border-gray-300 px-4 py-2 rounded-md text-gray-700 font-medium hover:bg-gray-100 transition">
               Export as CSV
             </button>
-            <button className="bg-gray-900 text-white px-5 py-2 rounded-md font-medium hover:bg-black transition">
+            <button
+              onClick={() => navigate("/questionnaire")}
+              className="bg-blue-700 text-white px-5 py-2 rounded-md font-medium hover:bg-blue-800 transition">
               Update Questionnaire
             </button>
           </div>
         </div>
       </main>
-
       <Footer />
     </div>
   );
