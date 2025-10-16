@@ -48,7 +48,7 @@ export default function DomainDetailsPage() {
   const location = useLocation();
   const completionStatus = location.state?.completion || "Completed";
 
-  const domain = mockDomainData.find((d) => d.id === Number(id));
+  // const domain = mockDomainData.find((d) => d.id === Number(id));
   const domainName = domainTitles[Number(id) - 1] || "Domain Analysis";
   const isDataAvailable = completionStatus !== "Not Started" && completionStatus !== "In Progress";
 
