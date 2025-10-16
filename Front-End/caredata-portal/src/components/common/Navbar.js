@@ -10,7 +10,7 @@ export default function Navbar() {
     { name: "Home", path: "/" },
     { name: "Upload CSV", path: "/upload-csv" },
     { name: "Questionnaire Form", path: "/questionnaire" },
-    { name: "My Data", path: "/my-data" },
+    { name: "My Data", path: "/mydata" },
   ];
 
   return (
@@ -35,7 +35,9 @@ export default function Navbar() {
         {/* Desktop Nav */}
         <div className="hidden sm:flex items-center gap-4">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive =
+              location.pathname === item.path ||
+              (location.pathname.startsWith("/domain") && item.path === "/mydata");
             return (
               <Link
                 key={item.path}
