@@ -1,22 +1,45 @@
-import Card from "../common/Card";
-
 export default function WhyChooseUs() {
   const reasons = [
-    { title: "Fast & Reliable", desc: "Submit reports in minutes, not hours." },
-    { title: "Secure", desc: "Your data is encrypted end-to-end." },
-    { title: "Trusted", desc: "Fully compliant with government standards." },
+    {
+      title: "Secure & Compliant",
+      desc: "Our platform ensures your data is securely submitted, keeping you compliant with all government regulations."
+    },
+    {
+      title: "Time-Saving Efficiency",
+      desc: "Reduce administrative burdens by automating the data reporting process, saving your team valuable time."
+    },
+    {
+      title: "Tailored Solutions",
+      desc: "Whether you’re uploading CSV files or integrating with an existing system, we provide flexible solutions that meet your facility’s needs."
+    }
   ];
 
   return (
-    <section className="bg-white py-16">
-      <div className="max-w-6xl mx-auto px-6 text-center">
-        <h2 className="text-3xl font-bold mb-6">Why Choose CareData Portal?</h2>
-        <p className="text-gray-600 mb-12">
-          We simplify compliance, reduce reporting errors, and save your facility time.
-        </p>
-        <div className="grid md:grid-cols-3 gap-8">
-          {reasons.map((r, idx) => (
-            <Card key={idx} title={r.title}>{r.desc}</Card>
+    <section className="relative bg-white py-20 overflow-hidden">
+      <div className="relative max-w-6xl mx-auto px-6">
+        <div className="text-left mb-12">
+          <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-2">
+            Purposes
+          </p>
+          <h2 className="text-4xl font-bold text-gray-900 leading-tight">
+            Why Choosing Us
+          </h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-10">
+          {reasons.map((reason, idx) => (
+            <div
+              key={idx}
+              className="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 text-left border border-gray-100"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                {reason.title}
+              </h3>
+              {/* 👇 justify the copy inside each card */}
+              <p className="text-gray-600 leading-relaxed text-justify" style={{ hyphens: "auto" }}>
+                {reason.desc}
+              </p>
+            </div>
           ))}
         </div>
       </div>

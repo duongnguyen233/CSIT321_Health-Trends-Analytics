@@ -1,5 +1,6 @@
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
+import MyDataSidebar from "../components/mydata/MyDataSidebar";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -27,10 +28,14 @@ export default function MyDataPage() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar active="My Data" />
 
-      <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 flex justify-center">
-        <div className="bg-white w-full max-w-6xl rounded-2xl shadow p-8 border border-gray-200">
+      <main className="flex flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto gap-6 w-full">
+        {/* Sidebar */}
+        <MyDataSidebar activePage="My Data" />
+
+        {/* Main Content */}
+        <div className="flex-1 bg-white rounded-2xl shadow p-8 border border-gray-200">
           <h1 className="text-3xl font-semibold text-gray-900 mb-3 text-center">
-            My Data Dashboard
+            My Data
           </h1>
           <p className="text-gray-600 text-center mb-8">
             View and manage the data you’ve submitted from your Quality Indicator Questionnaire.
@@ -69,10 +74,13 @@ export default function MyDataPage() {
                       <button
                         onClick={() =>
                           navigate(`/domain/${row.id}`, {
-                            state: { completion: row.completion },
+                            state: {
+                              completion: row.completion,
+                              domainName: row.domain, // ✅ Send domain name
+                            },
                           })
                         }
-                        className="text-blue-600 hover:text-blue-800 font-medium"
+                        className="text-orange-600 hover:text-orange-700 font-medium"
                       >
                         View Details
                       </button>
@@ -89,7 +97,7 @@ export default function MyDataPage() {
             <ul className="text-gray-700 list-disc list-inside space-y-1 text-sm">
               <li>
                 Total domains completed:{" "}
-                <span className="font-semibold text-blue-700">8 / 14</span>
+                <span className="font-semibold text-orange-600">8 / 14</span>
               </li>
               <li>
                 In progress:{" "}
@@ -113,7 +121,8 @@ export default function MyDataPage() {
             </button>
             <button
               onClick={() => navigate("/questionnaire")}
-              className="bg-blue-700 text-white px-5 py-2 rounded-md font-medium hover:bg-blue-800 transition">
+              className="bg-orange-500 text-white px-5 py-2 rounded-md font-medium hover:bg-orange-600 transition"
+            >
               Update Questionnaire
             </button>
           </div>

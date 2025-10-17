@@ -1,8 +1,10 @@
 import Navbar from "../components/common/Navbar";
 import Hero from "../components/landingPage/Hero";
-import Features from "../components/landingPage/Features";
-import HowItWorks from "../components/landingPage/HowItWorks";
+import ClientOverview from "../components/landingPage/ClientOverview";
+import UploadDocument from "../components/landingPage/UploadDocument";
 import WhyChooseUs from "../components/landingPage/WhyChooseUs";
+import FormFilling from "../components/landingPage/FormFilling";
+import DataSubmission from "../components/landingPage/DataSubmission";
 import Footer from "../components/common/Footer";
 
 export default function LandingPage() {
@@ -10,9 +12,11 @@ export default function LandingPage() {
     <>
       <Navbar />
       <Hero />
-      <Features />
-      <HowItWorks />
       <WhyChooseUs />
+      <UploadDocument />
+      <FormFilling/>
+      <DataSubmission />
+      <ClientOverview />
       <Footer />
     </>
   );
