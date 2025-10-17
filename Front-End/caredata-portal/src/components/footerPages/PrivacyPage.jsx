@@ -16,25 +16,25 @@ export default function PrivacyPage() {
             at the University of Wollongong for research and educational purposes.
           </p>
 
-          <h2 className="text-xl font-semibold text-blue-700 mb-2">Information We Collect</h2>
+          <h2 className="text-xl font-semibold text-orange-400 mb-2">Information We Collect</h2>
           <p className="text-gray-700 mb-4">
             We collect information such as user registration details, uploaded datasets, and responses to
             quality indicator questionnaires to support analysis and reporting.
           </p>
 
-          <h2 className="text-xl font-semibold text-blue-700 mb-2">How We Use Data</h2>
+          <h2 className="text-xl font-semibold text-orange-400 mb-2">How We Use Data</h2>
           <p className="text-gray-700 mb-4">
             Collected data is used solely for internal research and analytics to identify trends,
             improve healthcare quality, and ensure compliance with Australian Department of Health standards.
           </p>
 
-          <h2 className="text-xl font-semibold text-blue-700 mb-2">Security</h2>
+          <h2 className="text-xl font-semibold text-orange-400 mb-2">Security</h2>
           <p className="text-gray-700 mb-4">
             All information is securely stored with restricted access. Encryption and secure protocols are
             used to maintain confidentiality and integrity of your data.
           </p>
 
-          <h2 className="text-xl font-semibold text-blue-700 mb-2">Contact</h2>
+          <h2 className="text-xl font-semibold text-orange-400 mb-2">Contact</h2>
           <p className="text-gray-700">
             For any privacy concerns, contact us at <span className="font-semibold">caredata@uow.edu.au</span>.
           </p>

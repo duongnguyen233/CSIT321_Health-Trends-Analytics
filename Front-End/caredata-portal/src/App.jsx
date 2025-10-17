@@ -9,8 +9,9 @@ import RegisterPage from "./pages/RegisterPage";
 import UploadCSVPage from "./pages/UploadCSVPage";
 import MyDataPage from "./pages/MyDataPage";
 import DomainDetailsPage from "./components/mydata/DomainDetailsPage";
-
-// --- New Pages ---
+import SettingPage from "./components/mydata/SettingPage";
+import DocumentationPage from "./components/mydata/DocumentationPage";
+import Dashboard from "./components/mydata/Dashboard";
 import PrivacyPage from "./components/footerPages/PrivacyPage";
 import TermsPage from "./components/footerPages/TermsPage";
 import ContactPage from "./components/footerPages/ContactPage";
@@ -25,6 +26,9 @@ export default function App() {
         <Route path="/upload-csv" element={<UploadCSVPage />} />
         <Route path="/mydata" element={<MyDataPage />} />
         <Route path="/domain/:id" element={<DomainDetailsPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/settings" element={<SettingPage />} />
+        <Route path="/documentation" element={<DocumentationPage />} />
 
         {/* Auth routes */}
         <Route path="/login" element={<LoginPage />} />

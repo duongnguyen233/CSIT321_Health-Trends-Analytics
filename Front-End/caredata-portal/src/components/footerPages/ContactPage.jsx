@@ -44,7 +44,7 @@ export default function ContactPage() {
 
             <button
               type="submit"
-              className="w-full bg-blue-700 text-white font-medium py-2 rounded-md hover:bg-blue-800 transition"
+              className="w-full bg-primary text-white font-medium py-2 rounded-md hover:bg-orange-600 transition"
             >
               Send Message
             </button>
@@ -52,10 +52,10 @@ export default function ContactPage() {
 
           <div className="mt-10 text-center text-gray-600 text-sm">
             <p>
-              Project developed by <span className="font-semibold text-blue-700">Team W08</span>,
+              Project developed by <span className="font-semibold text-orange-400">Team W08</span>,
               University of Wollongong.
             </p>
-            <p>Email: <span className="text-blue-600">caredata@uow.edu.au</span></p>
+            <p>Email: <span className="text-orange-400">caredata@uow.edu.au</span></p>
           </div>
         </div>
       </main>

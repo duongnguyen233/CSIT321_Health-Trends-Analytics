@@ -69,7 +69,7 @@ export default function UploadCSVPage() {
             {/* Upload button */}
             <button
               type="submit"
-              className="w-full bg-gray-900 text-white py-2.5 rounded-md font-medium hover:bg-black transition"
+              className="w-full bg-primary text-white py-2.5 rounded-md font-medium hover:bg-orange-600 transition"
             >
               Upload File
             </button>

@@ -15,25 +15,25 @@ export default function TermsPage() {
             University of Wollongong for research and educational purposes.
           </p>
 
-          <h2 className="text-xl font-semibold text-blue-700 mb-2">Purpose</h2>
+          <h2 className="text-xl font-semibold text-orange-400 mb-2">Purpose</h2>
           <p className="text-gray-700 mb-4">
             The CareData Portal is designed to assist aged care and health research by supporting
             data collection and analysis. It is not intended for direct clinical use or patient treatment.
           </p>
 
-          <h2 className="text-xl font-semibold text-blue-700 mb-2">User Responsibilities</h2>
+          <h2 className="text-xl font-semibold text-orange-400 mb-2">User Responsibilities</h2>
           <p className="text-gray-700 mb-4">
             Users agree to provide accurate data and not misuse the platform. Any unauthorised access,
             tampering, or misuse of data may lead to restriction or removal.
           </p>
 
-          <h2 className="text-xl font-semibold text-blue-700 mb-2">Intellectual Property</h2>
+          <h2 className="text-xl font-semibold text-orange-400 mb-2">Intellectual Property</h2>
           <p className="text-gray-700 mb-4">
             All code, design, and visualisations belong to Team W08.
             The data provided by users remains their property but may be used in aggregated, anonymised research results.
           </p>
 
-          <h2 className="text-xl font-semibold text-blue-700 mb-2">Liability Disclaimer</h2>
+          <h2 className="text-xl font-semibold text-orange-400 mb-2">Liability Disclaimer</h2>
           <p className="text-gray-700 mb-4">
             The portal is provided “as is” for research purposes.
             The University of Wollongong and Team W08 are not responsible for data interpretation or decision-making based on analytics displayed.
