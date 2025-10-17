@@ -70,7 +70,9 @@ export default function Navbar() {
             const isActive =
               location.pathname === item.path ||
               (location.pathname.startsWith("/domain") && item.path === "/dashboard") ||
-              (location.pathname.startsWith("/mydata") && item.path === "/dashboard");
+              (location.pathname.startsWith("/mydata") && item.path === "/dashboard") ||
+              (location.pathname.startsWith("/setting") && item.path === "/dashboard") ||
+              (location.pathname.startsWith("/documentation") && item.path === "/dashboard");
             return (
               <Link
                 key={item.path}
