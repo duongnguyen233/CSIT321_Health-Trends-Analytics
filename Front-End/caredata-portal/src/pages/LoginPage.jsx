@@ -3,6 +3,8 @@ import { AuthContext } from "../context/AuthContext";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+
 export default function LoginPage() {
   const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
@@ -15,11 +17,12 @@ export default function LoginPage() {
 
     try {
       // Send login request to FastAPI
-      const response = await fetch("http://127.0.0.1:8000/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+
 
       if (!response.ok) {
         throw new Error("Invalid email or password");
@@ -32,7 +35,7 @@ export default function LoginPage() {
       localStorage.setItem("token", token);
 
       // Fetch current user info using token
-      const userRes = await fetch("http://127.0.0.1:8000/auth/me", {
+      const userRes = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
