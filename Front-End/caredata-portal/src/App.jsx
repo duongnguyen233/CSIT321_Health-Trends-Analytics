@@ -15,10 +15,12 @@ import Dashboard from "./components/mydata/Dashboard";
 import PrivacyPage from "./components/footerPages/PrivacyPage";
 import TermsPage from "./components/footerPages/TermsPage";
 import ContactPage from "./components/footerPages/ContactPage";
+import ScrollToTop from "./components/common/ScrollToTop";
 
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         {/* Main routes */}
         <Route path="/" element={<LandingPage />} />
