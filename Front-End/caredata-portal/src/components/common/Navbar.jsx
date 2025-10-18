@@ -40,7 +40,7 @@ export default function Navbar() {
 
   const navItems = [
     { name: "Home", path: "/" },
-    { name: "Upload CSV", path: "/upload-csv" },
+    { name: "Upload Data", path: "/upload-csv" },
     { name: "Questionnaire", path: "/questionnaire" },
     { name: "My Data", path: "/dashboard" },
   ];

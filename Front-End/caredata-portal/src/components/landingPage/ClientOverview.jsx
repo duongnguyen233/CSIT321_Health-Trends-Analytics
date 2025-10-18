@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { ArrowLeftIcon, ArrowRightIcon, StarIcon } from "@heroicons/react/24/solid";
 
 export default function ClientOverview() {
@@ -28,16 +29,34 @@ export default function ClientOverview() {
     },
   ];
 
+  // Animation variants
+  const fadeUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: (delay = 0) => ({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.8, delay, ease: "easeOut" },
+    }),
+  };
+
   return (
     <section className="relative bg-[#f8f8f8] py-24 overflow-hidden">
       <div className="max-w-6xl mx-auto px-6 text-center">
         {/* Section Header */}
-        <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-2">
-          Testimonials
-        </p>
-        <h2 className="text-4xl font-bold text-gray-900 mb-12">
-          Our Client Reviews
-        </h2>
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.4 }}
+          custom={0.1}
+        >
+          <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-2">
+            Testimonials
+          </p>
+          <h2 className="text-4xl font-bold text-gray-900 mb-12">
+            Our Client Reviews
+          </h2>
+        </motion.div>
 
         {/* Testimonials Grid */}
         <div className="grid md:grid-cols-3 gap-8 relative">
@@ -47,9 +66,14 @@ export default function ClientOverview() {
           </button>
 
           {testimonials.map((client, idx) => (
-            <div
+            <motion.div
               key={idx}
               className="relative rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all bg-gray-50"
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+              custom={idx * 0.2 + 0.2}
             >
               {/* Background image */}
               <img
@@ -87,7 +111,7 @@ export default function ClientOverview() {
                   ))}
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
 
           {/* Right Arrow */}
