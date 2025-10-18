@@ -3,26 +3,30 @@ import Footer from "../components/common/Footer";
 import MyDataSidebar from "../components/mydata/MyDataSidebar";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { DOMAINS } from "../components/common/domains";
 
 export default function MyDataPage() {
   const navigate = useNavigate();
 
-  const [data] = useState([
-    { id: 1, domain: "Pressure Injuries", completion: "Completed", lastUpdated: "2025-09-15" },
-    { id: 2, domain: "Restrictive Practices", completion: "In Progress", lastUpdated: "2025-09-20" },
-    { id: 3, domain: "Unplanned Weight Loss – Significant", completion: "Completed", lastUpdated: "2025-09-25" },
-    { id: 4, domain: "Unplanned Weight Loss – Consecutive", completion: "Not Started", lastUpdated: "—" },
-    { id: 5, domain: "Falls and Major Injury", completion: "Completed", lastUpdated: "2025-09-27" },
-    { id: 6, domain: "Medication – Polypharmacy", completion: "In Progress", lastUpdated: "2025-09-28" },
-    { id: 7, domain: "Medication – Antipsychotics", completion: "Completed", lastUpdated: "2025-09-29" },
-    { id: 8, domain: "Activities of Daily Living (ADLs)", completion: "In Progress", lastUpdated: "2025-09-29" },
-    { id: 9, domain: "Incontinence Care (IAD)", completion: "Not Started", lastUpdated: "—" },
-    { id: 10, domain: "Hospitalisation", completion: "Completed", lastUpdated: "2025-09-30" },
-    { id: 11, domain: "Workforce", completion: "Completed", lastUpdated: "2025-09-30" },
-    { id: 12, domain: "Consumer Experience (QCE-ACC)", completion: "In Progress", lastUpdated: "2025-09-30" },
-    { id: 13, domain: "Quality of Life (QOL-ACC)", completion: "Completed", lastUpdated: "2025-10-01" },
-    { id: 14, domain: "Allied Health Interventions", completion: "Completed", lastUpdated: "2025-10-01" },
-  ]);
+  // ✅ Use shared DOMAINS list instead of hardcoded array
+  const [data] = useState(
+    DOMAINS.map((domain, index) => ({
+      id: index + 1,
+      domain,
+      completion:
+        index % 3 === 0
+          ? "Completed"
+          : index % 3 === 1
+          ? "In Progress"
+          : "Not Started",
+      lastUpdated:
+        index % 3 === 0
+          ? "2025-09-30"
+          : index % 3 === 1
+          ? "2025-09-25"
+          : "—",
+    }))
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -46,16 +50,29 @@ export default function MyDataPage() {
             <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden">
               <thead className="bg-gray-100 border-b">
                 <tr>
-                  <th className="text-left text-gray-700 font-semibold py-3 px-4">Domain</th>
-                  <th className="text-left text-gray-700 font-semibold py-3 px-4">Completion</th>
-                  <th className="text-left text-gray-700 font-semibold py-3 px-4">Last Updated</th>
-                  <th className="text-center text-gray-700 font-semibold py-3 px-4">Actions</th>
+                  <th className="text-left text-gray-700 font-semibold py-3 px-4">
+                    Domain
+                  </th>
+                  <th className="text-left text-gray-700 font-semibold py-3 px-4">
+                    Completion
+                  </th>
+                  <th className="text-left text-gray-700 font-semibold py-3 px-4">
+                    Last Updated
+                  </th>
+                  <th className="text-center text-gray-700 font-semibold py-3 px-4">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {data.map((row) => (
-                  <tr key={row.id} className="border-b hover:bg-gray-50 transition">
-                    <td className="py-3 px-4 font-medium text-gray-900">{row.domain}</td>
+                  <tr
+                    key={row.id}
+                    className="border-b hover:bg-gray-50 transition"
+                  >
+                    <td className="py-3 px-4 font-medium text-gray-900">
+                      {row.domain}
+                    </td>
                     <td>
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -69,14 +86,16 @@ export default function MyDataPage() {
                         {row.completion}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-600">{row.lastUpdated}</td>
+                    <td className="py-3 px-4 text-gray-600">
+                      {row.lastUpdated}
+                    </td>
                     <td className="text-center py-3 px-4">
                       <button
                         onClick={() =>
                           navigate(`/domain/${row.id}`, {
                             state: {
                               completion: row.completion,
-                              domainName: row.domain, // ✅ Send domain name
+                              domainName: row.domain,
                             },
                           })
                         }
@@ -93,7 +112,9 @@ export default function MyDataPage() {
 
           {/* Summary Section */}
           <div className="mt-10 bg-gray-50 border border-gray-200 rounded-lg p-6">
-            <h3 className="font-semibold text-lg text-gray-800 mb-3">Data Summary:</h3>
+            <h3 className="font-semibold text-lg text-gray-800 mb-3">
+              Data Summary:
+            </h3>
             <ul className="text-gray-700 list-disc list-inside space-y-1 text-sm">
               <li>
                 Total domains completed:{" "}
@@ -128,6 +149,7 @@ export default function MyDataPage() {
           </div>
         </div>
       </main>
+
       <Footer />
     </div>
   );
