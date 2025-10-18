@@ -1,13 +1,31 @@
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
 export default function FormFilling() {
   const navigate = useNavigate();
 
+  // Animation variants
+  const fadeUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: (delay = 0) => ({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.8, delay, ease: "easeOut" },
+    }),
+  };
+
   return (
     <section className="relative bg-white py-24 overflow-hidden">
       <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-        {/* 📝 Left side */}
-        <div className="text-left">
+        {/* 📝 Left side (Text Content) */}
+        <motion.div
+          className="text-left"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.4 }}
+          custom={0.1}
+        >
           <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-2">
             Questionnaire
           </p>
@@ -28,37 +46,56 @@ export default function FormFilling() {
           >
             More Information
           </button>
-        </div>
+        </motion.div>
 
         {/* 🖼️ Right side — refined grid */}
-        <div className="grid grid-cols-2 gap-3">
+        <motion.div
+          className="grid grid-cols-2 gap-3"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.4 }}
+          custom={0.3}
+        >
           {/* Column 1: two stacked images closer together */}
           <div className="flex flex-col gap-3 justify-center">
-            <div className="relative w-full h-56 rounded-2xl overflow-visible flex justify-center items-center">
+            <motion.div
+              className="relative w-full h-56 rounded-2xl overflow-visible flex justify-center items-center"
+              variants={fadeUp}
+              custom={0.4}
+            >
               <img
                 src="/form1.png"
                 alt="Form Example 1"
                 className="w-full h-full object-contain scale-110 drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)]"
               />
-            </div>
-            <div className="relative w-full h-64 rounded-2xl overflow-visible flex justify-center items-center">
+            </motion.div>
+            <motion.div
+              className="relative w-full h-64 rounded-2xl overflow-visible flex justify-center items-center"
+              variants={fadeUp}
+              custom={0.5}
+            >
               <img
                 src="/form2.png"
                 alt="Form Example 2"
                 className="w-full h-full object-contain scale-110 drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)]"
               />
-            </div>
+            </motion.div>
           </div>
 
           {/* Column 2: one tall image */}
-          <div className="relative w-full h-[460px] rounded-2xl overflow-visible flex justify-center items-center">
+          <motion.div
+            className="relative w-full h-[460px] rounded-2xl overflow-visible flex justify-center items-center"
+            variants={fadeUp}
+            custom={0.6}
+          >
             <img
               src="/form3.png"
               alt="Form Example 3"
               className="w-full h-full object-contain scale-110 drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)]"
             />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

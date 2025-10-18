@@ -1,29 +1,57 @@
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
 export default function UploadDocument() {
   const navigate = useNavigate();
 
+  // Animation presets
+  const fadeUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: (delay = 0) => ({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.8, delay, ease: "easeOut" },
+    }),
+  };
+
   return (
     <section className="relative bg-[#f8f8f8] py-24 overflow-hidden">
       <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-        {/* Left side — transparent image */}
-        <div className="relative flex justify-center items-center">
+        {/* Left side — image */}
+        <motion.div
+          className="relative flex justify-center items-center"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.4 }}
+          custom={0.1}
+        >
           <img
-            src="/banner_upload.png" // <-- your transparent PNG
+            src="/banner_upload.png"
             alt="Upload Documents"
             className="w-full max-w-lg relative z-10 drop-shadow-[0_20px_40px_rgba(0,0,0,0.2)]"
           />
-        </div>
+        </motion.div>
 
         {/* Right side — text */}
-        <div className="text-left">
+        <motion.div
+          className="text-left"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.4 }}
+          custom={0.3}
+        >
           <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-2">
             Your Data
           </p>
           <h2 className="text-4xl font-bold text-gray-900 mb-6">
             Upload Documents
           </h2>
-          <p className="text-gray-600 leading-relaxed mb-8 text-justify" style={{ hyphens: "auto" }}>
+          <p
+            className="text-gray-600 leading-relaxed mb-8 text-justify"
+            style={{ hyphens: "auto" }}
+          >
             Upload your CSV files to effortlessly transfer data from your existing aged care
             system into the government-ready format. Our platform automatically validates and
             aligns your information with official domain standards, saving hours of manual
@@ -36,7 +64,7 @@ export default function UploadDocument() {
           >
             More Information
           </button>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
