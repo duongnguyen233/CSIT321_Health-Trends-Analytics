@@ -13,6 +13,7 @@ export default function RegisterPage() {
   });
   const [strength, setStrength] = useState("Weak");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
   // --- Password Strength Checker ---
@@ -40,10 +41,9 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await registerUser(form);
-      alert("✅ Registration successful!");
-      console.log("User created:", response.data);
-      navigate("/login");
+      // const response = await registerUser(form); // Back-end call (later)
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // simulate delay (frontend only)
+      setSuccess(true);
     } catch (error) {
       console.error(error);
       alert(
@@ -55,6 +55,32 @@ export default function RegisterPage() {
     }
   };
 
+  // Success Screen
+  if (success) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center">
+        <img
+          src="/success.png" // or use your image path
+          alt="Success"
+          className="w-24 h-24 mb-6"
+        />
+        <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+          Account created successfully!
+        </h2>
+        <p className="text-gray-500 mb-8">
+          Welcome aboard! Start your success journey with CareData!
+        </p>
+        <button
+          onClick={() => navigate("/login")}
+          className="bg-orange-500 text-white px-6 py-2.5 rounded-md font-medium hover:bg-orange-600 transition"
+        >
+          Let’s Start!
+        </button>
+      </div>
+    );
+  }
+
+  // --- Registration Form ---
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
@@ -82,7 +108,9 @@ export default function RegisterPage() {
 
               {/* Bottom group */}
               <div>
-                <h2 className="text-xl font-semibold mb-2">Seamless Integration</h2>
+                <h2 className="text-xl font-semibold mb-2">
+                  Seamless Integration
+                </h2>
                 <p className="text-gray-200 text-sm">
                   Effortlessly submit your data to Government Portal.
                 </p>
@@ -95,11 +123,7 @@ export default function RegisterPage() {
             <div className="w-full max-w-sm">
               {/* Logo and Title */}
               <div className="flex items-center justify-center mb-6">
-                <img
-                  src="logo_black.png"
-                  alt="logo"
-                  className="w-8 h-8 mr-2"
-                />
+                <img src="logo_black.png" alt="logo" className="w-8 h-8 mr-2" />
                 <h2 className="text-xl font-bold text-gray-900">
                   Care Data Portal
                 </h2>
@@ -206,11 +230,7 @@ export default function RegisterPage() {
 
                 {/* Terms checkbox */}
                 <label className="flex items-center gap-2 text-sm text-gray-600">
-                  <input
-                    type="checkbox"
-                    className="accent-orange-500"
-                    required
-                  />
+                  <input type="checkbox" className="accent-orange-500" required />
                   I agree to the Terms of Service.
                 </label>
 
