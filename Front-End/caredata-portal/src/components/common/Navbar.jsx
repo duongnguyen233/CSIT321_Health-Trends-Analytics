@@ -52,7 +52,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <img src="/favicon.ico" alt="CareData Logo" className="w-8 h-8" />
           <span className="text-xl sm:text-2xl font-bold text-primary tracking-tight">
-            CareData Portal
+            Care Data Portal
           </span>
         </div>
 
@@ -115,11 +115,11 @@ export default function Navbar() {
                 className={`px-6 py-2.5 min-w-[140px] text-center rounded-md font-semibold transition shadow-md ${
                   location.pathname === "/login" ||
                   location.pathname === "/register"
-                    ? "bg-primary text-black"
-                    : "bg-orange-600 text-white hover:bg-orange-700"
+                    ? "bg-orange-600 text-black"
+                    : "bg-primary text-white hover:bg-orange-700"
                 }`}
               >
-                Login
+                Sign In
               </Link>
             )}
           </div>
