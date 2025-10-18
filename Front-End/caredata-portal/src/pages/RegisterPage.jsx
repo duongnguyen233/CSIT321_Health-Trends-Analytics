@@ -41,8 +41,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      // const response = await registerUser(form); // Back-end call (later)
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // simulate delay (frontend only)
+      const response = await registerUser(form);
       setSuccess(true);
     } catch (error) {
       console.error(error);

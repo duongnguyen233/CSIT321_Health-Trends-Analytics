@@ -2,10 +2,12 @@ import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
 export default function LoginPage() {
+  const navigate = useNavigate();
   const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -112,7 +114,7 @@ export default function LoginPage() {
                 </button>
                 <button
                   className="flex-1 py-2 font-medium text-gray-400 hover:text-gray-600"
-                  onClick={() => (window.location.href = "/register")}
+                  onClick={() => navigate("/register")}
                 >
                   Sign Up
                 </button>
