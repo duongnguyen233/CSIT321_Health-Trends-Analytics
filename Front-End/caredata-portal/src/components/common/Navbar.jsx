@@ -65,66 +65,64 @@ export default function Navbar() {
         </button>
 
         {/* Desktop Navigation */}
-        <div className="hidden sm:flex items-center gap-4">
-          {navItems.map((item) => {
-            const isActive =
-              location.pathname === item.path ||
-              (location.pathname.startsWith("/domain") && item.path === "/dashboard") ||
-              (location.pathname.startsWith("/mydata") && item.path === "/dashboard") ||
-              (location.pathname.startsWith("/setting") && item.path === "/dashboard") ||
-              (location.pathname.startsWith("/documentation") && item.path === "/dashboard");
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`px-4 py-2 rounded-lg text-base font-medium transition-all ${
-                  isActive
-                    ? "bg-primary text-black shadow-md"
-                    : "text-gray-300 hover:text-primary hover:bg-grayish"
-                }`}
-              >
-                {item.name}
-              </Link>
-            );
-          })}
+        <div className="hidden sm:flex items-center justify-between w-full max-w-[800px] ml-10">
+          {/* Left Nav Buttons */}
+          <div className="flex items-center gap-4">
+            {navItems.map((item) => {
+              const isActive =
+                location.pathname === item.path ||
+                (location.pathname.startsWith("/domain") &&
+                  item.path === "/dashboard") ||
+                (location.pathname.startsWith("/mydata") &&
+                  item.path === "/dashboard") ||
+                (location.pathname.startsWith("/setting") &&
+                  item.path === "/dashboard") ||
+                (location.pathname.startsWith("/documentation") &&
+                  item.path === "/dashboard");
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`px-4 py-2 rounded-lg text-base font-medium transition-all ${
+                    isActive
+                      ? "bg-primary text-black shadow-md"
+                      : "text-gray-300 hover:text-primary hover:bg-grayish"
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
 
-          {/* User Auth Area */}
-          {user ? (
-            <div className="flex items-center gap-3">
-              <span className="font-medium text-gray-100">
-                Hello, {user ? `${user.firstName} ${user.lastName}` : "User"}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 rounded-md bg-primary text-black hover:bg-orange-600 transition"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <>
+          {/* Right Auth Section */}
+          <div className="flex items-center gap-4">
+            {user ? (
+              <>
+                <span className="font-medium text-gray-100">
+                  Hello, {user ? `${user.firstName} ${user.lastName}` : "User"}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="px-5 py-2.5 min-w-[120px] rounded-md bg-primary text-black hover:bg-orange-600 transition font-medium shadow-md"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
               <Link
                 to="/login"
-                className={`text-gray-300 font-medium px-4 py-2 rounded-md transition ${
-                  location.pathname === "/login"
-                    ? "bg-primary text-black"
-                    : "hover:text-primary"
-                }`}
-              >
-                Login
-              </Link>
-              <Link
-                to="/register"
-                className={`px-4 py-2 rounded-md font-medium shadow-md transition ${
+                className={`px-6 py-2.5 min-w-[140px] text-center rounded-md font-semibold transition shadow-md ${
+                  location.pathname === "/login" ||
                   location.pathname === "/register"
                     ? "bg-primary text-black"
                     : "bg-orange-600 text-white hover:bg-orange-700"
                 }`}
               >
-                Register
+                Login
               </Link>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
@@ -148,6 +146,7 @@ export default function Navbar() {
               </Link>
             );
           })}
+
           <hr className="w-full border-gray-700 my-2" />
 
           {user ? (
@@ -166,30 +165,18 @@ export default function Navbar() {
               </button>
             </>
           ) : (
-            <>
-              <Link
-                to="/login"
-                onClick={() => setIsOpen(false)}
-                className={`block w-full text-left px-3 py-2 rounded-md font-medium ${
-                  location.pathname === "/login"
-                    ? "bg-primary text-black"
-                    : "text-gray-300 hover:text-primary"
-                }`}
-              >
-                Login
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setIsOpen(false)}
-                className={`block w-full text-left px-3 py-2 rounded-md font-medium ${
-                  location.pathname === "/register"
-                    ? "bg-primary text-black"
-                    : "bg-orange-600 text-white hover:bg-orange-700"
-                }`}
-              >
-                Register
-              </Link>
-            </>
+            <Link
+              to="/login"
+              onClick={() => setIsOpen(false)}
+              className={`block w-full text-left px-3 py-2 rounded-md font-medium text-center ${
+                location.pathname === "/login" ||
+                location.pathname === "/register"
+                  ? "bg-primary text-black"
+                  : "bg-orange-600 text-white hover:bg-orange-700"
+              }`}
+            >
+              Login
+            </Link>
           )}
         </div>
       )}
