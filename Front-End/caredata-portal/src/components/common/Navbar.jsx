@@ -46,12 +46,12 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-dark fixed top-0 left-0 w-full z-50 text-white border-b border-primary/20">
+    <nav className="bg-dark fixed top-0 left-0 w-full z-50 text-white">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
         {/* Logo */}
         <div className="flex flex-col items-center gap-1">
           <img src="/favicon.ico" alt="CareData Logo" className="w-10 h-10" />
-          <span className="text-sm sm:text-base font-bold text-white leading-none">
+          <span className="text-lg sm:text-lg font-bold text-white leading-none">
             CareData Portal
           </span>
         </div>
