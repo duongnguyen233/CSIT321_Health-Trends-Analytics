@@ -38,12 +38,18 @@ export default function Navbar() {
     setUser(null);
   };
 
-  const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Upload Data", path: "/upload-csv" },
-    { name: "Questionnaire", path: "/questionnaire" },
-    { name: "My Data", path: "/dashboard" },
-  ];
+const navItems = user
+  ? [
+      { name: "Home", path: "/" },
+      { name: "Upload Data", path: "/upload-csv" },
+      { name: "Questionnaire", path: "/questionnaire" },
+      { name: "My Data", path: "/dashboard" }, // show only when logged in
+    ]
+  : [
+      { name: "Home", path: "/" },
+      { name: "Upload Data", path: "/upload-csv" },
+      { name: "Questionnaire", path: "/questionnaire" },
+    ];
 
   return (
     <nav className="bg-dark fixed top-0 left-0 w-full z-50 text-white">

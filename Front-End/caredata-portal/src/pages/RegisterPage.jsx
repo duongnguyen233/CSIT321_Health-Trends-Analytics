@@ -36,23 +36,34 @@ export default function RegisterPage() {
       setStrength(checkStrength(value));
     }
   };
-
-  const handleSubmit = async (e) => {
+// DuongNT - Fix for presentation (S)
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   try {
+  //     const response = await registerUser(form);
+  //     setSuccess(true);
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert(
+  //       "❌ Error registering user: " +
+  //         (error.response?.data?.detail || error.message)
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      const response = await registerUser(form);
-      setSuccess(true);
-    } catch (error) {
-      console.error(error);
-      alert(
-        "❌ Error registering user: " +
-          (error.response?.data?.detail || error.message)
-      );
-    } finally {
+
+    // Simulate registration success
+    setTimeout(() => {
       setLoading(false);
-    }
+      navigate("/setup-account"); // go to SetupAccountPage
+    }, 1200);
   };
+// DuongNT - Fix for presentation (E)
 
   // Success Screen
   if (success) {
