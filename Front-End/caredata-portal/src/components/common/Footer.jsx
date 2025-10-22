@@ -24,6 +24,9 @@ export default function Footer() {
           <Link to="/terms" className="hover:text-orange-400 transition">
             Terms
           </Link>
+          <Link to="/about" className="hover:text-orange-400 transition">
+            About Us
+          </Link>
           <Link to="/contact" className="hover:text-orange-400 transition">
             Contact
           </Link>

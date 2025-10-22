@@ -5,7 +5,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 flex justify-center">
+      <main className="flex-grow pb-12 px-4 sm:px-6 flex justify-center pt-32">
         <div className="bg-white max-w-4xl w-full rounded-2xl shadow p-8 border border-gray-200">
           <h1 className="text-3xl font-semibold text-gray-900 mb-2">About Us</h1>
           <p className="text-gray-600 mb-6">UOW Capstone Project — Spring 2025</p>
@@ -13,7 +13,7 @@ export default function AboutPage() {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-orange-500 mb-2">Our Purpose</h2>
             <p className="text-gray-700">
-              We’re building a Business-to-Government (B2G) SaaS platform—<span className="font-semibold">CareData Portal</span>—to help aged care providers manage Quality Indicator data with less friction. 
+              We’re building a Business-to-Government (B2G) SaaS platform—<span className="font-semibold">CareData Portal</span>—to help aged care providers manage Quality Indicator data with less friction.
               Our goals: streamline CSV ingestion, validate datasets, map fields to the required domain, and support secure reporting workflows for compliance and analytics.
             </p>
           </section>
