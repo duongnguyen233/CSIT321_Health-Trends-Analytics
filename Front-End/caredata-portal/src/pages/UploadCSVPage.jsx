@@ -23,7 +23,7 @@ export default function UploadCSVPage() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
 
-      <main className="flex-grow flex items-center justify-center px-4 pt-24 pb-12">
+      <main className="flex-grow flex items-center justify-center px-4 mt-24 pb-12 pt-12">
         <div className="bg-white w-full max-w-2xl rounded-2xl shadow p-8 border border-gray-200">
           <h1 className="text-3xl font-semibold text-center text-gray-900 mb-2">
             Upload Your Data

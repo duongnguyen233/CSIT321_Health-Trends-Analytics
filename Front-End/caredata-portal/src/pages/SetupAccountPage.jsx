@@ -1,25 +1,28 @@
-import { useState } from "react";
-import Navbar from "../common/Navbar";
-import Footer from "../common/Footer";
-import MyDataSidebar from "./MyDataSidebar";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/common/Navbar";
+import Footer from "../components/common/Footer";
 
-export default function SettingPage() {
-  const [settings, setSettings] = useState({
+export default function SetupAccountPage() {
+  const [account, setAccount] = useState({
     avatar: "",
-    firstName: "Duong",
-    lastName: "Nguyen",
-    facilityName: "Care Data Facility A",
-    abn: "12 345 678 910",
-    street: "123 Health St",
-    state: "NSW",
-    postcode: "2500",
-    contactEmail: "info@caredata.com",
-    contactPhone: "+61 400 123 456",
+    firstName: "",
+    lastName: "",
+    facilityName: "",
+    abn: "",
+    street: "",
+    state: "",
+    postcode: "",
+    contactEmail: "",
+    contactPhone: "",
   });
+
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setSettings((prev) => ({
+    setAccount((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -30,42 +33,73 @@ export default function SettingPage() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSettings((prev) => ({ ...prev, avatar: reader.result }));
+        setAccount((prev) => ({ ...prev, avatar: reader.result }));
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSave = () => {
-    console.log("Saved settings:", settings);
-    alert("✅ Profile information saved successfully!");
+  const handleSubmit = () => {
+    console.log("Account setup:", account);
+    setSuccess(true);
   };
+
+  // ⏱️ Auto redirect after 4 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        navigate("/"); // go back to LandingPage
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, navigate]);
 
   const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3177/3177440.png";
 
+  // --- Success Screen ---
+  if (success) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center">
+        <img
+          src="/success.png"
+          alt="Success"
+          className="w-24 h-24 mb-6"
+        />
+        <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+          Account created successfully!
+        </h2>
+        <p className="text-gray-500 mb-8">
+          Welcome aboard! Redirecting you to the homepage...
+        </p>
+        <button
+          onClick={() => navigate("/")}
+          className="bg-orange-500 text-white px-6 py-2.5 rounded-md font-medium hover:bg-orange-600 transition"
+        >
+          Let’s Start!
+        </button>
+      </div>
+    );
+  }
+
+  // --- Normal Setup Page ---
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50 pt-10">
       <Navbar active="My Data" />
 
-      <main className="flex flex-grow pt-32 pb-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto gap-6 w-full">
-        {/* Sidebar */}
-        <MyDataSidebar activePage="Settings" />
-
-        {/* Main Settings Content */}
+      <main className="flex flex-grow pt-24 pb-12 px-4 sm:px-6 max-w-[1280px] mx-auto gap-6">
         <div className="flex-1 bg-white rounded-2xl shadow p-8 border border-gray-200">
           <h1 className="text-3xl font-semibold text-gray-900 mb-3 text-center">
-            User & Facility Settings
+            Setup Your Account
           </h1>
           <p className="text-gray-600 text-center mb-8">
-            Manage your personal details, facility information, and contact preferences.
+            Complete your profile and facility details to start using CareData Portal.
           </p>
 
           {/* Avatar + Name Section */}
           <div className="flex items-center gap-10 mb-10">
-            {/* Avatar (left side) */}
             <div className="flex flex-col items-center justify-center">
               <img
-                src={settings.avatar || defaultAvatar}
+                src={account.avatar || defaultAvatar}
                 alt="User Avatar"
                 className="w-28 h-28 rounded-full border-4 border-gray-200 shadow-sm object-cover"
               />
@@ -76,11 +110,10 @@ export default function SettingPage() {
                   onChange={handleAvatarUpload}
                   className="hidden"
                 />
-                Change Avatar
+                Upload Avatar
               </label>
             </div>
 
-            {/* Name fields (right side) */}
             <div className="flex flex-col justify-center space-y-4 w-2/3 max-w-sm">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -88,7 +121,7 @@ export default function SettingPage() {
                 </label>
                 <input
                   name="firstName"
-                  value={settings.firstName}
+                  value={account.firstName}
                   onChange={handleChange}
                   className="w-[100%] border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter first name"
@@ -100,7 +133,7 @@ export default function SettingPage() {
                 </label>
                 <input
                   name="lastName"
-                  value={settings.lastName}
+                  value={account.lastName}
                   onChange={handleChange}
                   className="w-[100%] border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter last name"
@@ -109,7 +142,7 @@ export default function SettingPage() {
             </div>
           </div>
 
-          {/* Facility Information */}
+          {/* Facility Info */}
           <div className="space-y-4 mb-8">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">
               Facility Information
@@ -121,7 +154,7 @@ export default function SettingPage() {
                 </label>
                 <input
                   name="facilityName"
-                  value={settings.facilityName}
+                  value={account.facilityName}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter facility name"
@@ -133,7 +166,7 @@ export default function SettingPage() {
                 </label>
                 <input
                   name="abn"
-                  value={settings.abn}
+                  value={account.abn}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter ABN number"
@@ -141,7 +174,6 @@ export default function SettingPage() {
               </div>
             </div>
 
-            {/* Address */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -149,7 +181,7 @@ export default function SettingPage() {
                 </label>
                 <input
                   name="street"
-                  value={settings.street}
+                  value={account.street}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
                   placeholder="Street Address"
@@ -161,7 +193,7 @@ export default function SettingPage() {
                 </label>
                 <input
                   name="state"
-                  value={settings.state}
+                  value={account.state}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
                   placeholder="State"
@@ -173,7 +205,7 @@ export default function SettingPage() {
                 </label>
                 <input
                   name="postcode"
-                  value={settings.postcode}
+                  value={account.postcode}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
                   placeholder="Postcode"
@@ -182,7 +214,7 @@ export default function SettingPage() {
             </div>
           </div>
 
-          {/* Contact Information */}
+          {/* Contact Info */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">
               Contact Information
@@ -195,7 +227,7 @@ export default function SettingPage() {
                 <input
                   name="contactEmail"
                   type="email"
-                  value={settings.contactEmail}
+                  value={account.contactEmail}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter contact email"
@@ -208,7 +240,7 @@ export default function SettingPage() {
                 <input
                   name="contactPhone"
                   type="tel"
-                  value={settings.contactPhone}
+                  value={account.contactPhone}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter phone number"
@@ -217,13 +249,13 @@ export default function SettingPage() {
             </div>
           </div>
 
-          {/* Save Button */}
+          {/* Submit Button */}
           <div className="flex justify-center mt-10">
             <button
-              onClick={handleSave}
+              onClick={handleSubmit}
               className="bg-orange-500 text-white px-6 py-2 rounded-md font-medium hover:bg-orange-600 transition"
             >
-              Save Settings
+              Complete Setup
             </button>
           </div>
         </div>
