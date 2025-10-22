@@ -47,7 +47,7 @@ export default function SettingPage() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar active="My Data" />
 
-      <main className="flex flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto gap-6 w-full">
+      <main className="flex flex-grow pt-32 pb-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto gap-6 w-full">
         {/* Sidebar */}
         <MyDataSidebar activePage="Settings" />
 
