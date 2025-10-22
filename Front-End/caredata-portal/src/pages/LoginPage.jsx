@@ -14,50 +14,79 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
 
+// DuongNT - Fix for presentation (S)
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setError("");
+
+  //   try {
+  //     const response = await fetch(`${API_BASE_URL}/auth/login`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ email, password }),
+  //     });
+
+  //     if (!response.ok) throw new Error("Invalid email or password");
+
+  //     const data = await response.json();
+  //     const token = data.access_token;
+  //     localStorage.setItem("token", token);
+
+  //     const userRes = await fetch(`${API_BASE_URL}/auth/me`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+
+  //     if (!userRes.ok) throw new Error("Failed to fetch user info");
+
+  //     const userData = await userRes.json();
+  //     localStorage.setItem("user", JSON.stringify(userData));
+
+  //     login({
+  //       firstName: userData.first_name,
+  //       lastName: userData.last_name,
+  //       token,
+  //     });
+
+  //     if (remember) {
+  //       localStorage.setItem("rememberEmail", email);
+  //     } else {
+  //       localStorage.removeItem("rememberEmail");
+  //     }
+
+  //     window.location.href = "/";
+  //   } catch (err) {
+  //     console.error("Login error:", err);
+  //     setError(err.message);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) throw new Error("Invalid email or password");
-
-      const data = await response.json();
-      const token = data.access_token;
-      localStorage.setItem("token", token);
-
-      const userRes = await fetch(`${API_BASE_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!userRes.ok) throw new Error("Failed to fetch user info");
-
-      const userData = await userRes.json();
+    // Hardcoded credentials
+    if (email === "sample@gmail.com" && password === "123456") {
+      const userData = {
+        first_name: "Duong",
+        last_name: "",
+      };
+      localStorage.setItem("token", "fake-token");
       localStorage.setItem("user", JSON.stringify(userData));
 
       login({
         firstName: userData.first_name,
         lastName: userData.last_name,
-        token,
+        token: "fake-token",
       });
 
-      if (remember) {
-        localStorage.setItem("rememberEmail", email);
-      } else {
-        localStorage.removeItem("rememberEmail");
-      }
-
+      alert("✅ Login successful! Welcome, Duong!");
       window.location.href = "/";
-    } catch (err) {
-      console.error("Login error:", err);
-      setError(err.message);
+    } else {
+      setError("❌ Invalid email or password");
     }
   };
+
+// DuongNT - Fix for presentation (E)
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
