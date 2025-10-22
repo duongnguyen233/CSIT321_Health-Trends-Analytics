@@ -16,6 +16,7 @@ import PrivacyPage from "./components/footerPages/PrivacyPage";
 import TermsPage from "./components/footerPages/TermsPage";
 import ContactPage from "./components/footerPages/ContactPage";
 import ScrollToTop from "./components/common/ScrollToTop";
+import AboutPage from "./components/footerPages/AboutUs";
 import SetupAccountPage from "./pages/SetupAccountPage";
 
 export default function App() {
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/about" element={<AboutPage />} />
       </Routes>
     </Router>
   );
