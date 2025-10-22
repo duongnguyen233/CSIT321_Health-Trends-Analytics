@@ -30,7 +30,7 @@ export default function Dashboard() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar active="My Data" />
 
-      <main className="flex flex-grow pt-24 pb-12 px-4 sm:px-6 max-w-[1280px] mx-auto gap-6">
+      <main className="flex flex-grow pt-32 pb-12 px-4 sm:px-6 max-w-[1280px] mx-auto gap-6">
         <MyDataSidebar activePage="Dashboard" />
 
         <div className="flex-1 bg-white rounded-2xl shadow p-8 border border-gray-200">

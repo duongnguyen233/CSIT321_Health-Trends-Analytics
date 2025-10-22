@@ -9,26 +9,36 @@ export default function Navbar() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
+    const savedUser = localStorage.getItem("user");
+
+    // ✅ Instantly load user from localStorage (no delay)
+    if (savedUser) {
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        setUser({
+          firstName: parsedUser.first_name || parsedUser.firstName || "",
+          lastName: parsedUser.last_name || parsedUser.lastName || "",
+        });
+      } catch {
+        localStorage.removeItem("user");
+      }
+    }
+
+    // ✅ Only call API if token exists and user not already cached
+    if (token && !savedUser) {
       getCurrentUser(token)
         .then((data) => {
-          setUser({
+          const formattedUser = {
             firstName: data.first_name,
             lastName: data.last_name,
-          });
+          };
+          setUser(formattedUser);
           localStorage.setItem("user", JSON.stringify(data));
         })
         .catch(() => {
-          const savedUser = localStorage.getItem("user");
-          if (savedUser) setUser(JSON.parse(savedUser));
-          else {
-            localStorage.removeItem("token");
-            setUser(null);
-          }
+          localStorage.removeItem("token");
+          setUser(null);
         });
-    } else {
-      const savedUser = localStorage.getItem("user");
-      if (savedUser) setUser(JSON.parse(savedUser));
     }
   }, []);
 
@@ -38,12 +48,19 @@ export default function Navbar() {
     setUser(null);
   };
 
-  const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Upload Data", path: "/upload-csv" },
-    { name: "Questionnaire", path: "/questionnaire" },
-    { name: "My Data", path: "/dashboard" },
-  ];
+  // ✅ Show "My Data" only when logged in
+  const navItems = user
+    ? [
+        { name: "Home", path: "/" },
+        { name: "Upload Data", path: "/upload-csv" },
+        { name: "Questionnaire", path: "/questionnaire" },
+        { name: "My Data", path: "/dashboard" },
+      ]
+    : [
+        { name: "Home", path: "/" },
+        { name: "Upload Data", path: "/upload-csv" },
+        { name: "Questionnaire", path: "/questionnaire" },
+      ];
 
   return (
     <nav className="bg-dark fixed top-0 left-0 w-full z-50 text-white">
@@ -100,7 +117,7 @@ export default function Navbar() {
             {user ? (
               <>
                 <span className="font-medium text-gray-100">
-                  Hello, {user ? `${user.firstName} ${user.lastName}` : "User"}
+                  Hello, {user.firstName || "User"}
                 </span>
                 <button
                   onClick={handleLogout}

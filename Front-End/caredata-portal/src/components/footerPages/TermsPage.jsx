@@ -5,7 +5,7 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 flex justify-center">
+      <main className="flex-grow pb-12 px-4 sm:px-6 flex justify-center pt-32">
         <div className="bg-white max-w-4xl w-full rounded-2xl shadow p-8 border border-gray-200">
           <h1 className="text-3xl font-semibold text-gray-900 mb-4">Terms of Use</h1>
 
