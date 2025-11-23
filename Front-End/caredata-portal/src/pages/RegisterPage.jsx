@@ -3,6 +3,10 @@ import { registerUser } from "../services/api";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -36,41 +40,77 @@ export default function RegisterPage() {
       setStrength(checkStrength(value));
     }
   };
-// DuongNT - Fix for presentation (S)
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   try {
-  //     const response = await registerUser(form);
-  //     setSuccess(true);
-  //   } catch (error) {
-  //     console.error(error);
-  //     alert(
-  //       "❌ Error registering user: " +
-  //         (error.response?.data?.detail || error.message)
-  //     );
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    // Simulate registration success
-    setTimeout(() => {
+    try {
+      await registerUser(form);
+      setSuccess(true);
+    } catch (error) {
+      console.error(error);
+      alert(
+        "❌ Error registering user: " +
+          (error.response?.data?.detail || error.message)
+      );
+    } finally {
       setLoading(false);
-      navigate("/setup-account"); // go to SetupAccountPage
-    }, 1200);
+    }
   };
-// DuongNT - Fix for presentation (E)
+
+  // -------- Google Register / Login -----------
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const id_token = credentialResponse.credential;
+      if (!id_token) {
+        alert("Google login failed: no credential");
+        return;
+      }
+
+      // Call backend /auth/google
+      const res = await fetch(`${API_BASE_URL}/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_token }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || "Google login failed");
+      }
+
+      const data = await res.json();
+      const token = data.access_token;
+      localStorage.setItem("token", token);
+
+      // Fetch user info
+      const userRes = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!userRes.ok) throw new Error("Failed to fetch user info");
+
+      const userData = await userRes.json();
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      // After Google "register", go to setup account or home
+      navigate("/setup-account"); // or "/" if you prefer
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Google login failed");
+    }
+  };
+
+  const handleGoogleError = () => {
+    alert("Google login failed");
+  };
 
   // Success Screen
   if (success) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center">
         <img
-          src="/success.png" // or use your image path
+          src="/success.png"
           alt="Success"
           className="w-24 h-24 mb-6"
         />
@@ -104,19 +144,18 @@ export default function RegisterPage() {
               backgroundImage: "url('banner.png')",
             }}
           >
-            {/* Overlay */}
             <div className="absolute inset-0 bg-white/25"></div>
 
             <div className="relative z-10 flex flex-col justify-between h-full text-center max-w-sm py-10">
-              {/* Top group */}
               <div>
-                <h1 className="text-3xl font-bold mb-2">Welcome to Care Data</h1>
+                <h1 className="text-3xl font-bold mb-2">
+                  Welcome to Care Data
+                </h1>
                 <p className="text-gray-200 mb-8">
                   Your Gateway to Government Submission.
                 </p>
               </div>
 
-              {/* Bottom group */}
               <div>
                 <h2 className="text-xl font-semibold mb-2">
                   Seamless Integration
@@ -221,13 +260,13 @@ export default function RegisterPage() {
                   <ul className="mt-2 text-sm text-gray-500 space-y-1">
                     <li>
                       <span
-                        className={`${
+                        className={
                           strength === "Strong"
                             ? "text-green-500"
                             : strength === "Medium"
                             ? "text-yellow-500"
                             : "text-red-500"
-                        }`}
+                        }
                       >
                         ✓ Password Strength: {strength}
                       </span>
@@ -263,14 +302,13 @@ export default function RegisterPage() {
 
               {/* OAuth buttons */}
               <div className="flex gap-3">
-                <button className="flex-1 border rounded-md py-2 flex items-center justify-center gap-2 hover:bg-gray-50">
-                  <img
-                    src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
-                    alt="Google"
-                    className="w-4 h-4"
+                <div className="flex-1 flex items-center justify-center">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    useOneTap={false}
                   />
-                  Google
-                </button>
+                </div>
                 <button className="flex-1 border rounded-md py-2 flex items-center justify-center gap-2 hover:bg-gray-50">
                   <img
                     src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"

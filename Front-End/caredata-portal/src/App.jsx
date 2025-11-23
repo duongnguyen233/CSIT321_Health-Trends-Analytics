@@ -1,7 +1,7 @@
 // src/App.js
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
-// --- Existing Pages ---
+// Existing Pages
 import LandingPage from "./pages/LandingPage";
 import QuestionnaireForm from "./pages/QuestionnaireForm";
 import LoginPage from "./pages/LoginPage";
@@ -19,31 +19,120 @@ import ScrollToTop from "./components/common/ScrollToTop";
 import AboutPage from "./components/footerPages/AboutUs";
 import SetupAccountPage from "./pages/SetupAccountPage";
 
+import { useContext } from "react";
+import { AuthContext } from "./context/AuthContext";
+
+// ------------------- 🔐 Route Protection -------------------
+function RequireAuth({ children }) {
+  const { user } = useContext(AuthContext);
+  const isLoggedIn = !!localStorage.getItem("token");
+
+  if (!isLoggedIn) return <Navigate to="/login" replace />;
+  return children;
+}
+
+function RequireAdmin({ children }) {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  if (!user || user.role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
+// ------------------------------------------------------------
+
 export default function App() {
   return (
     <Router>
       <ScrollToTop />
       <Routes>
-        {/* Main routes */}
+        {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
-        <Route path="/questionnaire" element={<QuestionnaireForm />} />
-        <Route path="/upload-csv" element={<UploadCSVPage />} />
-        <Route path="/mydata" element={<MyDataPage />} />
-        <Route path="/domain/:id" element={<DomainDetailsPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/settings" element={<SettingPage />} />
-        <Route path="/documentation" element={<DocumentationPage />} />
-
-        {/* Auth routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/setup-account" element={<SetupAccountPage />} />
-
-        {/* Footer links */}
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/about" element={<AboutPage />} />
+
+        {/* Auth Routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/setup-account" element={<SetupAccountPage />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/questionnaire"
+          element={
+            <RequireAuth>
+              <QuestionnaireForm />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/upload-csv"
+          element={
+            <RequireAuth>
+              <UploadCSVPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/mydata"
+          element={
+            <RequireAuth>
+              <MyDataPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/domain/:id"
+          element={
+            <RequireAuth>
+              <DomainDetailsPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <RequireAuth>
+              <Dashboard />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <RequireAuth>
+              <SettingPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/documentation"
+          element={
+            <RequireAuth>
+              <DocumentationPage />
+            </RequireAuth>
+          }
+        />
+
+        {/* Example Admin-Only Route (optional) */}
+        {/*
+        <Route
+          path="/admin"
+          element={
+            <RequireAdmin>
+              <AdminDashboard />
+            </RequireAdmin>
+          }
+        />
+        */}
       </Routes>
     </Router>
   );
