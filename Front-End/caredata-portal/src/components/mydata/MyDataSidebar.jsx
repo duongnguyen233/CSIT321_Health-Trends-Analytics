@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LayoutGrid, Database, Settings, FileText } from "lucide-react";
+import { LayoutGrid, Database, Settings, FileText, GitBranch } from "lucide-react";
 
 export default function MyDataSidebar({ activePage = "Dashboard" }) {
   const navigate = useNavigate();
@@ -41,6 +41,20 @@ export default function MyDataSidebar({ activePage = "Dashboard" }) {
           >
             <Database size={16} />
             My Data
+          </li>
+
+          {/* ✅ New button under My Data */}
+          <li
+            onClick={() => navigate("/careJourneyFlow")}
+            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md cursor-pointer transition
+              ${
+                activePage === "Care Journey Flow"
+                  ? "bg-orange-500 text-white shadow-sm"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+          >
+            <GitBranch size={16} />
+            Care Journey Flow
           </li>
         </ul>
 

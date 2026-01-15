@@ -18,6 +18,7 @@ import ContactPage from "./components/footerPages/ContactPage";
 import ScrollToTop from "./components/common/ScrollToTop";
 import AboutPage from "./components/footerPages/AboutUs";
 import SetupAccountPage from "./pages/SetupAccountPage";
+import CareJourneyFlow from "./components/mydata/CareJourneyFlow";
 
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
@@ -118,6 +119,15 @@ export default function App() {
           element={
             <RequireAuth>
               <DocumentationPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/careJourneyFlow"
+          element={
+            <RequireAuth>
+              <CareJourneyFlow />
             </RequireAuth>
           }
         />
