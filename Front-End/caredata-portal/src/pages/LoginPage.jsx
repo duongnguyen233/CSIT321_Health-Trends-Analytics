@@ -51,21 +51,47 @@ export default function LoginPage() {
     setError("");
     try {
       if (useCognito) {
-        const result = await cognitoSignIn(email, password);
-        if (result.needsConfirmation) {
-          setError("");
-          setNeedsConfirmation(true);
-          setConfirmStep(result.nextStep?.signInStep || "CONFIRM_SIGN_UP");
+        try {
+          const result = await cognitoSignIn(email, password);
+          if (result.needsConfirmation) {
+            setError("");
+            setNeedsConfirmation(true);
+            setConfirmStep(result.nextStep?.signInStep || "CONFIRM_SIGN_UP");
+            return;
+          }
+          const token = result.token || (await getCognitoIdToken());
+          if (!token) throw new Error("Sign-in failed");
+          localStorage.setItem("token", token);
+          await setUserFromApi(token);
+          if (remember) localStorage.setItem("rememberEmail", email);
+          else localStorage.removeItem("rememberEmail");
+          window.location.href = "/";
           return;
+        } catch (err) {
+          // Handle case where user is already authenticated
+          if (err?.name === "UserAlreadyAuthenticatedException" || err?.message?.includes("already a signed in user")) {
+            try {
+              const token = await getCognitoIdToken();
+              if (token) {
+                localStorage.setItem("token", token);
+                await setUserFromApi(token);
+                if (remember) localStorage.setItem("rememberEmail", email);
+                else localStorage.removeItem("rememberEmail");
+                window.location.href = "/";
+                return;
+              }
+            } catch (e2) {
+              // If we can't get token, sign out and try again
+              try {
+                await cognitoSignOut();
+              } catch (_) {
+                // Ignore sign out errors
+              }
+              throw err; // Re-throw original error
+            }
+          }
+          throw err; // Re-throw if not UserAlreadyAuthenticatedException
         }
-        const token = result.token || (await getCognitoIdToken());
-        if (!token) throw new Error("Sign-in failed");
-        localStorage.setItem("token", token);
-        await setUserFromApi(token);
-        if (remember) localStorage.setItem("rememberEmail", email);
-        else localStorage.removeItem("rememberEmail");
-        window.location.href = "/";
-        return;
       }
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
