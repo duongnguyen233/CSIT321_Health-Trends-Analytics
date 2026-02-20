@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "aws-amplify": "^6.10.0",
     "@heroicons/react": "^2.2.0",
     "@react-oauth/google": "^0.12.2",
     "@testing-library/dom": "^10.4.1",

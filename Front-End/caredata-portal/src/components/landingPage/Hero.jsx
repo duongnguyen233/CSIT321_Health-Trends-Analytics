@@ -1,9 +1,24 @@
 import { motion } from "framer-motion";
 import Button from "../common/Button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export default function Hero() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem("token"));
+
+  useEffect(() => {
+    // Check login status whenever location changes or component mounts
+    setIsLoggedIn(!!localStorage.getItem("token"));
+    
+    // Also check periodically in case token is set asynchronously
+    const interval = setInterval(() => {
+      setIsLoggedIn(!!localStorage.getItem("token"));
+    }, 300);
+    
+    return () => clearInterval(interval);
+  }, [location.pathname]);
 
   const container = {
     hidden: { opacity: 0 },
@@ -82,18 +97,29 @@ export default function Hero() {
           effortlessly — with no manual formatting, no guesswork.
         </motion.p>
 
-        {/* Button */}
+        {/* Welcome message when logged in, button when not logged in */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, ease: "easeOut", delay: 0.8 }}
         >
-          <Button
-            onClick={() => navigate("/register")}
-            className="bg-primary text-black px-10 py-4 text-lg rounded-full hover:bg-orange-600 hover:scale-105 transition-all font-semibold shadow-lg"
-          >
-            Get Started Today
-          </Button>
+          {isLoggedIn ? (
+            <div className="text-center">
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                Welcome to DataCare Portal
+              </h2>
+              <p className="text-lg text-gray-200 max-w-xl mx-auto">
+                Upload your health records to view clear insights and track your health securely.
+              </p>
+            </div>
+          ) : (
+            <Button
+              onClick={() => navigate("/register")}
+              className="bg-primary text-black px-10 py-4 text-lg rounded-full hover:bg-orange-600 hover:scale-105 transition-all font-semibold shadow-lg"
+            >
+              Get Started Today
+            </Button>
+          )}
         </motion.div>
       </div>
     </section>

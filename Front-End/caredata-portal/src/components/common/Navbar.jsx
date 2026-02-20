@@ -1,6 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Hub } from "aws-amplify/utils";
 import { getCurrentUser } from "../../services/api";
+import { isCognitoEnabled } from "../../config/amplify";
+import { getCognitoIdToken, cognitoSignOut } from "../../services/cognitoAuth";
+
+async function syncUserFromCognitoToken(setUser) {
+  const cognitoToken = await getCognitoIdToken();
+  if (!cognitoToken) return;
+  localStorage.setItem("token", cognitoToken);
+  try {
+    const data = await getCurrentUser(cognitoToken);
+    setUser({
+      firstName: data.first_name || "",
+      lastName: data.last_name || "",
+    });
+    localStorage.setItem("user", JSON.stringify(data));
+  } catch (e) {
+    // Silent fail - user will need to sign in again
+  }
+}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +31,6 @@ export default function Navbar() {
     const token = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
 
-    // ✅ Instantly load user from localStorage (no delay)
     if (savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser);
@@ -25,15 +43,10 @@ export default function Navbar() {
       }
     }
 
-    // ✅ Only call API if token exists and user not already cached
     if (token && !savedUser) {
       getCurrentUser(token)
         .then((data) => {
-          const formattedUser = {
-            firstName: data.first_name,
-            lastName: data.last_name,
-          };
-          setUser(formattedUser);
+          setUser({ firstName: data.first_name, lastName: data.last_name });
           localStorage.setItem("user", JSON.stringify(data));
         })
         .catch(() => {
@@ -41,12 +54,42 @@ export default function Navbar() {
           setUser(null);
         });
     }
+    if (isCognitoEnabled() && !savedUser) {
+      const isOAuthCallback = typeof window !== "undefined" && window.location.search.includes("code=");
+      syncUserFromCognitoToken(setUser);
+      if (isOAuthCallback) {
+        [300, 800, 1500].forEach((delay) => {
+          setTimeout(() => syncUserFromCognitoToken(setUser), delay);
+        });
+      }
+      const unsubscribe = Hub.listen("auth", ({ payload }) => {
+        if (payload.event === "signInWithRedirect" || payload.event === "signedIn") {
+          syncUserFromCognitoToken(setUser);
+        }
+      });
+      return () => unsubscribe();
+    }
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Clear local state first to prevent any redirects from affecting the UI
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
+    
+    // Then try to sign out from Cognito (this might trigger OAuth redirect, but we've already cleared state)
+    if (isCognitoEnabled()) {
+      try {
+        // Use a timeout to prevent hanging if redirect happens
+        await Promise.race([
+          cognitoSignOut(),
+          new Promise((resolve) => setTimeout(resolve, 1000)), // Max 1 second wait
+        ]);
+      } catch (e) {
+        // Ignore OAuth redirect errors - state is already cleared
+      }
+    }
+    
     navigate("/");
   };
 

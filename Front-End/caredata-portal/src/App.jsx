@@ -16,6 +16,7 @@ import PrivacyPage from "./components/footerPages/PrivacyPage";
 import TermsPage from "./components/footerPages/TermsPage";
 import ContactPage from "./components/footerPages/ContactPage";
 import ScrollToTop from "./components/common/ScrollToTop";
+import OAuthErrorBanner from "./components/common/OAuthErrorBanner";
 import AboutPage from "./components/footerPages/AboutUs";
 import SetupAccountPage from "./pages/SetupAccountPage";
 import CareJourneyFlow from "./components/mydata/CareJourneyFlow";
@@ -46,6 +47,7 @@ export default function App() {
   return (
     <Router>
       <ScrollToTop />
+      <OAuthErrorBanner />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
