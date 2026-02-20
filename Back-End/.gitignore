@@ -23,6 +23,7 @@ venv/
 # Build
 build/
 dist/
+.aws-sam/
 
 # Local databases
 *.db

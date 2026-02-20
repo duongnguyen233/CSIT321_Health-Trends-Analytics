@@ -1,0 +1,14 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "caredata-api"
+resolve_s3 = true
+s3_prefix = "caredata-api"
+region = "ap-southeast-2"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Stage=\"dev\" CorsOrigin=\"http://localhost:5173,https://care-data-portal.netlify.app\""
+image_repositories = []
+
+[default.global.parameters]
+region = "ap-southeast-2"

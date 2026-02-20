@@ -1,0 +1,128 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: CareData API - Serverless (Cognito + Lambda + DynamoDB)
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+
+Globals:
+  Function:
+    Runtime: python3.11
+    Timeout: 30
+    MemorySize: 256
+
+Resources:
+  ProfilesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub CareDataProfiles-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: sub
+          AttributeType: S
+      KeySchema:
+        - AttributeName: sub
+          KeyType: HASH
+
+  CareDataApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Stage
+      # CORS is handled by Lambda (FastAPI CORSMiddleware) so preflight OPTIONS reach the app
+
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda_handler.handler
+      CodeUri: .
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: !Ref UserPool
+          COGNITO_REGION: !Ref AWS::Region
+          COGNITO_APP_CLIENT_ID: !Ref UserPoolClient
+          PROFILES_TABLE_NAME: !Sub CareDataProfiles-${Stage}
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProfilesTable
+  # Uncomment and set Cognito as authorizer when ready:
+  #   Auth:
+  #     Authorizer: CognitoAuthorizer
+  #     AuthorizationScopes:
+  #       - openid
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub caredata-users-${Stage}
+      AutoVerifiedAttributes: [email]
+      UsernameAttributes: [email]
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: false
+        - Name: given_name
+          Required: false
+          Mutable: true
+        - Name: family_name
+          Required: false
+          Mutable: true
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: !Sub caredata-web-${Stage}
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+      SupportedIdentityProviders:
+        - COGNITO
+      CallbackURLs:
+        - http://localhost:5173/
+        - https://care-data-portal.netlify.app/
+      LogoutURLs:
+        - http://localhost:5173/
+        - https://care-data-portal.netlify.app/
+
+  ApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref CareDataApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiFunction.Arn}/invocations
+      PayloadFormatVersion: "2.0"
+  ApiRouteDefault:
+    Type: AWS::ApiGatewayV2::Route
+    DependsOn: ApiIntegration
+    Properties:
+      ApiId: !Ref CareDataApi
+      RouteKey: "ANY /{proxy+}"
+      Target: !Sub integrations/${ApiIntegration}
+  ApiRouteRoot:
+    Type: AWS::ApiGatewayV2::Route
+    DependsOn: ApiIntegration
+    Properties:
+      ApiId: !Ref CareDataApi
+      RouteKey: "ANY /"
+      Target: !Sub integrations/${ApiIntegration}
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway URL (set VITE_API_BASE_URL in frontend)
+    Value: !Sub https://${CareDataApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/
+    Export:
+      Name: !Sub CareDataApiUrl-${Stage}
+  UserPoolId:
+    Description: Cognito User Pool ID (set VITE_USER_POOL_ID in frontend)
+    Value: !Ref UserPool
+    Export:
+      Name: !Sub CareDataUserPoolId-${Stage}
+  UserPoolClientId:
+    Description: Cognito App Client ID (set VITE_CLIENT_ID in frontend)
+    Value: !Ref UserPoolClient
+    Export:
+      Name: !Sub CareDataUserPoolClientId-${Stage}
