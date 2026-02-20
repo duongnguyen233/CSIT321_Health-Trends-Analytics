@@ -30,7 +30,23 @@ Resources:
     Type: AWS::Serverless::HttpApi
     Properties:
       StageName: !Ref Stage
-      # CORS is handled by Lambda (FastAPI CORSMiddleware) so preflight OPTIONS reach the app
+      CorsConfiguration:
+        AllowOrigins:
+          - http://localhost:5173
+          - http://127.0.0.1:5173
+          - https://d2vw6ry5du4tco.cloudfront.net
+          - https://care-data-portal.netlify.app
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+        AllowCredentials: true
+        MaxAge: 86400
 
   ApiFunction:
     Type: AWS::Serverless::Function
