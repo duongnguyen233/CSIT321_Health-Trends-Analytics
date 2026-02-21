@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 
 // Existing Pages
 import LandingPage from "./pages/LandingPage";
-import QuestionnaireForm from "./pages/QuestionnaireForm";
+import HealthScanPage from "./pages/HealthScanPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import UploadCSVPage from "./pages/UploadCSVPage";
@@ -63,10 +63,10 @@ export default function App() {
 
         {/* Protected Routes */}
         <Route
-          path="/questionnaire"
+          path="/health-scan"
           element={
             <RequireAuth>
-              <QuestionnaireForm />
+              <HealthScanPage />
             </RequireAuth>
           }
         />

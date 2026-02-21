@@ -98,14 +98,14 @@ export default function DomainDetailsPage() {
               <p className="text-gray-600 mb-6">
                 Data for{" "}
                 <span className="font-medium text-orange-600">{domainName}</span>{" "}
-                has not been completed yet. Please finish your questionnaire to
+                is not available yet. Upload a health record via Health Scan to
                 view analytics and charts.
               </p>
               <button
-                onClick={() => navigate("/questionnaire")}
+                onClick={() => navigate("/health-scan")}
                 className="bg-orange-500 text-white px-6 py-2 rounded-md font-medium hover:bg-orange-600 transition"
               >
-                Go to Questionnaire Form
+                Go to Health Scan
               </button>
             </div>
           ) : (

@@ -167,13 +167,13 @@ export default function Navbar() {
     ? [
         { name: "Home", path: "/" },
         { name: "Upload Data", path: "/upload-csv" },
-        { name: "Questionnaire", path: "/questionnaire" },
-        { name: "My Data", path: "/dashboard" },
+        { name: "Health Scan", path: "/health-scan" },
+        { name: "My Data", path: "/mydata" },
       ]
     : [
         { name: "Home", path: "/" },
         { name: "Upload Data", path: "/upload-csv" },
-        { name: "Questionnaire", path: "/questionnaire" },
+        { name: "Health Scan", path: "/health-scan" },
       ];
 
   return (
@@ -203,13 +203,13 @@ export default function Navbar() {
               const isActive =
                 location.pathname === item.path ||
                 (location.pathname.startsWith("/domain") &&
-                  item.path === "/dashboard") ||
+                  item.path === "/mydata") ||
                 (location.pathname.startsWith("/mydata") &&
-                  item.path === "/dashboard") ||
+                  item.path === "/mydata") ||
                 (location.pathname.startsWith("/setting") &&
-                  item.path === "/dashboard") ||
+                  item.path === "/mydata") ||
                 (location.pathname.startsWith("/documentation") &&
-                  item.path === "/dashboard");
+                  item.path === "/mydata");
               return (
                 <Link
                   key={item.path}

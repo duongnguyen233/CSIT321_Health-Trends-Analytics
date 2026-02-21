@@ -27,9 +27,9 @@ export default function FormFilling() {
           custom={0.1}
         >
           <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-2">
-            Questionnaire
+            Health Scan
           </p>
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">Form Filling</h2>
+          <h2 className="text-4xl font-bold text-gray-900 mb-6">Upload & analyze</h2>
           <p
             className="text-gray-600 leading-relaxed mb-8 text-justify"
             style={{ hyphens: "auto" }}
@@ -41,10 +41,10 @@ export default function FormFilling() {
             accuracy, and compliance across your aged care reporting workflow.
           </p>
           <button
-            onClick={() => navigate("/questionnaire")}
+            onClick={() => navigate("/health-scan")}
             className="bg-primary text-white px-6 py-3 rounded-md font-medium hover:bg-orange-600 transition-all shadow-md"
           >
-            More Information
+            Try Health Scan
           </button>
         </motion.div>
 

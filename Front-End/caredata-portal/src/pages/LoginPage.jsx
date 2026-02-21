@@ -257,7 +257,7 @@ export default function LoginPage() {
           {/* Left Panel */}
           <div
             className="hidden md:flex relative flex-col justify-center items-center w-1/2 bg-cover bg-center text-white p-10"
-            style={{ backgroundImage: "url('banner.png')" }}
+            style={{ backgroundImage: "url('/banner.png')" }}
           >
             <div className="absolute inset-0 bg-white/25"></div>
 
@@ -284,7 +284,7 @@ export default function LoginPage() {
 
               {/* Logo */}
               <div className="flex items-center justify-center mb-6">
-                <img src="logo_black.png" alt="logo" className="w-8 h-8 mr-2" />
+                <img src="/logo_black.png" alt="logo" className="w-8 h-8 mr-2" />
                 <h2 className="text-xl font-bold text-gray-900">Care Data Portal</h2>
               </div>
 
