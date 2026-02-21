@@ -6,6 +6,16 @@ Parameters:
   Stage:
     Type: String
     Default: dev
+  OpenAIApiKey:
+    Type: String
+    NoEcho: true
+    Description: "OpenAI API key for Health Scan (Vision). Get from https://platform.openai.com/api-keys"
+  CognitoUserPoolId:
+    Type: String
+    Description: "Existing Cognito User Pool ID (e.g. ap-southeast-2_XXXX)"
+  CognitoAppClientId:
+    Type: String
+    Description: "Existing Cognito App Client ID for the above pool"
 
 Globals:
   Function:
@@ -26,16 +36,27 @@ Resources:
         - AttributeName: sub
           KeyType: HASH
 
+  HealthDataTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub CareDataHealthData-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: sub
+          AttributeType: S
+      KeySchema:
+        - AttributeName: sub
+          KeyType: HASH
+
   CareDataApi:
     Type: AWS::Serverless::HttpApi
     Properties:
       StageName: !Ref Stage
       CorsConfiguration:
         AllowOrigins:
-          - http://localhost:5173
-          - http://127.0.0.1:5173
-          - https://d2vw6ry5du4tco.cloudfront.net
-          - https://care-data-portal.netlify.app
+          - "http://localhost:5173"
+          - "http://127.0.0.1:5173"
+          - "https://care-data-portal.netlify.app"
         AllowMethods:
           - GET
           - POST
@@ -55,54 +76,22 @@ Resources:
       CodeUri: .
       Environment:
         Variables:
-          COGNITO_USER_POOL_ID: !Ref UserPool
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_REGION: !Ref AWS::Region
-          COGNITO_APP_CLIENT_ID: !Ref UserPoolClient
+          COGNITO_APP_CLIENT_ID: !Ref CognitoAppClientId
+          OPENAI_API_KEY: !Ref OpenAIApiKey
           PROFILES_TABLE_NAME: !Sub CareDataProfiles-${Stage}
+          HEALTH_DATA_TABLE_NAME: !Sub CareDataHealthData-${Stage}
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref ProfilesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref HealthDataTable
   # Uncomment and set Cognito as authorizer when ready:
   #   Auth:
   #     Authorizer: CognitoAuthorizer
   #     AuthorizationScopes:
   #       - openid
-
-  UserPool:
-    Type: AWS::Cognito::UserPool
-    Properties:
-      UserPoolName: !Sub caredata-users-${Stage}
-      AutoVerifiedAttributes: [email]
-      UsernameAttributes: [email]
-      Schema:
-        - Name: email
-          Required: true
-          Mutable: false
-        - Name: given_name
-          Required: false
-          Mutable: true
-        - Name: family_name
-          Required: false
-          Mutable: true
-
-  UserPoolClient:
-    Type: AWS::Cognito::UserPoolClient
-    Properties:
-      UserPoolId: !Ref UserPool
-      ClientName: !Sub caredata-web-${Stage}
-      GenerateSecret: false
-      ExplicitAuthFlows:
-        - ALLOW_USER_PASSWORD_AUTH
-        - ALLOW_REFRESH_TOKEN_AUTH
-        - ALLOW_USER_SRP_AUTH
-      SupportedIdentityProviders:
-        - COGNITO
-      CallbackURLs:
-        - http://localhost:5173/
-        - https://care-data-portal.netlify.app/
-      LogoutURLs:
-        - http://localhost:5173/
-        - https://care-data-portal.netlify.app/
 
   ApiIntegration:
     Type: AWS::ApiGatewayV2::Integration
@@ -111,19 +100,29 @@ Resources:
       IntegrationType: AWS_PROXY
       IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiFunction.Arn}/invocations
       PayloadFormatVersion: "2.0"
-  ApiRouteDefault:
-    Type: AWS::ApiGatewayV2::Route
-    DependsOn: ApiIntegration
+
+  ApiPermission:
+    Type: AWS::Lambda::Permission
     Properties:
-      ApiId: !Ref CareDataApi
-      RouteKey: "ANY /{proxy+}"
-      Target: !Sub integrations/${ApiIntegration}
+      FunctionName: !Ref ApiFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${CareDataApi}/*/*
+
   ApiRouteRoot:
     Type: AWS::ApiGatewayV2::Route
     DependsOn: ApiIntegration
     Properties:
       ApiId: !Ref CareDataApi
       RouteKey: "ANY /"
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteProxy:
+    Type: AWS::ApiGatewayV2::Route
+    DependsOn: ApiIntegration
+    Properties:
+      ApiId: !Ref CareDataApi
+      RouteKey: "ANY /{proxy+}"
       Target: !Sub integrations/${ApiIntegration}
 
 Outputs:
@@ -134,11 +133,11 @@ Outputs:
       Name: !Sub CareDataApiUrl-${Stage}
   UserPoolId:
     Description: Cognito User Pool ID (set VITE_USER_POOL_ID in frontend)
-    Value: !Ref UserPool
+    Value: !Ref CognitoUserPoolId
     Export:
       Name: !Sub CareDataUserPoolId-${Stage}
   UserPoolClientId:
     Description: Cognito App Client ID (set VITE_CLIENT_ID in frontend)
-    Value: !Ref UserPoolClient
+    Value: !Ref CognitoAppClientId
     Export:
       Name: !Sub CareDataUserPoolClientId-${Stage}

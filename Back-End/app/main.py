@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth
+from app.api import auth, health_scan, mydata
 
 app = FastAPI(title="CareData Backend (AWS Serverless)")
 
@@ -20,6 +20,8 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(health_scan.router)
+app.include_router(mydata.router)
 
 
 @app.get("/")

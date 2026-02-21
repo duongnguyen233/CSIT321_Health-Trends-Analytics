@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     COGNITO_USER_POOL_ID: str | None = None
     COGNITO_REGION: str | None = None
     COGNITO_APP_CLIENT_ID: str | None = None
+    OPENAI_API_KEY: str | None = None  # For Health Scan (ChatGPT Vision)
 
     class Config:
         env_file = ".env"
