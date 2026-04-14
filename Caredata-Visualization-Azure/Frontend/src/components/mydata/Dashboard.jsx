@@ -342,7 +342,7 @@ export default function Dashboard() {
                   <Radar
                     name="Value"
                     dataKey="A"
-                    stroke="#ea580c"
+                    stroke="#D2C7E5"
                     fill="#fb923c"
                     fillOpacity={0.5}
                   />
@@ -360,7 +360,7 @@ export default function Dashboard() {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="value" fill="#f97316" name="Value" />
+                  <Bar dataKey="value" fill="#D2C7E5" name="Value" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -381,40 +381,40 @@ export default function Dashboard() {
                   <Line
                     type="monotone"
                     dataKey="value"
-                    stroke="#ea580c"
+                    stroke="#D2C7E5"
                     strokeWidth={2}
                     name="Value"
                   />
                 </LineChart>
               </ResponsiveContainer>
 
-              <div className="mt-6 bg-orange-50 border border-orange-200 rounded-lg p-5">
-                <h3 className="text-lg font-semibold text-orange-800 mb-3">
+              <div className="mt-6 bg-primary-light border border-primary/20 rounded-lg p-5">
+                <h3 className="text-lg font-semibold text-primary mb-3">
                   AI-Assisted Recommendations
                 </h3>
                 {displayedRecs && (displayedRecs.actions || displayedRecs.diet || displayedRecs.exercise || displayedRecs.risks) && (
                   <div className="space-y-4 text-sm text-gray-700">
                     {displayedRecs.actions && (
                       <div>
-                        <h4 className="font-semibold text-orange-800 mb-1">What to do</h4>
+                        <h4 className="font-semibold text-primary mb-1">What to do</h4>
                         <RecContent value={displayedRecs.actions} />
                       </div>
                     )}
                     {displayedRecs.diet && (
                       <div>
-                        <h4 className="font-semibold text-orange-800 mb-1">Diet: what to eat & avoid</h4>
+                        <h4 className="font-semibold text-primary mb-1">Diet: what to eat & avoid</h4>
                         <RecContent value={displayedRecs.diet} />
                       </div>
                     )}
                     {displayedRecs.exercise && (
                       <div>
-                        <h4 className="font-semibold text-orange-800 mb-1">Exercise & activity</h4>
+                        <h4 className="font-semibold text-primary mb-1">Exercise & activity</h4>
                         <RecContent value={displayedRecs.exercise} />
                       </div>
                     )}
                     {displayedRecs.risks && (
                       <div>
-                        <h4 className="font-semibold text-orange-800 mb-1">Possible risks / conditions</h4>
+                        <h4 className="font-semibold text-primary mb-1">Possible risks / conditions</h4>
                         <RecContent value={displayedRecs.risks} />
                       </div>
                     )}

@@ -7,20 +7,20 @@ import { getQIAggregates, getQIResidents } from "../services/api";
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 const SIDEBAR_ITEMS = [
-  { id:"pi",    label:"Pressure injuries",          dot:"#d85a30" },
-  { id:"falls", label:"Falls & major injury",       dot:"#ba7517" },
-  { id:"uwl",   label:"Unplanned weight loss",      dot:"#1d9e75" },
-  { id:"meds",  label:"Medications",                dot:"#ba7517" },
-  { id:"adl",   label:"Activities of daily living", dot:"#1d9e75" },
-  { id:"ic",    label:"Incontinence care",          dot:"#1d9e75" },
-  { id:"rp",    label:"Restrictive practices",      dot:"#d85a30" },
-  { id:"hosp",  label:"Hospitalisation",            dot:"#ba7517" },
-  { id:"ah",    label:"Allied health",              dot:"#1d9e75" },
-  { id:"cx",    label:"Consumer experience",        dot:"#1d9e75" },
-  { id:"qol",   label:"Quality of life",            dot:"#ba7517" },
-  { id:"wf",    label:"Workforce",                  dot:"#1d9e75" },
-  { id:"en",    label:"Enrolled nursing",           dot:"#ba7517" },
-  { id:"ls",    label:"Lifestyle officer",          dot:"#1d9e75" },
+  { id:"pi",    label:"Pressure injuries",          dot:"#F9C0AF" },
+  { id:"falls", label:"Falls & major injury",       dot:"#F2D894" },
+  { id:"uwl",   label:"Unplanned weight loss",      dot:"#D3EADA" },
+  { id:"meds",  label:"Medications",                dot:"#D2C7E5" },
+  { id:"adl",   label:"Activities of daily living", dot:"#D3EADA" },
+  { id:"ic",    label:"Incontinence care",          dot:"#FFDDD8" },
+  { id:"rp",    label:"Restrictive practices",      dot:"#F9C0AF" },
+  { id:"hosp",  label:"Hospitalisation",            dot:"#F2D894" },
+  { id:"ah",    label:"Allied health",              dot:"#D3EADA" },
+  { id:"cx",    label:"Consumer experience",        dot:"#D2C7E5" },
+  { id:"qol",   label:"Quality of life",            dot:"#FFDDD8" },
+  { id:"wf",    label:"Workforce",                  dot:"#D3EADA" },
+  { id:"en",    label:"Enrolled nursing",           dot:"#F2D894" },
+  { id:"ls",    label:"Lifestyle officer",          dot:"#D2C7E5" },
 ];
 
 // ─── Section templates (metadata only — rows computed dynamically) ───────────
@@ -484,7 +484,7 @@ export default function ReportsPage() {
           </div>
 
           {/* Description */}
-          <p className="text-sm text-gray-600 mb-6 leading-relaxed border-l-4 border-primary/30 pl-4 bg-orange-50/40 py-3 pr-3 rounded-r-lg">{section.description}</p>
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed border-l-4 border-primary/30 pl-4 bg-primary-light/40 py-3 pr-3 rounded-r-lg">{section.description}</p>
 
           {/* Alert callout (meds only) */}
           {section.alert && (
@@ -545,7 +545,7 @@ export default function ReportsPage() {
                       </thead>
                       <tbody>
                         {section.rows.map((row, ri) => (
-                          <tr key={ri} className={`border-b border-gray-100 ${ri % 2 === 0 ? "bg-white" : "bg-gray-50/60"} hover:bg-orange-50/30 transition`}>
+                          <tr key={ri} className={`border-b border-gray-100 ${ri % 2 === 0 ? "bg-white" : "bg-gray-50/60"} hover:bg-primary-light/30 transition`}>
                             {row.map((cell, ci) => (
                               <td key={ci} className={`px-4 py-3 ${ci === 0 ? "font-semibold text-gray-800" : valueCls(section.columns[ci], cell, section.highlight || [])}`}>
                                 {cell}

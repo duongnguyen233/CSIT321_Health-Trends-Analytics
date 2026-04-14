@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { registerUser, API_BASE_URL, getCurrentUser } from "../services/api";
+import { registerUser, resendVerification, API_BASE_URL, getCurrentUser } from "../services/api";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import { Link, useNavigate } from "react-router-dom";
@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [strength, setStrength] = useState("Weak");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [resending, setResending] = useState(false);
   const navigate = useNavigate();
 
   const checkStrength = (pwd) => {
@@ -38,14 +39,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const data = await registerUser(form);
-      localStorage.setItem("token", data.access_token);
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      } else {
-        const userData = await getCurrentUser(data.access_token);
-        localStorage.setItem("user", JSON.stringify(userData));
-      }
+      await registerUser(form);
       setSuccess(true);
     } catch (error) {
       console.error(error);
@@ -53,6 +47,18 @@ export default function RegisterPage() {
       alert("Error registering: " + (typeof detail === "string" ? detail : JSON.stringify(detail)));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    try {
+      await resendVerification(form.email);
+      alert("Verification email resent! Check your inbox.");
+    } catch {
+      alert("Failed to resend. Please try again.");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -88,20 +94,39 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center">
-        <img src="/success.png" alt="Success" className="w-24 h-24 mb-6" />
-        <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-          Account created successfully!
-        </h2>
-        <p className="text-gray-500 mb-8">
-          Welcome aboard! Start your success journey with CareData!
-        </p>
-        <button
-          onClick={() => (window.location.href = "/")}
-          className="bg-orange-500 text-white px-6 py-2.5 rounded-md font-medium hover:bg-orange-600 transition"
-        >
-          Let's Start!
-        </button>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center px-4">
+        <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary-light flex items-center justify-center">
+            <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+            Check your email
+          </h2>
+          <p className="text-gray-500 mb-2">
+            We've sent a verification link to:
+          </p>
+          <p className="text-gray-900 font-medium mb-6">{form.email}</p>
+          <p className="text-gray-400 text-sm mb-6">
+            Click the link in the email to activate your account. The link expires in 24 hours.
+          </p>
+          <button
+            onClick={handleResend}
+            disabled={resending}
+            className="text-primary font-medium text-sm hover:underline disabled:opacity-50"
+          >
+            {resending ? "Resending..." : "Didn't receive it? Resend verification email"}
+          </button>
+          <div className="mt-6 pt-4 border-t border-gray-100">
+            <button
+              onClick={() => navigate("/login")}
+              className="text-gray-500 text-sm hover:text-gray-700"
+            >
+              Back to Login
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -147,7 +172,7 @@ export default function RegisterPage() {
                 >
                   Sign In
                 </button>
-                <button className="flex-1 py-2 font-medium text-gray-900 border-b-2 border-orange-500">
+                <button className="flex-1 py-2 font-medium text-gray-900 border-b-2 border-primary">
                   Sign Up
                 </button>
               </div>
@@ -162,7 +187,7 @@ export default function RegisterPage() {
                       value={form.first_name}
                       onChange={handleChange}
                       placeholder="Enter your first name"
-                      className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-orange-400"
+                      className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-primary/60"
                       required
                     />
                   </div>
@@ -174,7 +199,7 @@ export default function RegisterPage() {
                       value={form.last_name}
                       onChange={handleChange}
                       placeholder="Enter your last name"
-                      className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-orange-400"
+                      className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-primary/60"
                       required
                     />
                   </div>
@@ -188,7 +213,7 @@ export default function RegisterPage() {
                     value={form.email}
                     onChange={handleChange}
                     placeholder="Enter your email"
-                    className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-orange-400"
+                    className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-primary/60"
                     required
                   />
                 </div>
@@ -201,7 +226,7 @@ export default function RegisterPage() {
                     value={form.password}
                     onChange={handleChange}
                     placeholder="Enter your password"
-                    className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-orange-400"
+                    className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-primary/60"
                     required
                   />
                   <ul className="mt-2 text-sm text-gray-500 space-y-1">
@@ -224,14 +249,14 @@ export default function RegisterPage() {
                 </div>
 
                 <label className="flex items-center gap-2 text-sm text-gray-600">
-                  <input type="checkbox" className="accent-orange-500" required />
+                  <input type="checkbox" className="accent-primary" required />
                   I agree to the Terms of Service.
                 </label>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 bg-orange-500 text-white font-semibold rounded-md hover:bg-orange-600 transition disabled:opacity-50"
+                  className="w-full py-2.5 bg-primary text-white font-semibold rounded-md hover:bg-primary-hover transition disabled:opacity-50"
                 >
                   {loading ? "Creating Account..." : "Create Account"}
                 </button>
@@ -260,7 +285,7 @@ export default function RegisterPage() {
 
               <p className="text-center text-sm mt-6 text-gray-600">
                 Already have an account?{" "}
-                <Link to="/login" className="text-orange-500 font-medium hover:underline">
+                <Link to="/login" className="text-primary font-medium hover:underline">
                   Login
                 </Link>
               </p>

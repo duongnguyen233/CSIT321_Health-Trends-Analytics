@@ -454,7 +454,7 @@ export default function DocumentationPage() {
                   onClick={() => applyPreset(key)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                     preset === key
-                      ? "bg-orange-500 text-white"
+                      ? "bg-primary text-white"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
@@ -475,7 +475,7 @@ export default function DocumentationPage() {
                   type="checkbox"
                   checked={selectedOptions[key]}
                   onChange={() => handleChange(key)}
-                  className="w-5 h-5 text-orange-500 focus:ring-orange-400 rounded"
+                  className="w-5 h-5 text-primary focus:ring-primary/60 rounded"
                 />
               </div>
             ))}
@@ -512,14 +512,14 @@ export default function DocumentationPage() {
             <button
               onClick={handleGenerate}
               disabled={generating || (needsUpload && !selectedUploadId)}
-              className="bg-orange-500 text-white px-6 py-3 rounded-md font-medium hover:bg-orange-600 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-primary text-white px-6 py-3 rounded-md font-medium hover:bg-primary-hover transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {generating ? "Generating…" : "Generate Documentation"}
             </button>
           </div>
 
-          <div className="mt-10 bg-orange-50 border border-orange-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-orange-800 mb-2">Tip</h3>
+          <div className="mt-10 bg-primary-light border border-primary/20 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-primary mb-2">Tip</h3>
             <p className="text-gray-700 leading-relaxed mb-2">
               Use presets for quick report types. The report downloads as a PDF automatically.
             </p>

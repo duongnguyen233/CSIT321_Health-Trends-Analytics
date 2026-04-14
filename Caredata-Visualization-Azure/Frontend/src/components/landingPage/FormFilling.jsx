@@ -43,7 +43,7 @@ export default function FormFilling() {
           </p>
           <button
             onClick={() => navigate("/voice/dashboard")}
-            className="bg-primary text-white px-6 py-3 rounded-md font-medium hover:bg-orange-600 transition-all shadow-md"
+            className="bg-primary text-white px-6 py-3 rounded-md font-medium hover:bg-primary-hover transition-all shadow-md"
           >
             Voice Dashboard
           </button>

@@ -207,7 +207,7 @@ export default function VoiceRecordPage() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               className="w-full text-2xl px-5 py-4 border-2 border-gray-300 rounded-xl
-                         focus:border-primary focus:ring-2 focus:ring-orange-200 outline-none"
+                         focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
               placeholder="e.g. Margaret"
               autoFocus
             />
@@ -222,7 +222,7 @@ export default function VoiceRecordPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full text-2xl px-5 py-4 border-2 border-gray-300 rounded-xl
-                         focus:border-primary focus:ring-2 focus:ring-orange-200 outline-none"
+                         focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
               placeholder="At least 4 characters"
             />
           </div>
@@ -233,7 +233,7 @@ export default function VoiceRecordPage() {
             type="submit"
             disabled={submitting}
             className="w-full py-5 bg-primary text-white text-2xl font-semibold rounded-xl
-                       hover:bg-orange-600 transition-colors disabled:opacity-50"
+                       hover:bg-primary-hover transition-colors disabled:opacity-50"
           >
             {submitting ? "Creating account..." : "Continue"}
           </button>
@@ -261,7 +261,7 @@ export default function VoiceRecordPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full text-2xl px-5 py-4 border-2 border-gray-300 rounded-xl
-                         focus:border-primary focus:ring-2 focus:ring-orange-200 outline-none"
+                         focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
               placeholder="Enter your password"
               autoFocus
             />
@@ -273,7 +273,7 @@ export default function VoiceRecordPage() {
             type="submit"
             disabled={submitting}
             className="w-full py-5 bg-primary text-white text-2xl font-semibold rounded-xl
-                       hover:bg-orange-600 transition-colors disabled:opacity-50"
+                       hover:bg-primary-hover transition-colors disabled:opacity-50"
           >
             {submitting ? "Logging in..." : "Continue"}
           </button>
@@ -315,7 +315,7 @@ export default function VoiceRecordPage() {
             onClick={handleConsent}
             disabled={submitting}
             className="w-full py-5 bg-primary text-white text-2xl font-semibold rounded-xl
-                       hover:bg-orange-600 transition-colors disabled:opacity-50"
+                       hover:bg-primary-hover transition-colors disabled:opacity-50"
           >
             {submitting ? "Saving..." : "I Agree — Continue"}
           </button>

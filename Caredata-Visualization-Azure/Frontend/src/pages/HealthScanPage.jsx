@@ -119,7 +119,7 @@ export default function HealthScanPage() {
             {/* Upload area */}
             <div
               className={`border-2 border-dashed rounded-lg p-8 text-center transition cursor-pointer ${
-                files.length ? "border-primary bg-orange-50/30" : "border-gray-300 hover:border-primary"
+                files.length ? "border-primary bg-primary-light/30" : "border-gray-300 hover:border-primary"
               }`}
               onClick={() => inputRef.current?.click()}
             >
@@ -186,7 +186,7 @@ export default function HealthScanPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
-                      <span className="absolute bottom-1 left-1 text-xs text-white bg-black/50 rounded px-1.5 py-0.5">
+                      <span className="absolute bottom-1 left-1 text-xs text-white bg-dark/50 rounded px-1.5 py-0.5">
                         {files[i]?.name?.slice(0, 12)}{files[i]?.name?.length > 12 ? "…" : ""}
                       </span>
                     </div>
@@ -204,7 +204,7 @@ export default function HealthScanPage() {
             <button
               type="submit"
               disabled={!files.length || isAnalyzing}
-              className="w-full bg-primary text-white py-2.5 rounded-md font-medium hover:bg-orange-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-primary text-white py-2.5 rounded-md font-medium hover:bg-primary-hover transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isAnalyzing ? "Analyzing…" : "Analyze health record" + (files.length > 1 ? "s" : "")}
             </button>
@@ -252,7 +252,7 @@ export default function HealthScanPage() {
                   setShowPromptDetail(false);
                   navigate("/mydata");
                 }}
-                className="mt-3 w-full bg-primary text-white py-2 rounded-md font-medium hover:bg-orange-600 transition"
+                className="mt-3 w-full bg-primary text-white py-2 rounded-md font-medium hover:bg-primary-hover transition"
               >
                 Go to My Data
               </button>

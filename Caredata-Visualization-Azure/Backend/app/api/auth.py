@@ -1,12 +1,14 @@
 """
-Auth: JWT-based register/login (Azure). No Cognito.
+Auth: JWT-based register/login (Azure). Email verification required.
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 
 from app.core.security import hash_password, verify_password
 from app.services.jwt_auth import get_current_user, create_access_token
 from app.services import user_store
+from app.services import verification_store
+from app.services.email_service import send_verification_email
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -28,6 +30,10 @@ class GoogleBody(BaseModel):
     id_token: str | None = None
 
 
+class ResendBody(BaseModel):
+    email: str
+
+
 @router.get("/me")
 def get_user_me(current_user: dict = Depends(get_current_user)):
     """Return the logged-in user's info (from JWT / user store)."""
@@ -42,7 +48,7 @@ def get_user_me(current_user: dict = Depends(get_current_user)):
 
 @router.post("/register")
 def register(body: RegisterBody):
-    """Register a new user."""
+    """Register a new user. Sends verification email instead of returning JWT."""
     email = (body.email or "").strip()
     password = body.password or ""
     first_name = (body.first_name or "").strip()
@@ -62,14 +68,70 @@ def register(body: RegisterBody):
         if "already registered" in str(e).lower():
             raise HTTPException(status_code=400, detail="Email already registered") from e
         raise HTTPException(status_code=400, detail=str(e)) from e
-    token = create_access_token({
+
+    # Generate verification token and send email
+    token = verification_store.create_token(email)
+    send_verification_email(email, token, first_name=first_name)
+
+    return {
+        "message": "Account created. Please check your email to verify your account.",
+        "email": email,
+        "requires_verification": True,
+    }
+
+
+@router.get("/verify-email")
+def verify_email(token: str = Query(...)):
+    """Verify email with token. Returns JWT on success."""
+    email = verification_store.verify_token(token)
+    if not email:
+        raise HTTPException(status_code=400, detail="Invalid or expired verification link")
+
+    # Mark user as verified
+    user_store.mark_email_verified(email)
+    verification_store.delete_tokens_for_email(email)
+
+    # Get user and return JWT
+    user = user_store.get_user_by_email(email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    jwt_token = create_access_token({
         "sub": user["id"],
         "email": user["email"],
-        "first_name": user["first_name"],
-        "last_name": user["last_name"],
-        "role": user["role"],
+        "first_name": user.get("first_name", "User"),
+        "last_name": user.get("last_name", ""),
+        "role": user.get("role", "user"),
     })
-    return {"access_token": token, "token_type": "bearer", "user": user}
+    return {
+        "access_token": jwt_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user["id"],
+            "email": user["email"],
+            "first_name": user.get("first_name", "User"),
+            "last_name": user.get("last_name", ""),
+            "role": user.get("role", "user"),
+        },
+    }
+
+
+@router.post("/resend-verification")
+def resend_verification(body: ResendBody):
+    """Resend verification email."""
+    email = (body.email or "").strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="Email is required")
+    user = user_store.get_user_by_email(email)
+    if not user:
+        # Don't reveal whether email exists
+        return {"message": "If an account exists with this email, a verification link has been sent."}
+    if user.get("email_verified"):
+        return {"message": "Email is already verified. You can log in."}
+
+    token = verification_store.create_token(email)
+    send_verification_email(email, token, first_name=user.get("first_name", ""))
+    return {"message": "If an account exists with this email, a verification link has been sent."}
 
 
 @router.post("/login")
@@ -82,6 +144,14 @@ def login(body: LoginBody):
     user = user_store.get_user_by_email(email)
     if not user or not verify_password(password, user.get("password_hash", "")):
         raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    # Check email verification
+    if not user.get("email_verified"):
+        raise HTTPException(
+            status_code=403,
+            detail="Email not verified. Please check your inbox for the verification link.",
+        )
+
     token = create_access_token({
         "sub": user["id"],
         "email": user["email"],
@@ -119,7 +189,7 @@ def google_login(body: GoogleBody):
         last_name = (payload.get("family_name") or "").strip()
         user = user_store.get_user_by_email(email)
         if not user:
-            # Create user with no password (Google-only)
+            # Create user with no password (Google-only) — auto-verified
             import secrets
             user = user_store.create_user(
                 email=email,
@@ -127,6 +197,8 @@ def google_login(body: GoogleBody):
                 first_name=first_name,
                 last_name=last_name,
             )
+            # Google users are auto-verified
+            user_store.mark_email_verified(email)
         else:
             user = {k: v for k, v in user.items() if k != "password_hash"}
             user.setdefault("first_name", first_name)

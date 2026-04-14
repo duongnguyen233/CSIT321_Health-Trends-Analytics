@@ -435,7 +435,7 @@ export default function SettingPage() {
                 <button
                   onClick={handleSaveFacility}
                   disabled={loading}
-                  className="bg-primary text-white text-base font-medium px-6 py-2.5 rounded-lg hover:bg-orange-600 transition disabled:opacity-50"
+                  className="bg-primary text-white text-base font-medium px-6 py-2.5 rounded-lg hover:bg-primary-hover transition disabled:opacity-50"
                 >
                   Save changes
                 </button>
@@ -488,7 +488,7 @@ export default function SettingPage() {
               <div className="flex items-center gap-3 mt-6">
                 <button
                   onClick={handleSaveBenchmarks}
-                  className="bg-primary text-white text-base font-medium px-6 py-2.5 rounded-lg hover:bg-orange-600 transition"
+                  className="bg-primary text-white text-base font-medium px-6 py-2.5 rounded-lg hover:bg-primary-hover transition"
                 >
                   Save benchmark values
                 </button>

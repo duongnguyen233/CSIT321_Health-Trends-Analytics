@@ -15,29 +15,25 @@ export default function Hero() {
   }, [location.pathname]);
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-black">
-
-      {/* Black box to push image down — do not remove */}
-      <div className="absolute top-0 left-0 w-full h-[20px] bg-black z-[1]" />
-
+    <section className="relative min-h-screen overflow-hidden bg-dark">
       {/* Full-bleed background image */}
       <img
         src="/banner.png"
         alt=""
-        className="absolute top-[20px] left-0 w-full h-[calc(100%-20px)] object-cover object-top"
+        className="absolute inset-0 w-full h-full object-cover object-center"
       />
 
-      {/* Gradient overlay — solid black at top for text, fades to show image, then white */}
+      {/* Gradient overlay — warm dark at top for text, fades to show image, then cream */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background: `linear-gradient(to bottom,
-            #000 0%, #000 32%,
-            rgba(0,0,0,0.75) 45%,
-            rgba(0,0,0,0.3) 58%,
-            rgba(0,0,0,0) 68%,
-            rgba(255,255,255,0.85) 90%,
-            #fff 100%)`,
+            #4a3f35 0%, #4a3f35 25%,
+            rgba(74,63,53,0.65) 38%,
+            rgba(74,63,53,0.2) 50%,
+            rgba(74,63,53,0) 60%,
+            rgba(250,246,241,0.85) 90%,
+            #faf6f1 100%)`,
         }}
       />
 
@@ -90,7 +86,7 @@ export default function Hero() {
         >
           <button
             onClick={() => navigate(isLoggedIn ? "/mydata" : "/login")}
-            className="inline-flex items-center gap-2 bg-primary text-white px-8 py-3 text-base font-semibold rounded-md hover:bg-orange-500 transition"
+            className="inline-flex items-center gap-2 bg-primary text-white px-8 py-3 text-base font-semibold rounded-md hover:bg-primary-hover transition"
           >
             {isLoggedIn ? "Go to Dashboard" : "Get Started"}
             <ArrowRightIcon className="w-4 h-4" />

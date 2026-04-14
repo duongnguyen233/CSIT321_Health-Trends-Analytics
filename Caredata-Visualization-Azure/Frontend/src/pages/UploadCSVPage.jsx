@@ -654,7 +654,7 @@ export default function UploadCSVPage() {
           {/* Drop zone */}
           <div
             className={`mx-5 mt-5 border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition bg-gray-50 ${
-              dragOver ? "border-primary bg-orange-50" : file ? "border-primary border-solid bg-orange-50/50" : "border-gray-300 hover:border-orange-400"
+              dragOver ? "border-primary bg-primary-light" : file ? "border-primary border-solid bg-primary-light/50" : "border-gray-300 hover:border-primary/40"
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -662,7 +662,7 @@ export default function UploadCSVPage() {
             onClick={() => document.getElementById("file-input")?.click()}
           >
             <input id="file-input" type="file" accept=".csv" onChange={handleFileChange} className="hidden" />
-            <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center mx-auto mb-3">
+            <div className="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center mx-auto mb-3">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-primary">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
               </svg>
@@ -671,7 +671,7 @@ export default function UploadCSVPage() {
             <div className="text-sm text-gray-500 mb-4 leading-relaxed">or click to browse.<br />One file per quarterly submission.</div>
             <button
               type="button"
-              className="bg-primary text-white text-sm font-semibold py-2.5 px-5 rounded-lg hover:bg-orange-600 transition"
+              className="bg-primary text-white text-sm font-semibold py-2.5 px-5 rounded-lg hover:bg-primary-hover transition"
               onClick={(e) => { e.stopPropagation(); document.getElementById("file-input")?.click(); }}
             >Browse files</button>
             <div className="text-sm text-gray-500 mt-3">Supported: .csv  Max: {MAX_SIZE_MB} MB</div>
@@ -679,8 +679,8 @@ export default function UploadCSVPage() {
 
           {/* File selected */}
           {file && (
-            <div className="mx-5 mt-4 flex items-center gap-3 bg-orange-50/70 border border-orange-200 rounded-lg px-4 py-3">
-              <div className="w-9 h-9 rounded-lg bg-orange-100 flex items-center justify-center shrink-0">
+            <div className="mx-5 mt-4 flex items-center gap-3 bg-primary-light/70 border border-primary/20 rounded-lg px-4 py-3">
+              <div className="w-9 h-9 rounded-lg bg-primary-light flex items-center justify-center shrink-0">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-primary">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
                 </svg>
@@ -715,23 +715,23 @@ export default function UploadCSVPage() {
 
               {/* GPMS field flag summary */}
               {uploadFlagSummary && (
-                <div className="bg-orange-50 border border-orange-200 rounded-lg px-4 py-3">
+                <div className="bg-primary-light border border-primary/20 rounded-lg px-4 py-3">
                   <div className="flex items-start gap-2">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-orange-500 mt-0.5 shrink-0">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-primary mt-0.5 shrink-0">
                       <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                       <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
                     </svg>
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-orange-800">
+                      <p className="text-sm font-semibold text-primary">
                         {uploadFlagSummary.filled} of {uploadFlagSummary.total} GPMS fields auto-filled from CSV
                       </p>
-                      <p className="text-xs text-orange-700 mt-0.5">
+                      <p className="text-xs text-primary/80 mt-0.5">
                         {uploadFlagSummary.unfilled} fields need manual entry (exclusion counts, dates, workforce details, etc.).
                         Form has been auto-filled — switch to Manual Entry to review and complete.
                       </p>
                       {gpmsFromUpload && Object.keys(gpmsFromUpload).length > 1 && (
                         <div className="mt-2 flex items-center gap-2">
-                          <span className="text-xs text-orange-700">Assessment date:</span>
+                          <span className="text-xs text-primary/80">Assessment date:</span>
                           <select
                             value={selectedGpmsDate}
                             onChange={e => {
@@ -752,7 +752,7 @@ export default function UploadCSVPage() {
                               setFormData(newForm);
                               setPrefilledKeys(filledKeys);
                             }}
-                            className="text-xs border border-orange-300 rounded px-2 py-1 bg-white text-orange-800"
+                            className="text-xs border border-primary/30 rounded px-2 py-1 bg-white text-primary"
                           >
                             {Object.keys(gpmsFromUpload).sort().map(d => (
                               <option key={d} value={d}>{d}</option>
@@ -763,7 +763,7 @@ export default function UploadCSVPage() {
                       <button
                         type="button"
                         onClick={() => { setActiveTab("manual"); setExpandedSections(new Set(GPMS_SECTIONS.map(s => s.id))); }}
-                        className="mt-3 bg-primary text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-orange-600 transition"
+                        className="mt-3 bg-primary text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-primary-hover transition"
                       >
                         Go to Manual Entry (review & complete)
                       </button>
@@ -781,7 +781,7 @@ export default function UploadCSVPage() {
               onClick={handleSubmit}
               disabled={uploading || !file}
               className={`w-full py-2.5 rounded-md font-medium text-base transition disabled:cursor-not-allowed relative overflow-hidden border-2 ${
-                uploading ? "border-primary bg-white" : "bg-primary text-white border-primary hover:bg-orange-600"
+                uploading ? "border-primary bg-white" : "bg-primary text-white border-primary hover:bg-primary-hover"
               } ${!file ? "opacity-50" : ""}`}
             >
               {uploading ? (
@@ -817,12 +817,12 @@ export default function UploadCSVPage() {
                 </thead>
                 <tbody>
                   {history.map((item) => (
-                    <tr key={item.uploadId} className={`border-b border-gray-100 last:border-0 ${selectedUploadId === item.uploadId ? "bg-orange-50/50" : ""}`}>
+                    <tr key={item.uploadId} className={`border-b border-gray-100 last:border-0 ${selectedUploadId === item.uploadId ? "bg-primary-light/50" : ""}`}>
                       <td className="py-2.5 pr-2 text-gray-900 font-medium break-words min-w-0" title={item.filename}>{item.filename || "—"}</td>
                       <td className="py-2.5 pr-2 text-gray-500 whitespace-nowrap">{formatUploadDate(item.uploadedAt)}</td>
                       <td className="py-2.5 pr-2">
                         {selectedUploadId === item.uploadId
-                          ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/20 text-orange-800">Displaying</span>
+                          ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/20 text-primary">Displaying</span>
                           : <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-800">Submitted</span>}
                       </td>
                       <td className="py-2.5 text-right">
@@ -834,7 +834,7 @@ export default function UploadCSVPage() {
                             </svg>
                           </button>
                           <button type="button" onClick={() => setSelected(selectedUploadId === item.uploadId ? "" : item.uploadId)}
-                            className={`p-1.5 rounded border ${selectedUploadId === item.uploadId ? "bg-primary border-primary text-white" : "border-gray-300 bg-white text-gray-500 hover:bg-orange-50"}`}
+                            className={`p-1.5 rounded border ${selectedUploadId === item.uploadId ? "bg-primary border-primary text-white" : "border-gray-300 bg-white text-gray-500 hover:bg-primary-light"}`}
                             title={selectedUploadId === item.uploadId ? "Used for dashboard" : "Use for dashboard"}>
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="20 6 9 17 4 12" />
@@ -1050,7 +1050,7 @@ export default function UploadCSVPage() {
 
         {/* Export manual entry */}
         <div className="bg-white rounded-2xl shadow border border-gray-200 p-6">
-          <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center mb-4">
+          <div className="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center mb-4">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-primary">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
               <path d="M12 18v-6" /><path d="M9 15l3 3 3-3" />
@@ -1067,7 +1067,7 @@ export default function UploadCSVPage() {
             type="button"
             onClick={handleExportExcel}
             disabled={filledCount === 0}
-            className="w-full bg-primary text-white text-sm font-semibold py-2.5 px-5 rounded-lg hover:bg-orange-600 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary text-white text-sm font-semibold py-2.5 px-5 rounded-lg hover:bg-primary-hover transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />

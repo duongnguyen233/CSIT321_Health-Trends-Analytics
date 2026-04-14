@@ -179,7 +179,7 @@ export default function Navbar() {
               <Link
                 to="/login"
                 onClick={() => setIsOpen(false)}
-                className="text-sm font-semibold text-primary hover:text-orange-400 transition whitespace-nowrap"
+                className="text-sm font-semibold text-primary hover:text-primary-hover transition whitespace-nowrap"
               >
                 Sign In
               </Link>

@@ -173,9 +173,9 @@ export default function UploadedHistoryPage() {
                         <td className="px-4 py-3">
                           <span className="inline-flex items-center gap-1.5 text-gray-900 font-medium">
                             {item.type === "csv" ? (
-                              <><FileSpreadsheet size={16} className="text-orange-600" /> CSV</>
+                              <><FileSpreadsheet size={16} className="text-primary" /> CSV</>
                             ) : (
-                              <><Scan size={16} className="text-orange-600" /> Health Scan</>
+                              <><Scan size={16} className="text-primary" /> Health Scan</>
                             )}
                           </span>
                         </td>

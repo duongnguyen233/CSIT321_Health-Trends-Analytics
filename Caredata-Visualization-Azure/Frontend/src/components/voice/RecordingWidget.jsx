@@ -153,7 +153,7 @@ export default function RecordingWidget({ prompt, onUpload, disabled = false }) 
             onClick={startRecording}
             disabled={disabled}
             className="w-full py-6 bg-primary text-white text-3xl font-semibold rounded-2xl
-                       hover:bg-orange-600 active:bg-orange-700 transition-colors
+                       hover:bg-primary-hover active:bg-primary-hover transition-colors
                        disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
             Start Recording
@@ -182,7 +182,7 @@ export default function RecordingWidget({ prompt, onUpload, disabled = false }) 
             <button
               onClick={handleUpload}
               className="flex-1 py-5 bg-primary text-white text-2xl font-semibold rounded-2xl
-                         hover:bg-orange-600 transition-colors shadow-lg"
+                         hover:bg-primary-hover transition-colors shadow-lg"
             >
               Upload
             </button>
@@ -219,7 +219,7 @@ export default function RecordingWidget({ prompt, onUpload, disabled = false }) 
             <p className="text-xl text-red-600 mb-4">{errorMsg}</p>
             <button
               onClick={handleReRecord}
-              className="px-8 py-3 bg-primary text-white text-xl rounded-xl hover:bg-orange-600 transition-colors"
+              className="px-8 py-3 bg-primary text-white text-xl rounded-xl hover:bg-primary-hover transition-colors"
             >
               Try again
             </button>

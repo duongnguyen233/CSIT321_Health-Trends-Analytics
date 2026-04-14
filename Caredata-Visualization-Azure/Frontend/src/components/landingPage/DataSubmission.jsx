@@ -15,7 +15,7 @@ export default function DataSubmission() {
   };
 
   return (
-    <section className="relative bg-[#fafafa] py-20 overflow-hidden">
+    <section className="relative bg-light py-20 overflow-hidden">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 px-6">
         {/* Left image section */}
         <motion.div
@@ -27,8 +27,8 @@ export default function DataSubmission() {
           custom={0.1}
         >
           {/* background shapes */}
-          <div className="absolute top-0 left-0 w-3/4 h-3/4 bg-orange-100 rounded-[2rem] -z-10"></div>
-          <div className="absolute bottom-0 right-0 w-3/4 h-3/4 bg-orange-200/60 rounded-[2rem] blur-3xl -z-20"></div>
+          <div className="absolute top-0 left-0 w-3/4 h-3/4 bg-primary-light rounded-[2rem] -z-10"></div>
+          <div className="absolute bottom-0 right-0 w-3/4 h-3/4 bg-sand/30 rounded-[2rem] blur-3xl -z-20"></div>
 
           {/* PNG with transparent border */}
           <img
@@ -47,7 +47,7 @@ export default function DataSubmission() {
           viewport={{ once: true, amount: 0.4 }}
           custom={0.3}
         >
-          <h3 className="text-sm font-semibold text-orange-500 tracking-wider uppercase mb-2">
+          <h3 className="text-sm font-semibold text-primary tracking-wider uppercase mb-2">
             QI Reporting
           </h3>
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
@@ -65,7 +65,7 @@ export default function DataSubmission() {
           </p>
           <button
             onClick={() => navigate("/dashboard")}
-            className="bg-primary text-white px-6 py-3 rounded-md font-medium hover:bg-orange-600 transition-all shadow-md"
+            className="bg-primary text-white px-6 py-3 rounded-md font-medium hover:bg-primary-hover transition-all shadow-md"
           >
             View Dashboard
           </button>

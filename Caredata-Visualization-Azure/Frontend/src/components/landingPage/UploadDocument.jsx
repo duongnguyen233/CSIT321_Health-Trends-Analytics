@@ -15,7 +15,7 @@ export default function UploadDocument() {
   };
 
   return (
-    <section className="relative bg-[#f8f8f8] py-24 overflow-hidden">
+    <section className="relative bg-light py-24 overflow-hidden">
       <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
         {/* Left side — image */}
         <motion.div
@@ -60,7 +60,7 @@ export default function UploadDocument() {
           </p>
           <button
             onClick={() => navigate("/upload-csv")}
-            className="bg-primary text-white px-6 py-3 rounded-md font-medium hover:bg-orange-600 transition-all shadow-md"
+            className="bg-primary text-white px-6 py-3 rounded-md font-medium hover:bg-primary-hover transition-all shadow-md"
           >
             Upload Data
           </button>

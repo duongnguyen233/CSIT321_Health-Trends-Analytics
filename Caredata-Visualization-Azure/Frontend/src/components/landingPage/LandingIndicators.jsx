@@ -28,7 +28,7 @@ export default function LandingIndicators() {
   };
 
   return (
-    <section className="relative bg-[#f8f8f8] py-24 overflow-hidden">
+    <section className="relative bg-light py-24 overflow-hidden">
       <div className="max-w-6xl mx-auto px-6">
         <motion.div
           initial="hidden"

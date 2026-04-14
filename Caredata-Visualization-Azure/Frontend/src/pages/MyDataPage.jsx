@@ -311,7 +311,7 @@ export default function MyDataPage() {
             </button>
             <button
               onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-              className="bg-orange-500 text-white px-5 py-2 rounded-md font-medium hover:bg-orange-600 transition"
+              className="bg-primary text-white px-5 py-2 rounded-md font-medium hover:bg-primary-hover transition"
             >
               {isEditing ? "Save" : "Edit Data"}
             </button>

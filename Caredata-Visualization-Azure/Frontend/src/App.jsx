@@ -22,6 +22,7 @@ import ContactPage from "./components/footerPages/ContactPage";
 import ScrollToTop from "./components/common/ScrollToTop";
 import AboutPage from "./components/footerPages/AboutUs";
 import SetupAccountPage from "./pages/SetupAccountPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 import VoiceRecordPage from "./pages/VoiceRecordPage";
 import ResidentPortalPage from "./pages/ResidentPortalPage";
 import VoiceDashboardPage from "./pages/VoiceDashboardPage";
@@ -63,6 +64,7 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/setup-account" element={<SetupAccountPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
         {/* Protected Routes */}
         <Route

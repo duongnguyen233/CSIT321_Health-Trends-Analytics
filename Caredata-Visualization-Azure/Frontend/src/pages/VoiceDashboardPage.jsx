@@ -35,17 +35,17 @@ import {
 
 // ── Style-guide palette ─────────────────────────────────────────────────────
 const PALETTE = {
-  secondary: "#E58411",  // orange/gold
-  info: "#2F80ED",       // blue
-  success: "#27AE60",    // green
-  warning: "#E2B93B",    // yellow
-  error: "#EB5757",      // red
-  dark: "#1E1E1E",
-  gray1: "#333333",
-  gray2: "#4F4F4F",
-  gray3: "#828282",
-  gray4: "#BDBDBD",
-  gray5: "#E0E0E0",
+  secondary: "#F2D894",  // soft gold
+  info: "#D2C7E5",       // lavender
+  success: "#D3EADA",    // mint
+  warning: "#F2D894",    // soft gold
+  error: "#F9C0AF",      // peach
+  dark: "#4a3f35",
+  gray1: "#6b5e52",
+  gray2: "#8a7e72",
+  gray3: "#b0a89e",
+  gray4: "#F9ECE3",
+  gray5: "#FDF8F4",
 };
 
 const ALERT_PIE_COLORS = [PALETTE.success, PALETTE.warning, PALETTE.error];
@@ -409,7 +409,7 @@ export default function VoiceDashboardPage() {
                       onBlur={() => setTimeout(() => setLinkDropdownOpen(false), 200)}
                       placeholder="Type patient ID (e.g. R001)..."
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
-                                 focus:border-orange-400 focus:ring-1 focus:ring-orange-200 outline-none bg-white"
+                                 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none bg-white"
                     />
                     {/* Dropdown suggestions */}
                     {linkDropdownOpen && linkSuggestions.length > 0 && (
@@ -461,7 +461,7 @@ export default function VoiceDashboardPage() {
                       onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addBatchTag(); } }}
                       placeholder="Type ID + Enter..."
                       className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm
-                                 focus:border-orange-400 focus:ring-1 focus:ring-orange-200 outline-none"
+                                 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none"
                     />
                     <button onClick={addBatchTag}
                       className="px-4 py-2 text-white text-sm font-medium rounded-lg"
@@ -535,7 +535,7 @@ export default function VoiceDashboardPage() {
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Reset Resident Password</h2>
               <div className="space-y-3">
                 <select value={resetTarget || ""} onChange={(e) => { setResetTarget(e.target.value || null); setResetMsg(""); }}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-200 outline-none">
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none">
                   <option value="">Select resident...</option>
                   {residents.map((r) => (
                     <option key={r.resident_id} value={r.resident_id}>
@@ -547,7 +547,7 @@ export default function VoiceDashboardPage() {
                   <>
                     <input type="text" value={resetPw} onChange={(e) => setResetPw(e.target.value)}
                       placeholder="New password (min 4 chars)"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-orange-400 focus:ring-1 focus:ring-orange-200 outline-none" />
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none" />
                     <button onClick={handleResetPassword}
                       className="w-full py-2.5 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors text-sm">
                       Reset Password
@@ -589,7 +589,7 @@ export default function VoiceDashboardPage() {
                   ].map(({ key, label }) => (
                     <button key={key} onClick={() => setDetailTab(key)}
                       className={`px-3 py-2 text-sm font-medium border-b-2 transition ${
-                        detailTab === key ? "border-orange-500 text-orange-600" : "border-transparent text-gray-500 hover:text-gray-700"
+                        detailTab === key ? "border-primary text-primary" : "border-transparent text-gray-500 hover:text-gray-700"
                       }`}>
                       {label}
                     </button>
@@ -706,7 +706,7 @@ export default function VoiceDashboardPage() {
                 <input type="text" value={tableSearch} onChange={(e) => setTableSearch(e.target.value)}
                   placeholder="Search by name or ID..."
                   className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm w-56
-                             focus:border-orange-400 focus:ring-1 focus:ring-orange-200 outline-none" />
+                             focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none" />
               </div>
 
               {loading ? (
@@ -746,7 +746,7 @@ export default function VoiceDashboardPage() {
                         return (
                           <tr key={r.profile_id}
                             className={`border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
-                              selectedResident === r.resident_id ? "bg-orange-50" : ""}`}
+                              selectedResident === r.resident_id ? "bg-primary-light" : ""}`}
                             onClick={() => handleViewHistory(r.resident_id)}>
                             <td className="py-3 px-3">
                               <div className="flex items-center gap-2">

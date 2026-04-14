@@ -46,6 +46,7 @@ def get_user_by_email(email: str) -> dict | None:
                 "first_name": entity.get("first_name", ""),
                 "last_name": entity.get("last_name", ""),
                 "role": entity.get("role", "user"),
+                "email_verified": entity.get("email_verified", False),
             }
         except Exception as e:
             if "ResourceNotFound" in str(type(e).__name__) or "404" in str(e):
@@ -133,6 +134,7 @@ def create_user(email: str, password_hash: str, first_name: str = "", last_name:
                 "first_name": user["first_name"],
                 "last_name": user["last_name"],
                 "role": "user",
+                "email_verified": False,
             })
         except Exception as e:
             logger.exception("user_store create_user: %s", e)
@@ -141,5 +143,29 @@ def create_user(email: str, password_hash: str, first_name: str = "", last_name:
         _in_memory_users[email] = {
             **user,
             "password_hash": password_hash,
+            "email_verified": False,
         }
     return user
+
+
+def mark_email_verified(email: str) -> bool:
+    """Mark a user's email as verified. Returns True on success."""
+    email = (email or "").strip().lower()
+    if not email:
+        return False
+    table = _get_table_client()
+    if table:
+        try:
+            entity = table.get_entity(partition_key="user", row_key=email)
+            entity["email_verified"] = True
+            table.upsert_entity(entity)
+            return True
+        except Exception as e:
+            logger.warning("user_store mark_email_verified: %s", e)
+            return False
+    else:
+        user = _in_memory_users.get(email)
+        if user:
+            user["email_verified"] = True
+            return True
+        return False

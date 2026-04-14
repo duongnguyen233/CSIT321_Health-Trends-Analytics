@@ -16,7 +16,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const COLORS = ["#ea580c", "#fbbf24", "#d1d5db"];
+const COLORS = ["#F9C0AF", "#D3EADA", "#F9ECE3"];
 
 export default function DomainDetailsPage() {
   const { id } = useParams();
@@ -97,13 +97,13 @@ export default function DomainDetailsPage() {
               </h3>
               <p className="text-gray-600 mb-6">
                 Data for{" "}
-                <span className="font-medium text-orange-600">{domainName}</span>{" "}
+                <span className="font-medium text-primary">{domainName}</span>{" "}
                 is not available yet. Upload a health record via Health Scan to
                 view analytics and charts.
               </p>
               <button
                 onClick={() => navigate("/health-scan")}
-                className="bg-orange-500 text-white px-6 py-2 rounded-md font-medium hover:bg-orange-600 transition"
+                className="bg-primary text-white px-6 py-2 rounded-md font-medium hover:bg-primary-hover transition"
               >
                 Go to Health Scan
               </button>
@@ -153,7 +153,7 @@ export default function DomainDetailsPage() {
                       <Line
                         type="monotone"
                         dataKey="value"
-                        stroke="#ea580c"
+                        stroke="#D2C7E5"
                         strokeWidth={2}
                       />
                     </LineChart>
@@ -171,7 +171,7 @@ export default function DomainDetailsPage() {
                     <XAxis dataKey="category" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="incidents" fill="#f97316" />
+                    <Bar dataKey="incidents" fill="#D2C7E5" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

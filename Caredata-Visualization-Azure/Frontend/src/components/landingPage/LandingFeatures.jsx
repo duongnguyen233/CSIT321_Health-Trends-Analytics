@@ -90,7 +90,7 @@ export default function LandingFeatures() {
               viewport={{ once: true, amount: 0.3 }}
               custom={idx * 0.2}
             >
-              <div className="w-9 h-9 rounded-lg bg-orange-100 flex items-center justify-center mb-3">
+              <div className="w-9 h-9 rounded-lg bg-primary-light flex items-center justify-center mb-3">
                 <FeatureIcon name={f.icon} />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-3">{f.name}</h3>

@@ -16,6 +16,14 @@ class Settings(BaseSettings):
     # OpenAI (for Health Scan / ChatGPT Vision)
     OPENAI_API_KEY: str | None = None
 
+    # Email verification (SMTP)
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USER: str | None = None
+    SMTP_PASSWORD: str | None = None
+    SMTP_FROM: str | None = None
+    FRONTEND_URL: str = "http://localhost:5173"
+
     # Voice Biomarker
     VOICE_UPLOAD_DIR: str = "voice_uploads"
     VOICE_LINK_EXPIRY_HOURS: int = 168  # 7 days

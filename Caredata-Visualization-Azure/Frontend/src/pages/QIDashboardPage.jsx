@@ -11,8 +11,8 @@ import {
 
 // ─── Constants (structural only — no demo data) ──────────────────────────────
 
-const ORANGE = "#f97316";
-const COLORS = { red: "#d85a30", amber: "#c27700", green: "#ff7b00", blue: "#378add", purple: "#534AB7" };
+const ORANGE = "#D2C7E5";
+const COLORS = { red: "#F9C0AF", amber: "#F2D894", green: "#D3EADA", blue: "#D2C7E5", purple: "#FFDDD8" };
 
 const INDICATORS_EMPTY = [
   "Pressure injuries", "Falls & major injury", "Unplanned weight loss", "Medications",
@@ -31,17 +31,17 @@ const DASHBOARD_TO_REPORTS_SECTION = {
 };
 
 const HEATMAP_COLS = ["PI","RP","UWL","Falls","Meds","ADL","IC","Hosp","WF","CX","QoL","EN","AH","LS"];
-const STATUS_DIST_COLORS = ["#ff7b00","#c27700","#d85a30","#d1d5db"];
-const TREND_DIR_COLORS = ["#16a34a","#f97316","#d85a30"];
+const STATUS_DIST_COLORS = ["#D3EADA","#F2D894","#F9C0AF","#F9ECE3"];
+const TREND_DIR_COLORS = ["#D3EADA","#F2D894","#F9C0AF"];
 
 const ID_TO_SHORT = {pi:"PI",rp:"RP",falls:"Falls",meds:"Meds",adl:"ADL",uwl:"UWL",incontinence:"IC",hosp:"Hosp",allied_health:"AH Gap",consumer_exp:"CX",qol:"QoL",workforce:"WF",enrolled_nursing:"EN",lifestyle:"LS"};
 const LOB_IDS = new Set(["pi","rp","falls","meds","adl","uwl","incontinence","hosp","allied_health"]);
 
 // 14 distinct colours for the all-indicators multi-line trend chart
 const TREND_COLORS = [
-  "#2563eb","#dc2626","#16a34a","#f97316","#8b5cf6",
-  "#06b6d4","#ec4899","#ca8a04","#14b8a6","#6366f1",
-  "#f43f5e","#84cc16","#a855f7","#78716c",
+  "#D2C7E5","#F9C0AF","#D3EADA","#F2D894","#FFDDD8",
+  "#F9ECE3","#C7B8D9","#BDE0CA","#E8CC7E","#F0B09A",
+  "#E5DAF0","#A8D4BC","#F5D89E","#FFD0C8",
 ];
 const TREND_SHORT = {
   pi:"PI",rp:"RP",falls:"Falls",meds:"Meds",adl:"ADL",uwl:"UWL",
@@ -73,13 +73,13 @@ const VIS_PANELS = [
 ];
 
 // Stacked bar color palettes
-const PI_STAGE_COLORS = { "Stage 1": "#fdba74", "Stage 2": "#fb923c", "Stage 3": "#f97316", "Stage 4": "#dc2626", Unstageable: "#7c3aed", DTI: "#475569" };
-const RP_COLORS = { Mechanical: "#dc2626", Physical: "#f97316", Environmental: "#eab308", Seclusion: "#7c3aed" };
-const IAD_COLORS = { "Cat 1A": "#fde68a", "Cat 1B": "#fbbf24", "Cat 2A": "#f97316", "Cat 2B": "#dc2626" };
-const AP_COLORS = { "No AP": "#d1d5db", "With Dx": "#f97316", "Without Dx": "#dc2626" };
-const CX_QOL_COLORS = { Excellent: "#16a34a", Good: "#22c55e", Moderate: "#eab308", Poor: "#f97316", "Very Poor": "#dc2626" };
-const MED_RANGE_COLORS = { "0–3": "#86efac", "4–6": "#fde68a", "7–9": "#fdba74", "10+": "#dc2626" };
-const ADL_CHANGE_COLORS = { Improved: "#16a34a", Stable: "#9ca3af", Declined: "#dc2626" };
+const PI_STAGE_COLORS = { "Stage 1": "#D3EADA", "Stage 2": "#F2D894", "Stage 3": "#FFDDD8", "Stage 4": "#F9C0AF", Unstageable: "#D2C7E5", DTI: "#F9ECE3" };
+const RP_COLORS = { Mechanical: "#F9C0AF", Physical: "#FFDDD8", Environmental: "#D3EADA", Seclusion: "#D2C7E5" };
+const IAD_COLORS = { "Cat 1A": "#D3EADA", "Cat 1B": "#F2D894", "Cat 2A": "#FFDDD8", "Cat 2B": "#F9C0AF" };
+const AP_COLORS = { "No AP": "#F9ECE3", "With Dx": "#D2C7E5", "Without Dx": "#F9C0AF" };
+const CX_QOL_COLORS = { Excellent: "#D3EADA", Good: "#BDE0CA", Moderate: "#F2D894", Poor: "#FFDDD8", "Very Poor": "#F9C0AF" };
+const MED_RANGE_COLORS = { "0–3": "#D3EADA", "4–6": "#BDE0CA", "7–9": "#F2D894", "10+": "#F9C0AF" };
+const ADL_CHANGE_COLORS = { Improved: "#D3EADA", Stable: "#F9ECE3", Declined: "#F9C0AF" };
 
 // ─── Builder functions (derive display data from API aggregates) ──────────────
 
@@ -411,21 +411,6 @@ function buildAlliedHealthData(allGpmsData, qiAggregates, dateToQuarter) {
 
 // ─── Additional builder functions (Phase 2 additions) ─────────────────────────
 
-function buildPIPrevalenceTrend(allGpmsData, dateToQuarter) {
-  if (!allGpmsData) return [];
-  return _sortedGpms(allGpmsData).map(([d, fd]) => ({
-    quarter: dateToQuarter?.[d] || d,
-    rate: fd.pi_total ? +((fd.pi_any / fd.pi_total) * 100).toFixed(1) : 0,
-  }));
-}
-
-function buildRPPrevalenceTrend(allGpmsData, dateToQuarter) {
-  if (!allGpmsData) return [];
-  return _sortedGpms(allGpmsData).map(([d, fd]) => ({
-    quarter: dateToQuarter?.[d] || d,
-    rate: fd.rp_total ? +((fd.rp_any / fd.rp_total) * 100).toFixed(1) : 0,
-  }));
-}
 
 function buildMedDistribution(allGpmsData, dateToQuarter) {
   if (!allGpmsData) return [];
@@ -452,41 +437,6 @@ function buildADLChangeDistribution(allGpmsData, dateToQuarter) {
     }));
 }
 
-function buildICSevereTrend(allGpmsData, dateToQuarter) {
-  if (!allGpmsData) return [];
-  return _sortedGpms(allGpmsData).map(([d, fd]) => {
-    const total = (fd.ic_iad_any || 0);
-    const severe = (fd.ic_iad_2a || 0) + (fd.ic_iad_2b || 0);
-    return { quarter: dateToQuarter?.[d] || d, severePct: total ? +((severe / total) * 100).toFixed(1) : 0 };
-  });
-}
-
-function buildHospEDRatio(allGpmsData, dateToQuarter) {
-  if (!allGpmsData) return [];
-  return _sortedGpms(allGpmsData).map(([d, fd]) => {
-    const all = fd.hosp_all || 0;
-    const ed = fd.hosp_ed || 0;
-    return { quarter: dateToQuarter?.[d] || d, ratio: all ? +((ed / all) * 100).toFixed(1) : 0 };
-  });
-}
-
-function buildCXPositiveTrend(allGpmsData, dateToQuarter) {
-  if (!allGpmsData) return [];
-  return _sortedGpms(allGpmsData).map(([d, fd]) => {
-    const total = (fd.cx_excellent || 0) + (fd.cx_good || 0) + (fd.cx_moderate || 0) + (fd.cx_poor || 0) + (fd.cx_very_poor || 0);
-    const positive = (fd.cx_excellent || 0) + (fd.cx_good || 0);
-    return { quarter: dateToQuarter?.[d] || d, positivePct: total ? +((positive / total) * 100).toFixed(1) : 0 };
-  });
-}
-
-function buildQoLPositiveTrend(allGpmsData, dateToQuarter) {
-  if (!allGpmsData) return [];
-  return _sortedGpms(allGpmsData).map(([d, fd]) => {
-    const total = (fd.qol_excellent || 0) + (fd.qol_good || 0) + (fd.qol_moderate || 0) + (fd.qol_poor || 0) + (fd.qol_very_poor || 0);
-    const positive = (fd.qol_excellent || 0) + (fd.qol_good || 0);
-    return { quarter: dateToQuarter?.[d] || d, positivePct: total ? +((positive / total) * 100).toFixed(1) : 0 };
-  });
-}
 
 // ─── Helper components ────────────────────────────────────────────────────────
 
@@ -499,7 +449,7 @@ function SparklineSVG({ data, status }) {
     const y = h - pad - ((v - min) / range) * (h - pad * 2);
     return `${x},${y}`;
   }).join(" ");
-  const colors = { green: "#ff7b00", amber: "#c27700", red: "#d85a30", nodata: "#999" };
+  const colors = { green: "#D3EADA", amber: "#F2D894", red: "#F9C0AF", nodata: "#F9ECE3" };
   const c = colors[status] || "#999";
   const last = pts.split(" ").pop();
   const [cx, cy] = last ? last.split(",") : ["0", "0"];
@@ -644,14 +594,8 @@ export default function QIDashboardPage() {
   const ahData = buildAlliedHealthData(allGpmsData, qiAggregates, dateToQuarter);
   const lsPanel = buildSingleTrendPanel(effectiveTrendSeries, "ls");
   // Phase 2 additions — deeper charts
-  const piPrevTrend = buildPIPrevalenceTrend(allGpmsData, dateToQuarter);
-  const rpPrevTrend = buildRPPrevalenceTrend(allGpmsData, dateToQuarter);
   const medDistribution = buildMedDistribution(allGpmsData, dateToQuarter);
   const adlChange = buildADLChangeDistribution(allGpmsData, dateToQuarter);
-  const icSevereTrend = buildICSevereTrend(allGpmsData, dateToQuarter);
-  const hospEDRatio = buildHospEDRatio(allGpmsData, dateToQuarter);
-  const cxPositiveTrend = buildCXPositiveTrend(allGpmsData, dateToQuarter);
-  const qolPositiveTrend = buildQoLPositiveTrend(allGpmsData, dateToQuarter);
 
   // ─── Navigation helpers ────────────────────────────────────────────────────
   // Map indicator section IDs to their visualization panel
@@ -687,7 +631,7 @@ export default function QIDashboardPage() {
 
   // Status dot color for a single indicator
   const panelDotColor = (indicatorId) => {
-    const dotColors = { red: "#d85a30", amber: "#ba7517", green: "#1d9e75", grey: "#9ca3af" };
+    const dotColors = { red: "#F9C0AF", amber: "#F2D894", green: "#D3EADA", grey: "#F9ECE3" };
     if (!latest) return dotColors.grey;
     const ind = (latest.indicators || []).find(i => i.id === indicatorId);
     if (!ind) return dotColors.grey;
@@ -706,7 +650,7 @@ export default function QIDashboardPage() {
           return (
             <li key={nav.id}>
               <button type="button" onClick={() => handleNavClick(nav.id)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition text-left ${isActive && !hasChildren ? "bg-primary text-white shadow-sm" : isActive && hasChildren ? "bg-orange-50 text-orange-700" : "text-gray-700 hover:bg-gray-100"}`}>
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition text-left ${isActive && !hasChildren ? "bg-primary text-white shadow-sm" : isActive && hasChildren ? "bg-primary-light text-primary" : "text-gray-700 hover:bg-gray-100"}`}>
                 <span className={isActive && !hasChildren ? "text-white" : "text-gray-500"}>{nav.icon}</span>
                 <span className="flex-1">{nav.label}</span>
                 {hasChildren && (
@@ -788,7 +732,7 @@ export default function QIDashboardPage() {
                     <Tooltip />
                     <Bar dataKey="rate" name="Rate" radius={4}>
                       {rates.map((entry, i) => (
-                        <Cell key={i} fill={entry.status === "red" ? "#d85a30" : entry.status === "amber" ? "#c27700" : "#f97316"} />
+                        <Cell key={i} fill={entry.status === "red" ? "#F9C0AF" : entry.status === "amber" ? "#F2D894" : "#D2C7E5"} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -805,46 +749,10 @@ export default function QIDashboardPage() {
                     <PolarGrid stroke="#e5e7eb" />
                     <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10 }} />
                     <PolarRadiusAxis angle={90} domain={[0, 25]} tick={{ fontSize: 9 }} />
-                    <Radar name="Facility" dataKey="value" stroke="#f97316" fill="#f97316" fillOpacity={0.35} strokeWidth={2} />
+                    <Radar name="Facility" dataKey="value" stroke="#D2C7E5" fill="#D2C7E5" fillOpacity={0.35} strokeWidth={2} />
                     <Radar name="National" dataKey="benchmark" stroke="#9ca3af" fill="none" fillOpacity={0} strokeWidth={2} strokeDasharray="5 3" />
                     <Legend /><Tooltip />
                   </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Status distribution donut */}
-            {(() => { const sd = buildStatusDistFromAggregates(qiAggregates); return sd && sd.length > 0 ? (
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                <h3 className="text-sm font-semibold text-gray-800 mb-1">Indicator Status Distribution</h3>
-                <p className="text-xs text-gray-500 mb-3">How many categories are on track, monitoring, or above threshold</p>
-                <ResponsiveContainer width="100%" height={220}>
-                  <PieChart>
-                    <Pie data={sd} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={3} dataKey="value" nameKey="name"
-                      label={({ name, value }) => `${name}: ${value}`}>
-                      {sd.map((_, i) => <Cell key={i} fill={STATUS_DIST_COLORS[i]} />)}
-                    </Pie>
-                    <Tooltip /><Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            ) : null; })()}
-            {/* Trend direction summary */}
-            {trendDirectionCounts.length > 0 && (
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                <h3 className="text-sm font-semibold text-gray-800 mb-1">Trend Direction Summary</h3>
-                <p className="text-xs text-gray-500 mb-3">Number of indicators improving, stable, or worsening over {quarters.length} quarters</p>
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={trendDirectionCounts} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#9ca3af" />
-                    <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" allowDecimals={false} />
-                    <Tooltip />
-                    <Bar dataKey="value" name="Indicators" radius={6}>
-                      {trendDirectionCounts.map((_, i) => <Cell key={i} fill={TREND_DIR_COLORS[i]} />)}
-                    </Bar>
-                  </BarChart>
                 </ResponsiveContainer>
               </div>
             )}
@@ -854,15 +762,15 @@ export default function QIDashboardPage() {
 
       {/* Upload banner (no data state) */}
       {!hasData && !loading && (
-        <div className="mb-6 bg-white rounded-2xl border-2 border-dashed border-gray-300 p-8 flex flex-wrap items-center gap-6 hover:border-orange-400 transition">
-          <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
+        <div className="mb-6 bg-white rounded-2xl border-2 border-dashed border-gray-300 p-8 flex flex-wrap items-center gap-6 hover:border-primary/40 transition">
+          <div className="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center shrink-0">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-primary"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-base font-semibold text-gray-900 mb-1">No QI data loaded yet</h3>
             <p className="text-sm text-gray-600">Upload your quarterly CSV export to populate all 14 indicators.</p>
           </div>
-          <Link to="/upload-csv" className="shrink-0 w-full sm:w-auto bg-primary text-white py-2.5 px-5 rounded-md font-medium hover:bg-orange-600 transition text-center">
+          <Link to="/upload-csv" className="shrink-0 w-full sm:w-auto bg-primary text-white py-2.5 px-5 rounded-md font-medium hover:bg-primary-hover transition text-center">
             Go to Data entry →
           </Link>
         </div>
@@ -923,7 +831,7 @@ export default function QIDashboardPage() {
                   <div className="h-7 mb-2"><SparklineSVG data={spark} status={status} /></div>
                   <div className="flex items-center justify-between flex-wrap gap-1">
                     {trend ? <span className={`text-xs font-medium ${trend === "up" ? "text-red-600" : trend === "down" ? "text-green-600" : "text-gray-500"}`}>{TREND_LABEL[trend] ?? "→ Stable"}</span> : <span className="text-xs text-gray-400">— No data</span>}
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full uppercase ${status === "green" ? "bg-orange-50 text-orange-800" : status === "amber" ? "bg-amber-50 text-amber-800" : status === "red" ? "bg-red-50 text-red-800" : "bg-gray-100 text-gray-600"}`}>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full uppercase ${status === "green" ? "bg-primary-light text-primary" : status === "amber" ? "bg-amber-50 text-amber-800" : status === "red" ? "bg-red-50 text-red-800" : "bg-gray-100 text-gray-600"}`}>
                       {STATUS_LABEL[status] ?? STATUS_LABEL.nodata}
                     </span>
                   </div>
@@ -966,7 +874,7 @@ export default function QIDashboardPage() {
     </div>
   );
   // Helper: single-indicator trend line panel
-  const SingleTrendChart = ({ panelData, color = "#f97316" }) => {
+  const SingleTrendChart = ({ panelData, color = "#D2C7E5" }) => {
     if (!panelData?.data?.length) return <GpmsPlaceholder />;
     return (
       <ResponsiveContainer width="100%" height={280}>
@@ -1007,34 +915,18 @@ export default function QIDashboardPage() {
             <StatCard label="High-acuity (S3+)" value={piSeverity[piSeverity.length-1]?._s3plus} />
             <StatCard label="S3+ %" value={piSeverity[piSeverity.length-1]?._s3PlusPct != null ? `${piSeverity[piSeverity.length-1]._s3PlusPct}%` : "—"} danger={piSeverity[piSeverity.length-1]?._s3PlusPct > 30} />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-1">Severity Distribution</p>
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={piSeverity} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="quarter" tick={{ fontSize: 11 }} stroke="#9ca3af" />
-                  <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" label={{ value: "Residents", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "#9ca3af" } }} />
-                  <Tooltip />
-                  {Object.entries(PI_STAGE_COLORS).map(([key, color]) => (<Bar key={key} dataKey={key} stackId="pi" fill={color} name={key} />))}
-                  <Legend />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            {piPrevTrend.length > 0 && (
-              <div>
-                <p className="text-xs font-medium text-gray-500 mb-1">Prevalence Rate Trend</p>
-                <ResponsiveContainer width="100%" height={320}>
-                  <LineChart data={piPrevTrend} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="quarter" tick={{ fontSize: 11 }} stroke="#9ca3af" />
-                    <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" unit="%" />
-                    <Tooltip formatter={(v) => `${v}%`} />
-                    <Line type="monotone" dataKey="rate" stroke="#f97316" strokeWidth={2} dot={{ r: 3, fill: "#f97316" }} name="PI prevalence %" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
+          <div>
+            <p className="text-xs font-medium text-gray-500 mb-1">Severity Distribution</p>
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={piSeverity} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="quarter" tick={{ fontSize: 11 }} stroke="#9ca3af" />
+                <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" label={{ value: "Residents", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "#9ca3af" } }} />
+                <Tooltip />
+                {Object.entries(PI_STAGE_COLORS).map(([key, color]) => (<Bar key={key} dataKey={key} stackId="pi" fill={color} name={key} />))}
+                <Legend />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </>) : <GpmsPlaceholder />}
       </div>
@@ -1050,38 +942,21 @@ export default function QIDashboardPage() {
             <StatCard label="Trend" value={ind?.trendArrow === "up" ? "▲ Worsening" : ind?.trendArrow === "down" ? "▼ Improving" : "— Stable"} />
           </div>
         ); })()}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {rpData.subTypeBreakdown.length > 0 ? (
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-1">Sub-Type Breakdown</p>
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={rpData.subTypeBreakdown} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="quarter" tick={{ fontSize: 11 }} stroke="#9ca3af" />
-                  <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" label={{ value: "Residents", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "#9ca3af" } }} />
-                  <Tooltip />
-                  {Object.entries(RP_COLORS).map(([key, color]) => (<Bar key={key} dataKey={key} stackId="rp" fill={color} name={key} />))}
-                  <Legend />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          ) : <GpmsPlaceholder msg="Upload CSV with RP sub-type columns (RP_MECH, RP_PHYS, RP_ENV, RP_SECLUSION) for detailed breakdown." />}
-          {rpPrevTrend.length > 0 && (
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-1">Prevalence Rate Trend</p>
-              <ResponsiveContainer width="100%" height={320}>
-                <LineChart data={rpPrevTrend} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="quarter" tick={{ fontSize: 11 }} stroke="#9ca3af" />
-                  <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" unit="%" />
-                  <Tooltip formatter={(v) => `${v}%`} />
-                  <ReferenceLine y={8} stroke="#dc2626" strokeDasharray="6 3" label={{ value: "8% threshold", position: "right", fontSize: 10, fill: "#dc2626" }} />
-                  <Line type="monotone" dataKey="rate" stroke="#dc2626" strokeWidth={2} dot={{ r: 3, fill: "#dc2626" }} name="RP prevalence %" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </div>
+        {rpData.subTypeBreakdown.length > 0 ? (
+          <div>
+            <p className="text-xs font-medium text-gray-500 mb-1">Sub-Type Breakdown</p>
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={rpData.subTypeBreakdown} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="quarter" tick={{ fontSize: 11 }} stroke="#9ca3af" />
+                <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" label={{ value: "Residents", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "#9ca3af" } }} />
+                <Tooltip />
+                {Object.entries(RP_COLORS).map(([key, color]) => (<Bar key={key} dataKey={key} stackId="rp" fill={color} name={key} />))}
+                <Legend />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : <GpmsPlaceholder msg="Upload CSV with RP sub-type columns (RP_MECH, RP_PHYS, RP_ENV, RP_SECLUSION) for detailed breakdown." />}
       </div>
 
       {/* ── QI 3: Unplanned Weight Loss ── */}
@@ -1101,7 +976,7 @@ export default function QIDashboardPage() {
               <YAxis tick={{ fontSize: 10 }} stroke="#9ca3af" unit="%" />
               <Tooltip formatter={(v) => `${v}%`} />
               <Line type="monotone" dataKey="Significant" stroke="#dc2626" strokeWidth={2} dot={{ r: 3, fill: "#dc2626" }} />
-              <Line type="monotone" dataKey="Consecutive" stroke="#f97316" strokeWidth={2} strokeDasharray="5 3" dot={{ r: 3, fill: "#f97316" }} />
+              <Line type="monotone" dataKey="Consecutive" stroke="#F9C0AF" strokeWidth={2} strokeDasharray="5 3" dot={{ r: 3, fill: "#F9C0AF" }} />
               <Legend />
             </LineChart>
           </ResponsiveContainer>
@@ -1125,7 +1000,7 @@ export default function QIDashboardPage() {
               <XAxis dataKey="quarter" tick={{ fontSize: 10 }} stroke="#9ca3af" />
               <YAxis tick={{ fontSize: 10 }} stroke="#9ca3af" unit="%" />
               <Tooltip formatter={(v) => `${v}%`} />
-              <Line type="monotone" dataKey="Any fall" stroke="#f97316" strokeWidth={2} dot={{ r: 3, fill: "#f97316" }} />
+              <Line type="monotone" dataKey="Any fall" stroke="#D2C7E5" strokeWidth={2} dot={{ r: 3, fill: "#D2C7E5" }} />
               <Line type="monotone" dataKey="Major injury" stroke="#dc2626" strokeWidth={2} dot={{ r: 3, fill: "#dc2626" }} />
               <Line type="monotone" dataKey="Severity ratio" stroke="#8b5cf6" strokeWidth={2} strokeDasharray="5 3" dot={{ r: 3, fill: "#8b5cf6" }} />
               <Legend />
@@ -1144,37 +1019,6 @@ export default function QIDashboardPage() {
             <StatCard label="AP rate" value={medData.apBreakdown.length > 0 ? `${Number(((medData.apBreakdown[medData.apBreakdown.length-1]["With Dx"] + medData.apBreakdown[medData.apBreakdown.length-1]["Without Dx"]) / (medData.apBreakdown[medData.apBreakdown.length-1]["No AP"] + medData.apBreakdown[medData.apBreakdown.length-1]["With Dx"] + medData.apBreakdown[medData.apBreakdown.length-1]["Without Dx"]) * 100).toFixed(1))}%` : "—"} />
             <StatCard label="Without Dx" value={medData.apBreakdown.length > 0 ? medData.apBreakdown[medData.apBreakdown.length-1]["Without Dx"] : "—"} danger />
             <StatCard label="Without Dx %" value={medData.apBreakdown.length > 0 ? (() => { const last = medData.apBreakdown[medData.apBreakdown.length-1]; const allAP = last["With Dx"] + last["Without Dx"]; return allAP > 0 ? `${Number((last["Without Dx"] / allAP * 100).toFixed(1))}%` : "0%"; })() : "—"} danger />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {medData.polyTrend.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Polypharmacy Rate (%)</h4>
-                <ResponsiveContainer width="100%" height={280}>
-                  <LineChart data={medData.polyTrend} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="quarter" tick={{ fontSize: 10 }} stroke="#9ca3af" />
-                    <YAxis tick={{ fontSize: 10 }} stroke="#9ca3af" unit="%" />
-                    <Tooltip formatter={(v) => `${v}%`} />
-                    <Line type="monotone" dataKey="rate" stroke="#f97316" strokeWidth={2} dot={{ r: 3, fill: "#f97316" }} name="Polypharmacy %" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-            {medData.apBreakdown.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Antipsychotic Prescribing</h4>
-                <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={medData.apBreakdown} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="quarter" tick={{ fontSize: 10 }} stroke="#9ca3af" />
-                    <YAxis tick={{ fontSize: 10 }} stroke="#9ca3af" label={{ value: "Residents", angle: -90, position: "insideLeft", style: { fontSize: 10, fill: "#9ca3af" } }} />
-                    <Tooltip />
-                    {Object.entries(AP_COLORS).map(([key, color]) => (<Bar key={key} dataKey={key} stackId="ap" fill={color} name={key} />))}
-                    <Legend />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
           </div>
           {medDistribution.length > 0 && (
             <div className="mt-4">
@@ -1208,7 +1052,7 @@ export default function QIDashboardPage() {
               <PolarGrid stroke="#e5e7eb" />
               <PolarAngleAxis dataKey="domain" tick={{ fontSize: 10 }} />
               <PolarRadiusAxis angle={90} domain={[0, 3]} tick={{ fontSize: 9 }} />
-              <Radar name="Latest" dataKey="latest" stroke="#f97316" fill="#f97316" fillOpacity={0.35} strokeWidth={2} />
+              <Radar name="Latest" dataKey="latest" stroke="#D2C7E5" fill="#D2C7E5" fillOpacity={0.35} strokeWidth={2} />
               <Radar name="Earliest" dataKey="earliest" stroke="#9ca3af" fill="none" fillOpacity={0} strokeWidth={2} strokeDasharray="5 3" />
               <Legend /><Tooltip />
             </RadarChart>
@@ -1243,35 +1087,18 @@ export default function QIDashboardPage() {
               <StatCard label="Severe %" value={iadAny > 0 ? `${Number((severe / iadAny * 100).toFixed(1))}%` : "—"} danger={iadAny > 0 && severe / iadAny > 0.3} />
             </div>
           ); })()}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-1">Severity Distribution</p>
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={icData.iadSeverity} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="quarter" tick={{ fontSize: 11 }} stroke="#9ca3af" />
-                  <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" label={{ value: "Residents", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "#9ca3af" } }} />
-                  <Tooltip />
-                  {Object.entries(IAD_COLORS).map(([key, color]) => (<Bar key={key} dataKey={key} stackId="iad" fill={color} name={key} />))}
-                  <Legend />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            {icSevereTrend.length > 0 && (
-              <div>
-                <p className="text-xs font-medium text-gray-500 mb-1">Severe IAD Proportion (Cat 2A + 2B)</p>
-                <ResponsiveContainer width="100%" height={320}>
-                  <LineChart data={icSevereTrend} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="quarter" tick={{ fontSize: 11 }} stroke="#9ca3af" />
-                    <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" unit="%" />
-                    <Tooltip formatter={(v) => `${v}%`} />
-                    <ReferenceLine y={30} stroke="#dc2626" strokeDasharray="6 3" label={{ value: "30% threshold", position: "right", fontSize: 10, fill: "#dc2626" }} />
-                    <Line type="monotone" dataKey="severePct" stroke="#dc2626" strokeWidth={2} dot={{ r: 3, fill: "#dc2626" }} name="Severe IAD %" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
+          <div>
+            <p className="text-xs font-medium text-gray-500 mb-1">Severity Distribution</p>
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={icData.iadSeverity} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="quarter" tick={{ fontSize: 11 }} stroke="#9ca3af" />
+                <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" label={{ value: "Residents", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "#9ca3af" } }} />
+                <Tooltip />
+                {Object.entries(IAD_COLORS).map(([key, color]) => (<Bar key={key} dataKey={key} stackId="iad" fill={color} name={key} />))}
+                <Legend />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </>) : <GpmsPlaceholder />}
       </div>
@@ -1299,20 +1126,6 @@ export default function QIDashboardPage() {
               <Legend />
             </LineChart>
           </ResponsiveContainer>
-          {hospEDRatio.length > 0 && (
-            <div className="mt-4">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">ED Proportion of All Hospitalisations</h4>
-              <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={hospEDRatio} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="quarter" tick={{ fontSize: 10 }} stroke="#9ca3af" />
-                  <YAxis tick={{ fontSize: 10 }} stroke="#9ca3af" unit="%" />
-                  <Tooltip formatter={(v) => `${v}%`} />
-                  <Line type="monotone" dataKey="ratio" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3, fill: "#8b5cf6" }} name="ED / All hosp %" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          )}
         </>) : <GpmsPlaceholder />}
       </div>
 
@@ -1320,11 +1133,18 @@ export default function QIDashboardPage() {
       <div id="panel-qi-wf" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
         <div className="flex items-center gap-2 mb-1"><span className="text-xs font-bold text-white bg-primary rounded px-1.5 py-0.5">QI 9</span><h3 className="text-base font-semibold text-gray-900">Workforce Adequacy</h3></div>
         <p className="text-sm text-gray-500 mb-4">Are we meeting workforce adequacy targets?</p>
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           <StatCard label="WF adequacy" value={wfPanel.current != null ? `${wfPanel.current}%` : "—"} />
-          <StatCard label="Gap to 90%" value={wfPanel.gap != null ? `${wfPanel.gap > 0 ? wfPanel.gap : 0}pp` : "—"} danger={wfPanel.gap > 0} />
+          <StatCard label="Target" value="90%" />
+          <StatCard label="Gap to target" value={wfPanel.gap != null ? `${wfPanel.gap > 0 ? wfPanel.gap : 0}pp` : "—"} danger={wfPanel.gap > 0} />
+          <StatCard label="Trend" value={(() => { const ts = effectiveTrendSeries.find(t => t.id === "wf"); if (!ts || ts.data.length < 2) return "— Stable"; const d = ts.data[ts.data.length-1].value - ts.data[0].value; return Math.abs(d) < 0.5 ? "— Stable" : (ts.lob ? d < 0 : d > 0) ? "▲ Improving" : "▼ Declining"; })()} />
         </div>
-        <SingleTrendChart panelData={wfPanel} color="#2563eb" />
+        {wfPanel.data.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-gray-500 mb-1">Workforce Adequacy — Trend</p>
+            <SingleTrendChart panelData={wfPanel} />
+          </div>
+        )}
       </div>
 
       {/* ── QI 10: Consumer Experience ── */}
@@ -1337,34 +1157,18 @@ export default function QIDashboardPage() {
             <StatCard label="Positive sentiment" value={cxData.positivePct != null ? `${cxData.positivePct}%` : "—"} sub="Excellent + Good" />
             <StatCard label="Trend" value={getInd("consumer_exp")?.trendArrow === "down" ? "▲ Improving" : getInd("consumer_exp")?.trendArrow === "up" ? "▼ Declining" : "— Stable"} />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-1">Score Band Distribution</p>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={cxData.bands} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="quarter" tick={{ fontSize: 10 }} stroke="#9ca3af" />
-                  <YAxis tick={{ fontSize: 10 }} stroke="#9ca3af" />
-                  <Tooltip />
-                  {Object.entries(CX_QOL_COLORS).map(([key, color]) => (<Bar key={key} dataKey={key} stackId="cx" fill={color} name={key} />))}
-                  <Legend />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            {cxPositiveTrend.length > 0 && (
-              <div>
-                <p className="text-xs font-medium text-gray-500 mb-1">Positive Sentiment Trend (Excellent + Good)</p>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={cxPositiveTrend} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="quarter" tick={{ fontSize: 11 }} stroke="#9ca3af" />
-                    <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" unit="%" />
-                    <Tooltip formatter={(v) => `${v}%`} />
-                    <Line type="monotone" dataKey="positivePct" stroke="#16a34a" strokeWidth={2} dot={{ r: 3, fill: "#16a34a" }} name="Positive %" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
+          <div>
+            <p className="text-xs font-medium text-gray-500 mb-1">Score Band Distribution</p>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={cxData.bands} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="quarter" tick={{ fontSize: 10 }} stroke="#9ca3af" />
+                <YAxis tick={{ fontSize: 10 }} stroke="#9ca3af" />
+                <Tooltip />
+                {Object.entries(CX_QOL_COLORS).map(([key, color]) => (<Bar key={key} dataKey={key} stackId="cx" fill={color} name={key} />))}
+                <Legend />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </>) : <GpmsPlaceholder />}
       </div>
@@ -1379,34 +1183,18 @@ export default function QIDashboardPage() {
             <StatCard label="Positive sentiment" value={qolData.positivePct != null ? `${qolData.positivePct}%` : "—"} sub="Excellent + Good" />
             <StatCard label="Trend" value={getInd("qol")?.trendArrow === "down" ? "▲ Improving" : getInd("qol")?.trendArrow === "up" ? "▼ Declining" : "— Stable"} />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-1">Score Band Distribution</p>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={qolData.bands} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="quarter" tick={{ fontSize: 10 }} stroke="#9ca3af" />
-                  <YAxis tick={{ fontSize: 10 }} stroke="#9ca3af" />
-                  <Tooltip />
-                  {Object.entries(CX_QOL_COLORS).map(([key, color]) => (<Bar key={key} dataKey={key} stackId="qol" fill={color} name={key} />))}
-                  <Legend />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            {qolPositiveTrend.length > 0 && (
-              <div>
-                <p className="text-xs font-medium text-gray-500 mb-1">Positive Sentiment Trend (Excellent + Good)</p>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={qolPositiveTrend} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="quarter" tick={{ fontSize: 11 }} stroke="#9ca3af" />
-                    <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" unit="%" />
-                    <Tooltip formatter={(v) => `${v}%`} />
-                    <Line type="monotone" dataKey="positivePct" stroke="#16a34a" strokeWidth={2} dot={{ r: 3, fill: "#16a34a" }} name="Positive %" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
+          <div>
+            <p className="text-xs font-medium text-gray-500 mb-1">Score Band Distribution</p>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={qolData.bands} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="quarter" tick={{ fontSize: 10 }} stroke="#9ca3af" />
+                <YAxis tick={{ fontSize: 10 }} stroke="#9ca3af" />
+                <Tooltip />
+                {Object.entries(CX_QOL_COLORS).map(([key, color]) => (<Bar key={key} dataKey={key} stackId="qol" fill={color} name={key} />))}
+                <Legend />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </>) : <GpmsPlaceholder />}
       </div>
@@ -1415,11 +1203,18 @@ export default function QIDashboardPage() {
       <div id="panel-qi-en" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
         <div className="flex items-center gap-2 mb-1"><span className="text-xs font-bold text-white bg-primary rounded px-1.5 py-0.5">QI 12</span><h3 className="text-base font-semibold text-gray-900">Enrolled Nursing — Direct Care</h3></div>
         <p className="text-sm text-gray-500 mb-4">Is enrolled nursing direct care meeting the target?</p>
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           <StatCard label="EN direct care" value={enPanel.current != null ? `${enPanel.current}%` : "—"} />
-          <StatCard label="Gap to 90%" value={enPanel.gap != null ? `${enPanel.gap > 0 ? enPanel.gap : 0}pp` : "—"} danger={enPanel.gap > 0} />
+          <StatCard label="Target" value="90%" />
+          <StatCard label="Gap to target" value={enPanel.gap != null ? `${enPanel.gap > 0 ? enPanel.gap : 0}pp` : "—"} danger={enPanel.gap > 0} />
+          <StatCard label="Trend" value={(() => { const ts = effectiveTrendSeries.find(t => t.id === "en"); if (!ts || ts.data.length < 2) return "— Stable"; const d = ts.data[ts.data.length-1].value - ts.data[0].value; return Math.abs(d) < 0.5 ? "— Stable" : (ts.lob ? d < 0 : d > 0) ? "▲ Improving" : "▼ Declining"; })()} />
         </div>
-        <SingleTrendChart panelData={enPanel} color="#8b5cf6" />
+        {enPanel.data.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-gray-500 mb-1">Enrolled Nursing Direct Care — Trend</p>
+            <SingleTrendChart panelData={enPanel} />
+          </div>
+        )}
       </div>
 
       {/* ── QI 13: Allied Health ── */}
@@ -1461,7 +1256,7 @@ export default function QIDashboardPage() {
                     <YAxis tick={{ fontSize: 10 }} stroke="#9ca3af" />
                     <Tooltip />
                     {["Physiotherapy","Occupational Therapy","Speech Pathology","Podiatry"].map((d, i) => (
-                      <Bar key={d} dataKey={d} fill={["#2563eb","#f97316","#16a34a","#8b5cf6"][i]} name={d} />
+                      <Bar key={d} dataKey={d} fill={["#D2C7E5","#FFDDD8","#D3EADA","#FFDDD8"][i]} name={d} />
                     ))}
                     <Legend />
                   </BarChart>
@@ -1476,11 +1271,18 @@ export default function QIDashboardPage() {
       <div id="panel-qi-ls" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
         <div className="flex items-center gap-2 mb-1"><span className="text-xs font-bold text-white bg-primary rounded px-1.5 py-0.5">QI 14</span><h3 className="text-base font-semibold text-gray-900">Lifestyle Officer — Sessions</h3></div>
         <p className="text-sm text-gray-500 mb-4">Are lifestyle sessions on track?</p>
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           <StatCard label="Avg sessions" value={lsPanel.current != null ? lsPanel.current : "—"} />
+          <StatCard label="Target" value="2.0 sessions/resident/qtr" />
+          <StatCard label="Gap to target" value={lsPanel.current != null ? `${Math.max(0, 2.0 - lsPanel.current).toFixed(1)}` : "—"} danger={lsPanel.current != null && lsPanel.current < 2.0} />
           <StatCard label="Trend" value={(() => { const ts = effectiveTrendSeries.find(t => t.id === "ls"); if (!ts || ts.data.length < 2) return "— Stable"; const d = ts.data[ts.data.length-1].value - ts.data[0].value; return Math.abs(d) < 0.5 ? "— Stable" : (ts.lob ? d < 0 : d > 0) ? "▲ Improving" : "▼ Declining"; })()} />
         </div>
-        <SingleTrendChart panelData={lsPanel} color="#14b8a6" />
+        {lsPanel.data.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-gray-500 mb-1">Lifestyle Sessions — Trend</p>
+            <SingleTrendChart panelData={{...lsPanel, target: 2.0}} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1675,7 +1477,7 @@ export default function QIDashboardPage() {
                   <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#d1d5db" />
                   <YAxis tick={{ fontSize: 10 }} stroke="#d1d5db" width={32} />
                   <Tooltip contentStyle={{ fontSize: 12 }} />
-                  <Line type="monotone" dataKey="value" stroke={improving ? "#f97316" : "#d85a30"} strokeWidth={2} dot={{ r: 3 }} name={ts.unit} />
+                  <Line type="monotone" dataKey="value" stroke={improving ? "#D3EADA" : "#F9C0AF"} strokeWidth={2} dot={{ r: 3 }} name={ts.unit} />
                 </LineChart>
               </ResponsiveContainer>
             </div>

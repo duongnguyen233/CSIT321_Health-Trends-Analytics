@@ -22,7 +22,7 @@ export default function MyDataSidebar({ activePage = "Dashboard" }) {
             className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md cursor-pointer transition
               ${
                 activePage === "My Data"
-                  ? "bg-orange-500 text-white shadow-sm"
+                  ? "bg-primary text-white shadow-sm"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
           >
@@ -35,7 +35,7 @@ export default function MyDataSidebar({ activePage = "Dashboard" }) {
             className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md cursor-pointer transition
               ${
                 activePage === "Dashboard"
-                  ? "bg-orange-500 text-white shadow-sm"
+                  ? "bg-primary text-white shadow-sm"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
           >
@@ -48,7 +48,7 @@ export default function MyDataSidebar({ activePage = "Dashboard" }) {
             className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md cursor-pointer transition
               ${
                 activePage === "Uploaded History"
-                  ? "bg-orange-500 text-white shadow-sm"
+                  ? "bg-primary text-white shadow-sm"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
           >
@@ -68,7 +68,7 @@ export default function MyDataSidebar({ activePage = "Dashboard" }) {
             className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md cursor-pointer transition
               ${
                 activePage === "Settings"
-                  ? "bg-orange-500 text-white shadow-sm"
+                  ? "bg-primary text-white shadow-sm"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
           >
@@ -81,7 +81,7 @@ export default function MyDataSidebar({ activePage = "Dashboard" }) {
             className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md cursor-pointer transition
               ${
                 activePage === "Documentation"
-                  ? "bg-orange-500 text-white shadow-sm"
+                  ? "bg-primary text-white shadow-sm"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
           >

@@ -7,13 +7,16 @@ module.exports = {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       colors: {
-        primary: "#ff7b00",   // orange accent
-        dark: "#111111",      // deep black background
-        light: "#f9f9f9",     // soft white for text backgrounds
-        grayish: "#1a1a1a",   // subtle gray for sections
+        primary: "#b08968",        // warm camel/tan accent
+        "primary-hover": "#9a7558", // darker tan for hover states
+        "primary-light": "#f0e6dc", // warm beige for light backgrounds
+        dark: "#4a3f35",           // warm dark brown (navbar/hero)
+        light: "#faf6f1",          // warm cream
+        grayish: "#6b5e52",       // warm medium brown
+        sand: "#c4b596",          // sand/tan mid-tone
       },
       backgroundImage: {
-        "hero-gradient": "linear-gradient(to bottom, #000000, #ff7b00)",
+        "hero-gradient": "linear-gradient(to bottom, #4a3f35, #b08968)",
       },
       keyframes: {
         gradient: {

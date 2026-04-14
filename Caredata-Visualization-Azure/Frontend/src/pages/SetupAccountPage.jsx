@@ -73,7 +73,7 @@ export default function SetupAccountPage() {
         </p>
         <button
           onClick={() => navigate("/")}
-          className="bg-orange-500 text-white px-6 py-2.5 rounded-md font-medium hover:bg-orange-600 transition"
+          className="bg-primary text-white px-6 py-2.5 rounded-md font-medium hover:bg-primary-hover transition"
         >
           Let’s Start!
         </button>
@@ -103,7 +103,7 @@ export default function SetupAccountPage() {
                 alt="User Avatar"
                 className="w-28 h-28 rounded-full border-4 border-gray-200 shadow-sm object-cover"
               />
-              <label className="mt-3 text-sm text-orange-600 font-medium cursor-pointer hover:underline">
+              <label className="mt-3 text-sm text-primary font-medium cursor-pointer hover:underline">
                 <input
                   type="file"
                   accept="image/*"
@@ -123,7 +123,7 @@ export default function SetupAccountPage() {
                   name="firstName"
                   value={account.firstName}
                   onChange={handleChange}
-                  className="w-[100%] border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
+                  className="w-[100%] border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-primary/60"
                   placeholder="Enter first name"
                 />
               </div>
@@ -135,7 +135,7 @@ export default function SetupAccountPage() {
                   name="lastName"
                   value={account.lastName}
                   onChange={handleChange}
-                  className="w-[100%] border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
+                  className="w-[100%] border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-primary/60"
                   placeholder="Enter last name"
                 />
               </div>
@@ -156,7 +156,7 @@ export default function SetupAccountPage() {
                   name="facilityName"
                   value={account.facilityName}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-primary/60"
                   placeholder="Enter facility name"
                 />
               </div>
@@ -168,7 +168,7 @@ export default function SetupAccountPage() {
                   name="abn"
                   value={account.abn}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-primary/60"
                   placeholder="Enter ABN number"
                 />
               </div>
@@ -183,7 +183,7 @@ export default function SetupAccountPage() {
                   name="street"
                   value={account.street}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-primary/60"
                   placeholder="Street Address"
                 />
               </div>
@@ -195,7 +195,7 @@ export default function SetupAccountPage() {
                   name="state"
                   value={account.state}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-primary/60"
                   placeholder="State"
                 />
               </div>
@@ -207,7 +207,7 @@ export default function SetupAccountPage() {
                   name="postcode"
                   value={account.postcode}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-primary/60"
                   placeholder="Postcode"
                 />
               </div>
@@ -229,7 +229,7 @@ export default function SetupAccountPage() {
                   type="email"
                   value={account.contactEmail}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-primary/60"
                   placeholder="Enter contact email"
                 />
               </div>
@@ -242,7 +242,7 @@ export default function SetupAccountPage() {
                   type="tel"
                   value={account.contactPhone}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-orange-500"
+                  className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-800 focus:ring-2 focus:ring-primary/60"
                   placeholder="Enter phone number"
                 />
               </div>
@@ -253,7 +253,7 @@ export default function SetupAccountPage() {
           <div className="flex justify-center mt-10">
             <button
               onClick={handleSubmit}
-              className="bg-orange-500 text-white px-6 py-2 rounded-md font-medium hover:bg-orange-600 transition"
+              className="bg-primary text-white px-6 py-2 rounded-md font-medium hover:bg-primary-hover transition"
             >
               Complete Setup
             </button>

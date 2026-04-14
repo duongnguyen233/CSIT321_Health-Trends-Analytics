@@ -315,7 +315,7 @@ export default function BenchmarkingPage() {
               return (
                 <div
                   key={ind.name}
-                  className="grid grid-cols-[minmax(140px,180px)_1fr_70px_70px_70px] gap-2 sm:gap-3 items-center py-2.5 px-3 rounded-lg bg-gray-50 border border-gray-100 hover:bg-orange-50/50 hover:border-orange-100 transition min-w-[600px]"
+                  className="grid grid-cols-[minmax(140px,180px)_1fr_70px_70px_70px] gap-2 sm:gap-3 items-center py-2.5 px-3 rounded-lg bg-gray-50 border border-gray-100 hover:bg-primary-light/50 hover:border-primary-light transition min-w-[600px]"
                 >
                   <div className="text-sm font-medium text-gray-900 truncate">{ind.name}</div>
                   <div className="relative h-5 bg-gray-200 rounded overflow-visible">
@@ -362,7 +362,7 @@ export default function BenchmarkingPage() {
                   <YAxis domain={[30, 80]} tick={{ fontSize: 11 }} stroke="#9ca3af" />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="facility" stroke="#f97316" strokeWidth={2} dot={{ r: 3 }} name="Facility percentile" />
+                  <Line type="monotone" dataKey="facility" stroke="#D2C7E5" strokeWidth={2} dot={{ r: 3 }} name="Facility percentile" />
                   <Line type="monotone" dataKey="national" stroke="#9ca3af" strokeDasharray="4 4" strokeWidth={2} dot={false} name="National median (50th)" />
                 </LineChart>
               </ResponsiveContainer>
