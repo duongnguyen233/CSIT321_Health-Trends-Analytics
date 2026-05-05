@@ -1,3 +1,4 @@
+# --- Web framework + auth (Phase 0 baseline) -----------------------------
 fastapi==0.119.0
 uvicorn==0.37.0
 pydantic>=2.0
@@ -6,5 +7,30 @@ python-dotenv==1.1.1
 python-jose[cryptography]==3.3.0
 python-multipart==0.0.20
 passlib[bcrypt]>=1.7.4
+
+# --- Storage backends (Phase 0 + Phase 2 blob) ---------------------------
 azure-data-tables>=12.4.0
+azure-storage-blob>=12.23.0
+
+# --- LLM + speech-to-text (Phase 0 OpenAI; Phase 2 local Whisper) --------
 openai>=1.0.0
+faster-whisper>=1.0.0
+
+# --- Numeric / scientific stack (Phase 2 acoustic features) --------------
+numpy>=1.26,<3.0
+scipy>=1.13
+joblib>=1.4
+scikit-learn>=1.5
+
+# --- Audio I/O + analysis (Phase 2) --------------------------------------
+soundfile>=0.12
+librosa>=0.10
+silero-vad>=5.1
+opensmile>=2.5
+praat-parselmouth>=0.4.4
+
+# --- NLP for transcript-derived linguistic features (Phase 2) ------------
+spacy>=3.7
+
+# --- Change-point detection (Phase 3 nightly cron; pinned now to lock) ---
+ruptures>=1.1
