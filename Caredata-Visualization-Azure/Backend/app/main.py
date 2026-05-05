@@ -1,8 +1,12 @@
+import asyncio
+import os
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from app.api import auth, health_scan, mydata, upload_csv, qi, gpms, voice_v2
+from app.services.voice_changepoint import cpd_loop_forever
 from app.services.voice_seed_v2 import seed_v2_demo_data
 
 app = FastAPI(title="CareData Backend (Azure)")
@@ -60,8 +64,12 @@ async def _voice_legacy_alias(path: str, request: Request):
 
 
 @app.on_event("startup")
-def startup_event():
+async def startup_event():
     seed_v2_demo_data()
+    # Schedule the nightly change-point scan unless explicitly disabled
+    # (tests set VOICE_DISABLE_CPD_LOOP=1 to keep test runs deterministic).
+    if not os.environ.get("VOICE_DISABLE_CPD_LOOP"):
+        asyncio.create_task(cpd_loop_forever())
 
 
 @app.get("/")

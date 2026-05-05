@@ -18,6 +18,11 @@ os.environ.pop("AZURE_STORAGE_CONNECTION_STRING", None)
 # Also defang any *_CONNECTION_STRING propagation that might have leaked in.
 os.environ["AZURE_STORAGE_CONNECTION_STRING"] = ""
 
+# Disable the nightly CPD asyncio loop so tests don't leave a background
+# task running. The test suite invokes run_changepoint_scan_for_facility()
+# synchronously when it wants CPD coverage.
+os.environ["VOICE_DISABLE_CPD_LOOP"] = "1"
+
 # 2. Add Backend/ to sys.path so `from app...` works.
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BACKEND_DIR not in sys.path:
