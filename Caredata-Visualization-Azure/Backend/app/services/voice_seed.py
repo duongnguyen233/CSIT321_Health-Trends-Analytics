@@ -170,7 +170,7 @@ DEMO_RESIDENTS = [
                     "Compared to baseline: speech rate changed by +0.9%, pause duration changed by +2.4%. "
                     "Voice biomarkers remain consistently within normal range across four recordings. Baseline is now "
                     "well-established with high confidence. Margaret's vocal profile is stable — no clinical concerns. "
-                    "This analysis is a clinical decision support tool. It does not constitute a diagnosis."
+                    "This is a trend monitoring tool, not a diagnostic device."
                 ),
             },
         ],
@@ -294,11 +294,11 @@ DEMO_RESIDENTS = [
                     "Elevated jitter detected, suggesting vocal instability or tremor. "
                     "Vocal fatigue detected: energy dropped significantly toward the end of the recording. "
                     "Compared to baseline: speech rate changed by -14.6%, pause duration changed by -3.3%. "
-                    "Harold's speech rate remains depressed from baseline with persistent vocal tremor. The reading task "
-                    "showed a self-correction ('Margaret... sorry... Margaret'), suggesting mild word-finding or "
-                    "attention difficulty. Vocal fatigue index of 0.73 indicates declining energy across the recording. "
-                    "Continued monitoring is warranted. Consider referral for speech pathology assessment and medication "
-                    "review (particularly if antipsychotics are prescribed). This analysis is a clinical decision support tool."
+                    "Harold's speech rate remains reduced from baseline with persistent vocal tremor in the phonatory "
+                    "dimension. The reading task showed a self-correction ('Margaret... sorry... Margaret'), suggesting "
+                    "linguistic-dimension hesitation. Vocal fatigue index of 0.73 indicates declining energy across the "
+                    "recording. Continued monitoring is warranted. Consider referral for speech pathology assessment and "
+                    "medication review. This is a trend monitoring tool, not a diagnostic device."
                 ),
             },
         ],
@@ -382,13 +382,12 @@ DEMO_RESIDENTS = [
                     "Compared to baseline: speech rate dropped by -41.3%, energy decreased by -32.1%, pitch dropped by -12.0%. "
                     "These changes significantly exceed monitoring thresholds. Dorothy's speech shows marked deterioration "
                     "from baseline across all acoustic dimensions. The dramatic increase in pause frequency (5→18), "
-                    "combined with word-finding difficulty evident in the transcript ('I can't remember what it's called'), "
-                    "severe vocal fatigue, and substantially increased jitter/shimmer, suggest possible acute cognitive "
-                    "or neurological change. Differential considerations include UTI-related delirium, medication side effects, "
-                    "cerebrovascular event, or acute illness. IMMEDIATE CLINICAL ASSESSMENT RECOMMENDED. "
-                    "Recommend: urgent medical review, UTI screening, neurological assessment, medication reconciliation. "
-                    "This analysis is a clinical decision support tool. It does not constitute a diagnosis. "
-                    "All flagged conditions require clinical assessment by a qualified health professional."
+                    "combined with linguistic-dimension hesitation in the transcript ('I can't remember what it's called'), "
+                    "severe vocal fatigue, and substantially increased jitter/shimmer, suggest a sustained cross-dimension "
+                    "voice shift. The phonatory, articulatory, prosodic, and linguistic dimensions are all affected. "
+                    "IMMEDIATE CLINICAL ASSESSMENT RECOMMENDED. Recommend: urgent medical review and medication "
+                    "reconciliation. This is a trend monitoring tool, not a diagnostic device. "
+                    "All flagged voice changes require clinical assessment by a qualified health professional."
                 ),
             },
         ],

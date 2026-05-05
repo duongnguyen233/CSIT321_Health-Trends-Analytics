@@ -843,9 +843,11 @@ Baseline Comparison:
             prompt += f"\nTranscript: \"{transcript[:500]}\"\n"
 
         prompt += """
-Focus on: clinical significance, potential conditions to monitor (stroke risk, cognitive decline,
-depression, delirium, dysphagia), and recommended actions. Do NOT diagnose — recommend assessment.
-End with the standard disclaimer."""
+Focus on: which voice dimensions (phonatory / articulatory / prosodic / respiratory /
+linguistic) have shifted relative to baseline, the magnitude of the shift, and recommended
+next steps for the nurse (e.g. clinical re-assessment, GP review, hydration check). Do NOT
+name any neurological or psychiatric condition. Frame everything as 'voice quality changes
+flagged for nurse review'. End with: 'This is a trend monitoring tool, not a diagnostic device.'"""  # FRAMING_OK
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -923,7 +925,7 @@ def get_qi_flags(current_user: dict = Depends(get_current_user)):
             qi_links.append({
                 "qi_category": "QI 08 — Hospitalisation",
                 "indicator": "HOSP_ED",
-                "flag": "Acute voice changes suggesting stroke/TIA or delirium — clinical escalation recommended",
+                "flag": "Acute multi-dimensional voice shift — escalate to clinical review",
                 "severity": "red",
             })
         fatigue = features.get("vocal_fatigue_index", 1.0)
@@ -931,7 +933,7 @@ def get_qi_flags(current_user: dict = Depends(get_current_user)):
             qi_links.append({
                 "qi_category": "QI 11 — Quality of Life",
                 "indicator": "QOL_01",
-                "flag": "Vocal fatigue and flat affect detected — depression screening recommended",
+                "flag": "Vocal fatigue with reduced prosodic range — recommend wellbeing check-in",
                 "severity": level,
             })
 
@@ -1050,8 +1052,8 @@ table{{border-collapse:collapse;width:100%}}th{{text-align:left;padding:6px 12px
 
 <hr style="margin-top:30px;border:none;border-top:1px solid #e5e7eb">
 <p style="font-size:12px;color:#9ca3af;text-align:center">
-This analysis is a clinical decision support tool. It does not constitute a diagnosis.
-All flagged conditions require clinical assessment by a qualified health professional.
+This is a trend monitoring tool, not a diagnostic device. Flagged voice changes
+require clinical assessment by a qualified health professional.
 <br>CareData Voice Biomarker Module · Confidential
 </p>
 </body></html>"""
