@@ -46,12 +46,14 @@ from app.core.config import settings
 from app.services import (
     voice_analysis_db,
     voice_audio_blob,
+    voice_features_db,
     voice_link_db,
     voice_profile_db,
     voice_recording_db,
     voice_score_db,
 )
 from app.services.jwt_auth import get_current_user
+from app.services.voice_processor_v2 import LowSnrError, extract_all
 
 
 router = APIRouter(prefix="/api/voice/v2", tags=["Voice Biomarker v2"])
@@ -198,22 +200,64 @@ async def upload(
 
 
 def _process_recording_v2(recording_id: str, profile_id: str) -> None:
-    """Phase 1 placeholder.
+    """Phase 2 pipeline runner.
 
-    Marks the recording done. Phase 2 replaces this with the real pipeline
-    (transcode → VAD/SNR → per-stage features → score → alerts). For Phase 1
-    we only need the status to flip so the dashboard's polling logic works.
+    1. Mark processing.
+    2. Pull audio bytes back from blob.
+    3. Run voice_processor_v2.extract_all (raises LowSnrError to fail-fast).
+    4. Persist Features row.
+    5. Stamp SNR onto Recording, mark status=done.
+
+    Phase 3 will plug scoring + alert generation in here.
     """
     try:
         voice_recording_db.update_status(profile_id, recording_id, "processing")
+        rec = voice_recording_db.get_recording(profile_id, recording_id)
+        if rec is None:
+            logger.warning("recording vanished mid-process recording_id=%s", recording_id)
+            return
+
+        blob_uri = rec.get("audio_blob_uri") or ""
+        audio_bytes = voice_audio_blob.download_audio(blob_uri) if blob_uri else None
+        if not audio_bytes:
+            logger.warning(
+                "audio bytes unavailable; marking failed recording_id=%s", recording_id
+            )
+            voice_recording_db.update_status(profile_id, recording_id, "failed")
+            return
+
+        stage_offsets = rec.get("stage_offsets") or {}
+
+        try:
+            features = extract_all(audio_bytes, stage_offsets)
+        except LowSnrError as e:
+            logger.info(
+                "low SNR rejected recording_id=%s snr=%.2f", recording_id, e.snr_db
+            )
+            voice_recording_db.set_quality_metrics(
+                profile_id, recording_id, snr_db=e.snr_db
+            )
+            voice_recording_db.update_status(profile_id, recording_id, "failed")
+            # Phase 3 may want to surface this to the nurse dashboard via a
+            # context_flag-style annotation; today we just record the SNR.
+            return
+
+        voice_features_db.create_features(
+            profile_id=profile_id,
+            recording_id=recording_id,
+            features=features,
+        )
+        voice_recording_db.set_quality_metrics(
+            profile_id, recording_id, snr_db=features.get("snr_db"),
+        )
         voice_recording_db.update_status(profile_id, recording_id, "done")
         logger.info(
-            "v2 placeholder processed recording_id=%s profile_id=%s",
-            recording_id, profile_id,
+            "v2 pipeline done recording_id=%s profile_id=%s snr=%.2f",
+            recording_id, profile_id, features.get("snr_db", 0.0),
         )
-    except Exception:  # pragma: no cover
+    except Exception:  # pragma: no cover - belt-and-braces
         logger.exception(
-            "v2 placeholder failed recording_id=%s profile_id=%s",
+            "v2 pipeline crashed recording_id=%s profile_id=%s",
             recording_id, profile_id,
         )
         voice_recording_db.update_status(profile_id, recording_id, "failed")
