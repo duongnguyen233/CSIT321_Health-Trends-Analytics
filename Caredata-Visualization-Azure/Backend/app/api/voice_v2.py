@@ -1,0 +1,352 @@
+"""Voice biomarker v2 API — the redesigned router (Phase 1 of the rebuild).
+
+Mounted at `/api/voice/v2/`. Coexists with the legacy `/api/voice/...` router
+during the cutover; the legacy router will be removed in Phase 2.
+
+Endpoints:
+- GET  /api/voice/v2/r/{token}                       — link metadata (public)
+- POST /api/voice/v2/upload                          — multipart upload (public)
+- POST /api/voice/v2/n/residents/{id}/issue-link     — nurse-only, idempotent
+- POST /api/voice/v2/n/residents/{id}/lock-baseline  — nurse-only (Phase 1 stub)
+- GET  /api/voice/v2/n/residents/{id}/scores         — nurse-only
+- GET  /api/voice/v2/n/alerts                        — nurse-only
+- POST /api/voice/v2/n/alerts/{alert_id}/ack         — nurse-only
+
+The framing rule (no disease names) is enforced repo-wide by
+`tests/voice/test_framing.py` — every string in this file has been chosen
+to describe voice dimensions, never neurological labels.
+"""
+from __future__ import annotations
+
+import logging
+import uuid
+from datetime import date, datetime, timedelta, timezone
+
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    UploadFile,
+)
+from pydantic import ValidationError
+
+from app.api.voice_prompts import get_script
+from app.api.voice_schemas import (
+    ClientMeta,
+    ContextFlags,
+    LinkMetadata,
+    StageOffsets,
+    UploadResponse,
+)
+from app.core.config import settings
+from app.services import (
+    voice_analysis_db,
+    voice_audio_blob,
+    voice_link_db,
+    voice_profile_db,
+    voice_recording_db,
+    voice_score_db,
+)
+from app.services.jwt_auth import get_current_user
+
+
+router = APIRouter(prefix="/api/voice/v2", tags=["Voice Biomarker v2"])
+logger = logging.getLogger(__name__)
+
+MAX_AUDIO_BYTES = 5 * 1024 * 1024  # 5 MB
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _link_is_expired(link: dict) -> bool:
+    expires_at = link.get("expires_at") or ""
+    try:
+        exp = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+    except (ValueError, TypeError):
+        return True
+    return datetime.now(timezone.utc) > exp
+
+
+def _validation_400(prefix: str, errors):
+    raise HTTPException(
+        status_code=400,
+        detail={"code": "VALIDATION", "where": prefix, "errors": list(errors)},
+    )
+
+
+# ---------------------------------------------------------------------------
+# Public — link metadata
+# ---------------------------------------------------------------------------
+
+
+@router.get("/r/{token}", response_model=LinkMetadata)
+def get_link_metadata(token: str):
+    link = voice_link_db.get_link(token)
+    if link is None:
+        raise HTTPException(404, "link not found")
+    if link.get("used"):
+        raise HTTPException(410, "link already used")
+    if _link_is_expired(link):
+        raise HTTPException(410, "link expired")
+    profile = voice_profile_db.get_by_resident_id(link["resident_id"])
+    display_name = profile.get("display_name") if profile else link["resident_id"]
+    script = get_script("v1")
+    return LinkMetadata(
+        resident_display_name=display_name,
+        language=script["language"],
+        script_version=script["version"],
+        valid_for_date=link.get("valid_for_date") or date.today().isoformat(),
+        stages=script["stages"],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Public — upload
+# ---------------------------------------------------------------------------
+
+
+@router.post("/upload", response_model=UploadResponse, status_code=202)
+async def upload(
+    background_tasks: BackgroundTasks,
+    token: str = Form(...),
+    audio: UploadFile = File(...),
+    stage_offsets: str = Form(...),
+    context_flags: str = Form(...),
+    client_meta: str = Form(...),
+):
+    # 1. Token + state checks
+    link = voice_link_db.get_link(token)
+    if link is None:
+        raise HTTPException(404, "link not found")
+    if link.get("used") or _link_is_expired(link):
+        raise HTTPException(410, "link unavailable")
+
+    # 2. Parse + validate JSON form fields. `client_meta` enforces the
+    #    noise-suppression / auto-gain-control hard rule.
+    try:
+        offsets = StageOffsets.model_validate_json(stage_offsets)
+    except ValidationError as e:
+        _validation_400("stage_offsets", e.errors())
+    try:
+        flags = ContextFlags.model_validate_json(context_flags)
+    except ValidationError as e:
+        _validation_400("context_flags", e.errors())
+    try:
+        meta = ClientMeta.model_validate_json(client_meta)
+    except ValidationError as e:
+        # Detect AGC / NS violations for a clearer code.
+        for err in e.errors():
+            loc = ".".join(str(p) for p in err.get("loc", ()))
+            if loc in ("noise_suppression", "auto_gain_control"):
+                raise HTTPException(
+                    status_code=400,
+                    detail={"code": "AUDIO_CONSTRAINTS_VIOLATED", "field": loc},
+                )
+        _validation_400("client_meta", e.errors())
+
+    # 3. Resident profile must exist
+    profile = voice_profile_db.get_by_resident_id(link["resident_id"])
+    if profile is None:
+        raise HTTPException(404, "resident profile not found")
+
+    # 4. Read audio (5 MB cap)
+    audio_bytes = await audio.read()
+    if len(audio_bytes) > MAX_AUDIO_BYTES:
+        raise HTTPException(413, "file too large")
+
+    # 5. Upload to blob, insert recording row, mark link used
+    recording_id = str(uuid.uuid4())
+    blob_uri = voice_audio_blob.upload_audio(
+        link["resident_id"], recording_id, audio_bytes,
+        content_type=audio.content_type or "audio/webm",
+    )
+    voice_recording_db.create_recording(
+        profile_id=profile["profile_id"],
+        recording_id=recording_id,
+        duration_s=0.0,  # populated by background task once features extracted
+        prompt_id="v1",
+        audio_blob_uri=blob_uri,
+        stage_offsets=offsets.model_dump(),
+        context_flags=flags.model_dump(),
+        client_meta=meta.model_dump(),
+    )
+    voice_link_db.mark_used(token)
+
+    # 6. Enqueue background processing. Phase 1 leaves the heavy pipeline as a
+    #    placeholder — the recording status flips to 'done' with the existing
+    #    pure-Python feature extractor in the legacy code path. Phase 2
+    #    replaces _process_recording_v2 with the real pipeline.
+    background_tasks.add_task(
+        _process_recording_v2,
+        recording_id=recording_id,
+        profile_id=profile["profile_id"],
+    )
+
+    return UploadResponse(recording_id=recording_id, status="queued")
+
+
+# ---------------------------------------------------------------------------
+# Background processor — Phase 1 placeholder
+# ---------------------------------------------------------------------------
+
+
+def _process_recording_v2(recording_id: str, profile_id: str) -> None:
+    """Phase 1 placeholder.
+
+    Marks the recording done. Phase 2 replaces this with the real pipeline
+    (transcode → VAD/SNR → per-stage features → score → alerts). For Phase 1
+    we only need the status to flip so the dashboard's polling logic works.
+    """
+    try:
+        voice_recording_db.update_status(profile_id, recording_id, "processing")
+        voice_recording_db.update_status(profile_id, recording_id, "done")
+        logger.info(
+            "v2 placeholder processed recording_id=%s profile_id=%s",
+            recording_id, profile_id,
+        )
+    except Exception:  # pragma: no cover
+        logger.exception(
+            "v2 placeholder failed recording_id=%s profile_id=%s",
+            recording_id, profile_id,
+        )
+        voice_recording_db.update_status(profile_id, recording_id, "failed")
+
+
+# ---------------------------------------------------------------------------
+# Nurse — issue link
+# ---------------------------------------------------------------------------
+
+
+@router.post("/n/residents/{resident_id}/issue-link")
+def issue_link(
+    resident_id: str,
+    date_param: str = Query(..., alias="date", description="ISO date YYYY-MM-DD"),
+    current_user: dict = Depends(get_current_user),
+):
+    # Idempotent per (resident_id, date)
+    existing = voice_link_db.get_link_by_resident_and_date(resident_id, date_param)
+    if existing is not None and not existing.get("used") and not _link_is_expired(existing):
+        return {
+            "token": existing["token"],
+            "url": _link_url(existing["token"]),
+            "resident_id": resident_id,
+            "valid_for_date": date_param,
+            "expires_at": existing["expires_at"],
+        }
+
+    # Otherwise create a fresh one. Expires at end of day + 24h grace.
+    expires_at = (datetime.now(timezone.utc) + timedelta(hours=36)).isoformat()
+    link = voice_link_db.create_link(
+        resident_id=resident_id,
+        facility_id="default",
+        generated_by=current_user.get("sub", ""),
+        expires_at=expires_at,
+        valid_for_date=date_param,
+    )
+    return {
+        "token": link["token"],
+        "url": _link_url(link["token"]),
+        "resident_id": resident_id,
+        "valid_for_date": date_param,
+        "expires_at": expires_at,
+    }
+
+
+def _link_url(token: str) -> str:
+    base = getattr(settings, "VOICE_LINK_BASE_URL", "http://localhost:5173")
+    return f"{base}/voice/record/{token}"
+
+
+# ---------------------------------------------------------------------------
+# Nurse — lock-baseline (Phase 1 stub)
+# ---------------------------------------------------------------------------
+
+BASELINE_RECORDINGS_REQUIRED = 10
+
+
+@router.post("/n/residents/{resident_id}/lock-baseline")
+def lock_baseline(
+    resident_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    profile = voice_profile_db.get_by_resident_id(resident_id)
+    if profile is None:
+        raise HTTPException(404, "resident profile not found")
+    have = len(voice_recording_db.list_recordings(profile["profile_id"]))
+    if have < BASELINE_RECORDINGS_REQUIRED:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "INSUFFICIENT_RECORDINGS",
+                "have": have,
+                "need": BASELINE_RECORDINGS_REQUIRED,
+            },
+        )
+    # Phase 3 lands the real fit. Phase 1 just acknowledges that we *would*.
+    return {
+        "baseline_locked": False,
+        "reason": "phase_1_stub",
+        "recordings_have": have,
+        "recordings_need": BASELINE_RECORDINGS_REQUIRED,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Nurse — scores time series
+# ---------------------------------------------------------------------------
+
+
+@router.get("/n/residents/{resident_id}/scores")
+def get_scores(
+    resident_id: str,
+    days: int = Query(60, ge=1, le=365),
+    current_user: dict = Depends(get_current_user),
+):
+    profile = voice_profile_db.get_by_resident_id(resident_id)
+    if profile is None:
+        raise HTTPException(404, "resident profile not found")
+    scores = voice_score_db.list_scores(profile["profile_id"], limit=days)
+    return {"resident_id": resident_id, "days": days, "scores": scores}
+
+
+# ---------------------------------------------------------------------------
+# Nurse — dimension alerts
+# ---------------------------------------------------------------------------
+
+
+@router.get("/n/alerts")
+def list_alerts(
+    status: str = Query("open", pattern="^(open|all)$"),
+    current_user: dict = Depends(get_current_user),
+):
+    open_only = status == "open"
+    alerts = voice_analysis_db.list_dim_alerts(open_only=open_only)
+    return {"status": status, "alerts": alerts}
+
+
+@router.post("/n/alerts/{alert_id}/ack")
+def ack_alert(
+    alert_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    # Search across all profiles for the alert (cheap in-memory; in Tables we
+    # could index by alert_id but Phase 1's volume doesn't justify it).
+    all_alerts = voice_analysis_db.list_dim_alerts(open_only=False)
+    target = next((a for a in all_alerts if a["alert_id"] == alert_id), None)
+    if target is None:
+        raise HTTPException(404, "alert not found")
+    ok = voice_analysis_db.ack_dim_alert(
+        profile_id=target["profile_id"],
+        alert_id=alert_id,
+        ack_by=current_user.get("sub", ""),
+    )
+    if not ok:
+        raise HTTPException(500, "ack failed")
+    return {"acknowledged": True, "alert_id": alert_id}

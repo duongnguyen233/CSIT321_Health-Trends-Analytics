@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, health_scan, mydata, upload_csv, qi, gpms, voice
+from app.api import auth, health_scan, mydata, upload_csv, qi, gpms, voice, voice_v2
 from app.services.voice_seed import seed_demo_data
 
 app = FastAPI(title="CareData Backend (Azure)")
@@ -31,6 +31,7 @@ app.include_router(upload_csv.router)
 app.include_router(qi.router)
 app.include_router(gpms.router)
 app.include_router(voice.router)
+app.include_router(voice_v2.router)
 
 
 @app.on_event("startup")
