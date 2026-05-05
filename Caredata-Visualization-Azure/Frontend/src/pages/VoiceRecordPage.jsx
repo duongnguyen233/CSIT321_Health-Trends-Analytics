@@ -1,423 +1,146 @@
 /**
- * VoiceRecordPage, Public resident-facing recording page.
+ * VoiceRecordPage — public resident-facing recording page (v2).
  *
- * Accessed via /voice/record/:token (no Navbar, no Footer).
- * Elderly-accessible: large fonts, high contrast, minimal UI.
+ * Routed at /voice/record/:token (no nav, no footer). The token IS the
+ * auth — we GET /api/voice/v2/r/{token} to fetch the script, then drop
+ * the resident straight into the RecordingWidget. No registration / login
+ * step in v2 (the previous flow stored a per-resident password; the new
+ * spec uses per-day token-only auth).
  *
  * Flow:
- *   1. Validate link token
- *   2. If no account → registration form (name + 4-char password)
- *   3. If has account → login (password only)
- *   4. Consent screen (first time only)
- *   5. After auth + consent → show recording interface with prompt
+ *   loading -> ready  (RecordingWidget renders)
+ *           -> expired (link used or expired -> friendly message)
+ *           -> error  (network / server error)
  */
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  validateVoiceLink,
-  registerResident,
-  loginResident,
-  uploadRecording,
-  getRandomPrompt,
-  getConsent,
-  updateConsent,
-} from "../services/voiceApi";
+import { motion } from "framer-motion";
+
+import { getLinkMeta } from "../services/voiceApiV2";
 import RecordingWidget from "../components/voice/RecordingWidget";
 import BrandMark from "../components/common/BrandMark";
 
-const inputStyle = {
-  background: "var(--bg-paper)",
-  border: "1px solid var(--line)",
-  borderRadius: 14,
-  color: "var(--ink-900)",
-  fontSize: 22,
-  padding: "16px 20px",
-  outline: "none",
-  width: "100%",
-};
 
 export default function VoiceRecordPage() {
   const { token } = useParams();
-  const [step, setStep] = useState("loading"); // loading | invalid | register | login | consent | record
-  const [linkData, setLinkData] = useState(null);
-  const [error, setError] = useState("");
-  const [prompt, setPrompt] = useState(null);
+  const [phase, setPhase] = useState("loading"); // loading | ready | expired | error
+  const [link, setLink] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
 
-  // Registration / login fields
-  const [displayName, setDisplayName] = useState("");
-  const [password, setPassword] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  // Validate link on mount
   useEffect(() => {
-    if (!token) {
-      setStep("invalid");
-      return;
-    }
-    validateVoiceLink(token)
-      .then((data) => {
-        setLinkData(data);
-        if (!data.valid) {
-          setStep("invalid");
-        } else if (data.has_account) {
-          setStep("login");
+    let cancelled = false;
+    async function load() {
+      try {
+        const meta = await getLinkMeta(token);
+        if (cancelled) return;
+        setLink(meta);
+        setPhase("ready");
+      } catch (e) {
+        if (cancelled) return;
+        const status = e?.response?.status;
+        if (status === 410) {
+          setPhase("expired");
+        } else if (status === 404) {
+          setPhase("expired");
         } else {
-          setStep("register");
+          setErrorMsg(e?.message || "Could not load this link.");
+          setPhase("error");
         }
-      })
-      .catch(() => {
-        setStep("invalid");
-      });
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [token]);
-
-  // Load prompt when entering record step
-  useEffect(() => {
-    if (step === "record" && !prompt) {
-      getRandomPrompt()
-        .then(setPrompt)
-        .catch(() =>
-          setPrompt({
-            id: "fallback",
-            type: "open_response",
-            text: "Please tell me about your day today.",
-          })
-        );
-    }
-  }, [step, prompt]);
-
-  // After successful auth, check consent
-  const proceedAfterAuth = useCallback(async () => {
-    try {
-      const { consent_status } = await getConsent();
-      if (consent_status === "active") {
-        setStep("record");
-      } else {
-        setStep("consent");
-      }
-    } catch {
-      setStep("consent");
-    }
-  }, []);
-
-  const handleRegister = useCallback(
-    async (e) => {
-      e.preventDefault();
-      setError("");
-      if (displayName.trim().length < 1) {
-        setError("Please enter your name.");
-        return;
-      }
-      if (password.length < 4) {
-        setError("Password must be at least 4 characters.");
-        return;
-      }
-      setSubmitting(true);
-      try {
-        const result = await registerResident(token, displayName.trim(), password);
-        localStorage.setItem("resident_token", result.access_token);
-        setStep("consent");
-      } catch (err) {
-        const msg = err.response?.data?.detail || "Registration failed. Please try again.";
-        setError(typeof msg === "string" ? msg : JSON.stringify(msg));
-      } finally {
-        setSubmitting(false);
-      }
-    },
-    [token, displayName, password]
-  );
-
-  const handleLogin = useCallback(
-    async (e) => {
-      e.preventDefault();
-      setError("");
-      if (password.length < 4) {
-        setError("Please enter your password.");
-        return;
-      }
-      setSubmitting(true);
-      try {
-        const result = await loginResident(linkData.resident_id, password);
-        localStorage.setItem("resident_token", result.access_token);
-        await proceedAfterAuth();
-      } catch (err) {
-        const msg = err.response?.data?.detail || "Login failed. Please check your password.";
-        setError(typeof msg === "string" ? msg : JSON.stringify(msg));
-      } finally {
-        setSubmitting(false);
-      }
-    },
-    [linkData, password, proceedAfterAuth]
-  );
-
-  const handleConsent = useCallback(async () => {
-    setSubmitting(true);
-    try {
-      await updateConsent(true);
-      setStep("record");
-    } catch {
-      setError("Failed to save consent. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  }, []);
-
-  const handleUpload = useCallback(async (wavBlob) => {
-    const file = new File([wavBlob], "recording.wav", { type: "audio/wav" });
-    await uploadRecording(file);
-  }, []);
-
-  const bigBtn = {
-    width: "100%",
-    padding: "20px",
-    fontSize: 22,
-    fontWeight: 600,
-    borderRadius: 14,
-    border: "1px solid var(--ink-900)",
-    background: "var(--ink-900)",
-    color: "var(--bg-white)",
-    cursor: submitting ? "not-allowed" : "pointer",
-    opacity: submitting ? 0.6 : 1,
-    transition: "all .15s ease",
-  };
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center px-6 py-12"
-      style={{ background: "var(--bg-cream)" }}
+      className="min-h-screen"
+      style={{ background: "var(--bg-paper)" }}
     >
-      {/* Logo / Header */}
-      <div className="mb-10 text-center flex flex-col items-center gap-3">
-        <div className="flex items-center gap-3">
-          <BrandMark size={40} />
-          <span
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: 38,
-              color: "var(--ink-900)",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            CareData
+      <header className="border-b border-gray-100 bg-white">
+        <div className="max-w-3xl mx-auto px-6 h-16 flex items-center gap-2">
+          <BrandMark size={28} />
+          <span className="text-[15px] font-semibold tracking-tight text-gray-900">
+            CareData &middot; Voice check-in
           </span>
         </div>
-        <p style={{ fontSize: 18, color: "var(--ink-500)" }}>Voice Health Check</p>
+      </header>
+
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+        {phase === "loading" && <LoadingState />}
+        {phase === "expired" && <ExpiredState />}
+        {phase === "error" && <ErrorState message={errorMsg} />}
+        {phase === "ready" && link && (
+          <Ready link={link} token={token} />
+        )}
+      </main>
+
+      <footer className="max-w-3xl mx-auto px-6 py-8 text-xs text-gray-500 text-center">
+        This is a trend monitoring tool, not a diagnostic device. Recordings
+        are reviewed by your nursing team.
+      </footer>
+    </div>
+  );
+}
+
+
+function Ready({ link, token }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <div className="text-center mb-6">
+        <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+          {link.valid_for_date}
+        </p>
+        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">
+          Hello, {link.resident_display_name}
+        </h1>
+        <p className="text-sm text-gray-600 mt-2">
+          Your nurse asked us to check in with you today. It only takes a minute.
+        </p>
       </div>
+      <RecordingWidget token={token} stages={link.stages} />
+    </motion.div>
+  );
+}
 
-      {/* Loading */}
-      {step === "loading" && (
-        <div className="text-center">
-          <div
-            className="w-12 h-12 rounded-full animate-spin mx-auto"
-            style={{
-              border: "3px solid var(--line)",
-              borderTopColor: "var(--sage-ink)",
-            }}
-          />
-          <p className="mt-4" style={{ fontSize: 18, color: "var(--ink-500)" }}>Loading...</p>
-        </div>
-      )}
 
-      {/* Invalid link */}
-      {step === "invalid" && (
-        <div className="text-center max-w-md">
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
-            style={{ background: "var(--bg-clay-tint)", border: "1px solid var(--line)" }}
-          >
-            <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: "var(--clay-ink)" }}>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
-          <h2
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: 30,
-              color: "var(--ink-900)",
-              marginBottom: 12,
-              letterSpacing: "-0.01em",
-            }}
-          >
-            {linkData?.message || "This link is no longer valid."}
-          </h2>
-          <p style={{ fontSize: 18, color: "var(--ink-700)" }}>
-            Please ask your nurse for a new recording link.
-          </p>
-        </div>
-      )}
+function LoadingState() {
+  return (
+    <div className="bg-white border border-gray-100 rounded-xl shadow-md p-8 text-center">
+      <div className="inline-block h-8 w-8 border-4 border-gray-200 border-t-primary rounded-full animate-spin mb-3" />
+      <p className="text-sm text-gray-600">Loading your check-in&hellip;</p>
+    </div>
+  );
+}
 
-      {/* Registration form */}
-      {step === "register" && (
-        <form onSubmit={handleRegister} className="w-full max-w-md cd-surface p-8 space-y-6">
-          <div className="text-center mb-2">
-            <h2
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: 30,
-                color: "var(--ink-900)",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              Welcome
-            </h2>
-            <p className="mt-2" style={{ fontSize: 18, color: "var(--ink-500)" }}>
-              Please create your name and password to get started.
-            </p>
-          </div>
 
-          <div>
-            <label className="block mb-2" style={{ fontSize: 17, fontWeight: 500, color: "var(--ink-700)" }}>
-              Your Name
-            </label>
-            <input
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              style={inputStyle}
-              placeholder="e.g. Margaret"
-              autoFocus
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2" style={{ fontSize: 17, fontWeight: 500, color: "var(--ink-700)" }}>
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={inputStyle}
-              placeholder="At least 4 characters"
-            />
-          </div>
-
-          {error && (
-            <p style={{ fontSize: 16, color: "var(--clay-ink)" }}>{error}</p>
-          )}
-
-          <button type="submit" disabled={submitting} style={bigBtn}>
-            {submitting ? "Creating account..." : "Continue"}
-          </button>
-        </form>
-      )}
-
-      {/* Login form */}
-      {step === "login" && (
-        <form onSubmit={handleLogin} className="w-full max-w-md cd-surface p-8 space-y-6">
-          <div className="text-center mb-2">
-            <h2
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: 30,
-                color: "var(--ink-900)",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              Welcome back{linkData?.display_name ? `, ${linkData.display_name}` : ""}
-            </h2>
-            <p className="mt-2" style={{ fontSize: 18, color: "var(--ink-500)" }}>
-              Please enter your password to continue.
-            </p>
-          </div>
-
-          <div>
-            <label className="block mb-2" style={{ fontSize: 17, fontWeight: 500, color: "var(--ink-700)" }}>
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={inputStyle}
-              placeholder="Enter your password"
-              autoFocus
-            />
-          </div>
-
-          {error && (
-            <p style={{ fontSize: 16, color: "var(--clay-ink)" }}>{error}</p>
-          )}
-
-          <button type="submit" disabled={submitting} style={bigBtn}>
-            {submitting ? "Logging in..." : "Continue"}
-          </button>
-        </form>
-      )}
-
-      {/* Consent screen */}
-      {step === "consent" && (
-        <div className="w-full max-w-lg cd-surface p-8 space-y-6">
-          <div className="text-center mb-2">
-            <h2
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: 28,
-                color: "var(--ink-900)",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              Consent for Voice Recording
-            </h2>
-          </div>
-
-          <div
-            className="space-y-4"
-            style={{
-              background: "var(--bg-paper)",
-              border: "1px solid var(--line-soft)",
-              borderRadius: 14,
-              padding: 24,
-              fontSize: 17,
-              color: "var(--ink-700)",
-              lineHeight: 1.6,
-            }}
-          >
-            <p>
-              <strong style={{ color: "var(--ink-900)" }}>What is recorded:</strong> A short voice sample
-              (30&ndash;60 seconds) of you speaking aloud.
-            </p>
-            <p>
-              <strong style={{ color: "var(--ink-900)" }}>How it is used:</strong> Your recording is analysed by
-              computer to check for changes in your speech patterns that may indicate health changes.
-            </p>
-            <p>
-              <strong style={{ color: "var(--ink-900)" }}>Who can see results:</strong> Your nurse and care team
-              can view the analysis results. They <strong>cannot</strong> listen to your recording.
-            </p>
-            <p>
-              <strong style={{ color: "var(--ink-900)" }}>Your rights:</strong> You own your recordings. You
-              can listen to, download, or delete them at any time. You can withdraw consent at any time.
-            </p>
-            <p>
-              <strong style={{ color: "var(--ink-900)" }}>Storage:</strong> Recordings are stored securely and
-              encrypted. Analysis results are kept even if you delete the recording.
-            </p>
-          </div>
-
-          {error && <p style={{ fontSize: 16, color: "var(--clay-ink)" }}>{error}</p>}
-
-          <button onClick={handleConsent} disabled={submitting} style={bigBtn}>
-            {submitting ? "Saving..." : "I Agree, Continue"}
-          </button>
-
-          <p className="text-center" style={{ fontSize: 14, color: "var(--ink-500)" }}>
-            You can withdraw consent at any time through your recording portal.
-          </p>
-        </div>
-      )}
-
-      {/* Recording interface */}
-      {step === "record" && (
-        <div className="w-full max-w-lg">
-          <RecordingWidget prompt={prompt} onUpload={handleUpload} />
-        </div>
-      )}
-
-      {/* Footer disclaimer */}
-      <p className="mt-12 text-center max-w-md" style={{ fontSize: 13, color: "var(--ink-500)" }}>
-        This recording is used for health monitoring purposes only.
-        You own your recordings and can request deletion at any time.
+function ExpiredState() {
+  return (
+    <div className="bg-white border border-gray-100 rounded-xl shadow-md p-8 text-center">
+      <h2 className="text-lg font-semibold text-gray-900 mb-2">
+        This link has expired
+      </h2>
+      <p className="text-sm text-gray-600">
+        Your daily voice link is only good for one recording. Please ask your
+        nurse for a fresh link.
       </p>
+    </div>
+  );
+}
+
+
+function ErrorState({ message }) {
+  return (
+    <div className="bg-white border border-gray-100 rounded-xl shadow-md p-8 text-center">
+      <h2 className="text-lg font-semibold text-gray-900 mb-2">
+        We couldn&rsquo;t load this page
+      </h2>
+      <p className="text-sm text-gray-600">{message || "Please try again later."}</p>
     </div>
   );
 }

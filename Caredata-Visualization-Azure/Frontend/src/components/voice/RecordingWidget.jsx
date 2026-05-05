@@ -1,295 +1,471 @@
 /**
- * RecordingWidget, accessible voice recording component.
+ * Voice biomarker recording widget — 4-stage daily battery (~75 s).
  *
- * Uses browser MediaRecorder API to capture audio, converts to WAV via
- * AudioContext for backend compatibility. Large UI elements for elderly users.
+ * Walks the resident through sustained_a -> ddk -> reading -> open_prompt
+ * with a per-stage timer + progress bar. On completion, captures the
+ * Blob, the per-stage offsets the audio actually got recorded at, the
+ * resident-toggled context flags, and a snapshot of the MediaStream
+ * constraints, then submits via uploadRecording().
  *
- * Props:
- *   prompt    , { id, type, text } prompt object to display
- *   onUpload  , async (wavBlob) => void, called when user confirms upload
- *   disabled  , boolean, disable recording
+ * HARD CONTRACT (per VOICE_BIOMARKER.md \xa77.3):
+ *   getUserMedia({ audio: {
+ *     channelCount: 1,
+ *     echoCancellation: true,
+ *     noiseSuppression: false,    // MUST be false
+ *     autoGainControl: false,     // MUST be false
+ *   }})
+ *
+ * Backend rejects 400 AUDIO_CONSTRAINTS_VIOLATED if these flip.
  */
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { uploadRecording } from "../../services/voiceApiV2";
 
-const MAX_DURATION_S = 60;
 
-export default function RecordingWidget({ prompt, onUpload, disabled = false }) {
-  const [state, setState] = useState("idle"); // idle | recording | recorded | uploading | done | error
+const AUDIO_CONSTRAINTS = {
+  audio: {
+    channelCount: 1,
+    echoCancellation: true,
+    noiseSuppression: false,
+    autoGainControl: false,
+  },
+};
+
+
+function stageColor(idx, total) {
+  const palette = ["#8AA791", "#95A8BD", "#B7A07F", "#A4ACA6"];
+  return palette[idx % total] || palette[0];
+}
+
+
+export default function RecordingWidget({ token, stages, onComplete, onError }) {
+  const [phase, setPhase] = useState("intro"); // intro | recording | uploading | success | error
+  const [stageIdx, setStageIdx] = useState(0);
   const [elapsed, setElapsed] = useState(0);
-  const [errorMsg, setErrorMsg] = useState("");
-  const mediaRecorder = useRef(null);
-  const audioChunks = useRef([]);
-  const timerRef = useRef(null);
+  const [contextFlags, setContextFlags] = useState({
+    cold: false,
+    dentures_out: false,
+    just_woke_up: false,
+    pain: false,
+  });
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  const mediaRecorderRef = useRef(null);
   const streamRef = useRef(null);
-  const audioCtxRef = useRef(null);
+  const chunksRef = useRef([]);
+  const tickRef = useRef(null);
+  const startTsRef = useRef(0);
+  const stageTimestampsRef = useRef([]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      clearInterval(timerRef.current);
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-      }
-    };
+  const totalTarget = useMemo(
+    () => stages.reduce((acc, s) => acc + (s.target_duration_s || 0), 0),
+    [stages]
+  );
+
+  useEffect(() => () => {
+    cleanupStream();
+    if (tickRef.current) clearInterval(tickRef.current);
   }, []);
 
-  const startRecording = useCallback(async () => {
-    setErrorMsg("");
+  function cleanupStream() {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+    mediaRecorderRef.current = null;
+  }
+
+  async function start() {
+    setErrorMsg(null);
+    chunksRef.current = [];
+    stageTimestampsRef.current = stages.map((s) => ({ id: s.id, start: null, end: null }));
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
       streamRef.current = stream;
-
-      audioChunks.current = [];
-      const recorder = new MediaRecorder(stream);
-      mediaRecorder.current = recorder;
-
+      const mime =
+        ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"].find((t) =>
+          window.MediaRecorder?.isTypeSupported?.(t)
+        ) || "";
+      const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
       recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunks.current.push(e.data);
+        if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
       };
+      recorder.onstop = handleRecorderStop;
+      recorder.start(250);
+      mediaRecorderRef.current = recorder;
 
-      recorder.onstop = () => {
-        clearInterval(timerRef.current);
-        stream.getTracks().forEach((t) => t.stop());
-        setState("recorded");
-      };
-
-      recorder.start();
-      setState("recording");
+      startTsRef.current = performance.now();
+      stageTimestampsRef.current[0].start = 0;
+      setStageIdx(0);
       setElapsed(0);
-
-      const startTime = Date.now();
-      timerRef.current = setInterval(() => {
-        const secs = Math.floor((Date.now() - startTime) / 1000);
-        setElapsed(secs);
-        if (secs >= MAX_DURATION_S) {
-          recorder.stop();
-        }
-      }, 250);
-    } catch (err) {
+      setPhase("recording");
+      tickRef.current = setInterval(tick, 100);
+    } catch (e) {
       setErrorMsg(
-        "Could not access your microphone. Please allow microphone access and try again."
+        e?.name === "NotAllowedError"
+          ? "Microphone access was denied. Please allow access and try again."
+          : `Could not start recording: ${e?.message || e}`
       );
-      setState("error");
+      setPhase("error");
+      onError?.(e);
     }
-  }, []);
+  }
 
-  const stopRecording = useCallback(() => {
-    if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
-      mediaRecorder.current.stop();
+  function tick() {
+    const now = (performance.now() - startTsRef.current) / 1000;
+    setElapsed(now);
+    const idx = stageIdxFromElapsed(now);
+    if (idx !== stageIdx) {
+      const ts = stageTimestampsRef.current;
+      if (ts[stageIdx]) ts[stageIdx].end = now;
+      if (idx < stages.length && ts[idx]) ts[idx].start = now;
+      setStageIdx(idx);
+      if (idx >= stages.length) finishRecording();
     }
-  }, []);
+  }
 
-  const handleUpload = useCallback(async () => {
-    setState("uploading");
+  function stageIdxFromElapsed(t) {
+    let acc = 0;
+    for (let i = 0; i < stages.length; i++) {
+      acc += stages[i].target_duration_s || 0;
+      if (t < acc) return i;
+    }
+    return stages.length;
+  }
+
+  function finishRecording() {
+    if (tickRef.current) {
+      clearInterval(tickRef.current);
+      tickRef.current = null;
+    }
+    const ts = stageTimestampsRef.current;
+    if (ts[stages.length - 1] && ts[stages.length - 1].end == null) {
+      ts[stages.length - 1].end = (performance.now() - startTsRef.current) / 1000;
+    }
+    const rec = mediaRecorderRef.current;
+    if (rec && rec.state !== "inactive") rec.stop();
+  }
+
+  async function handleRecorderStop() {
+    const tracks = streamRef.current?.getTracks() ?? [];
+    const trackSettings = tracks[0]?.getSettings?.() || {};
+    cleanupStream();
+
+    if (chunksRef.current.length === 0) {
+      setErrorMsg("No audio captured. Please try again.");
+      setPhase("error");
+      return;
+    }
+
+    setPhase("uploading");
     try {
-      const blob = new Blob(audioChunks.current, { type: "audio/webm" });
-      // Convert WebM → WAV via AudioContext
-      const wavBlob = await convertToWav(blob);
-      await onUpload(wavBlob);
-      setState("done");
-    } catch (err) {
-      setErrorMsg("Upload failed. Please try again.");
-      setState("error");
+      const blob = new Blob(chunksRef.current, {
+        type: chunksRef.current[0].type || "audio/webm",
+      });
+      const stageOffsets = buildStageOffsetsFromTimestamps();
+      const clientMeta = {
+        ua: navigator.userAgent || "unknown",
+        sample_rate: trackSettings.sampleRate || 48000,
+        channels: trackSettings.channelCount || 1,
+        echo_cancellation: !!trackSettings.echoCancellation,
+        noise_suppression: trackSettings.noiseSuppression === true,
+        auto_gain_control: trackSettings.autoGainControl === true,
+      };
+      const out = await uploadRecording({
+        token,
+        audio: blob,
+        stageOffsets,
+        contextFlags,
+        clientMeta,
+      });
+      setPhase("success");
+      onComplete?.(out);
+    } catch (e) {
+      const code = e?.response?.data?.detail?.code;
+      const msg =
+        code === "AUDIO_CONSTRAINTS_VIOLATED"
+          ? "Your browser is preprocessing the audio. Please try a different browser, or check your microphone settings."
+          : code === "VALIDATION"
+          ? "The recording could not be validated by the server. Please try again."
+          : `Upload failed: ${e?.message || "unknown error"}`;
+      setErrorMsg(msg);
+      setPhase("error");
+      onError?.(e);
     }
-  }, [onUpload]);
+  }
 
-  const handleReRecord = useCallback(() => {
-    audioChunks.current = [];
-    setState("idle");
-    setElapsed(0);
-    setErrorMsg("");
-  }, []);
+  function buildStageOffsetsFromTimestamps() {
+    const ts = stageTimestampsRef.current;
+    const total = (performance.now() - startTsRef.current) / 1000;
+    const out = {};
+    for (let i = 0; i < stages.length; i++) {
+      const s = ts[i];
+      const start = s?.start ?? 0;
+      const end = s?.end ?? Math.min(total, start + (stages[i].target_duration_s || 0));
+      out[stages[i].id] = [Number(start.toFixed(2)), Number(end.toFixed(2))];
+    }
+    return out;
+  }
 
-  const formatTime = (secs) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  };
+  if (phase === "intro") {
+    return (
+      <IntroPanel
+        stages={stages}
+        contextFlags={contextFlags}
+        setContextFlags={setContextFlags}
+        onStart={start}
+        totalTarget={totalTarget}
+      />
+    );
+  }
+  if (phase === "recording") {
+    return (
+      <RecordingPanel
+        stages={stages}
+        stageIdx={stageIdx}
+        elapsed={elapsed}
+        totalTarget={totalTarget}
+        onStop={finishRecording}
+      />
+    );
+  }
+  if (phase === "uploading") return <UploadingPanel />;
+  if (phase === "success") return <SuccessPanel />;
+  return <ErrorPanel message={errorMsg} onRetry={() => setPhase("intro")} />;
+}
+
+
+function IntroPanel({ stages, contextFlags, setContextFlags, onStart, totalTarget }) {
+  const flagOptions = [
+    { id: "cold", label: "I have a cold today" },
+    { id: "dentures_out", label: "My dentures are out" },
+    { id: "just_woke_up", label: "I just woke up" },
+    { id: "pain", label: "I am in pain right now" },
+  ];
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white border border-gray-100 rounded-xl shadow-md p-6 max-w-2xl mx-auto"
+    >
+      <h2 className="text-lg font-semibold text-gray-900 mb-1">
+        Today&rsquo;s voice check-in
+      </h2>
+      <p className="text-sm text-gray-600 mb-4">
+        Four short prompts in about {Math.round(totalTarget)} seconds.
+        Find a quiet spot. Speak naturally.
+      </p>
+      <ol className="space-y-2 mb-5">
+        {stages.map((s, i) => (
+          <li key={s.id} className="flex gap-3">
+            <div
+              className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-semibold"
+              style={{ background: "var(--bg-cream)", color: "var(--ink-900)" }}
+            >
+              {i + 1}
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-gray-900">
+                {s.text || s.id}
+              </div>
+              {s.instruction && (
+                <div className="text-xs text-gray-600 mt-0.5">{s.instruction}</div>
+              )}
+              <div className="text-xs text-gray-500 mt-0.5">
+                ~{s.target_duration_s}s
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      <div className="border-t border-gray-100 pt-4 mb-5">
+        <p className="text-xs font-medium text-gray-700 mb-2 uppercase tracking-wide">
+          Anything we should know about today?
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {flagOptions.map((f) => (
+            <label
+              key={f.id}
+              className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none"
+            >
+              <input
+                type="checkbox"
+                checked={!!contextFlags[f.id]}
+                onChange={(e) =>
+                  setContextFlags({ ...contextFlags, [f.id]: e.target.checked })
+                }
+                className="accent-primary"
+              />
+              {f.label}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onStart}
+        className="bg-primary text-white font-semibold rounded-md px-6 py-3 hover:bg-orange-500 w-full"
+      >
+        Start recording
+      </button>
+      <p className="text-xs text-gray-500 mt-3 text-center">
+        This is a trend monitoring tool, not a diagnostic device.
+      </p>
+    </motion.div>
+  );
+}
+
+
+function RecordingPanel({ stages, stageIdx, elapsed, totalTarget, onStop }) {
+  const cur = stages[Math.min(stageIdx, stages.length - 1)];
+  let stageStartElapsed = 0;
+  for (let i = 0; i < stageIdx; i++) stageStartElapsed += stages[i].target_duration_s || 0;
+  const stagePct =
+    cur && cur.target_duration_s > 0
+      ? Math.min(100, ((elapsed - stageStartElapsed) / cur.target_duration_s) * 100)
+      : 100;
+  const overallPct = Math.min(100, (elapsed / totalTarget) * 100);
 
   return (
-    <div className="flex flex-col items-center gap-8 w-full max-w-lg mx-auto">
-      {/* Prompt display */}
-      {prompt && state !== "done" && (
-        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 w-full">
-          <p className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wide">
-            {prompt.type === "read_aloud"
-              ? "Please read aloud"
-              : prompt.type === "sequencing"
-              ? "Follow the instruction"
-              : "Tell us about..."}
-          </p>
-          <p className="text-2xl leading-relaxed text-gray-900 font-medium">
-            {prompt.text}
-          </p>
-        </div>
-      )}
-
-      {/* Timer */}
-      {(state === "recording" || state === "recorded") && (
-        <div className="text-center">
-          <span className="text-6xl font-bold text-gray-900 tabular-nums">
-            {formatTime(elapsed)}
-          </span>
-          <p className="text-lg text-gray-500 mt-2">
-            {state === "recording"
-              ? `Recording... (max ${MAX_DURATION_S}s)`
-              : "Recording complete"}
-          </p>
-        </div>
-      )}
-
-      {/* Recording indicator */}
-      {state === "recording" && (
-        <div className="flex items-center gap-3">
-          <span className="w-4 h-4 bg-red-500 rounded-full animate-pulse" />
-          <span className="text-xl text-red-600 font-semibold">Recording</span>
-        </div>
-      )}
-
-      {/* Action buttons */}
-      <div className="flex flex-col items-center gap-4 w-full">
-        {state === "idle" && (
-          <button
-            onClick={startRecording}
-            disabled={disabled}
-            className="w-full py-6 bg-primary text-white text-3xl font-semibold rounded-2xl
-                       hover:bg-primary-hover active:bg-primary-hover transition-colors
-                       disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-          >
-            Start Recording
-          </button>
-        )}
-
-        {state === "recording" && (
-          <button
-            onClick={stopRecording}
-            className="w-full py-6 bg-red-600 text-white text-3xl font-semibold rounded-2xl
-                       hover:bg-red-700 active:bg-red-800 transition-colors shadow-lg"
-          >
-            Stop Recording
-          </button>
-        )}
-
-        {state === "recorded" && (
-          <div className="flex gap-4 w-full">
-            <button
-              onClick={handleReRecord}
-              className="flex-1 py-5 bg-gray-200 text-gray-800 text-2xl font-semibold rounded-2xl
-                         hover:bg-gray-300 transition-colors"
-            >
-              Re-record
-            </button>
-            <button
-              onClick={handleUpload}
-              className="flex-1 py-5 bg-primary text-white text-2xl font-semibold rounded-2xl
-                         hover:bg-primary-hover transition-colors shadow-lg"
-            >
-              Upload
-            </button>
-          </div>
-        )}
-
-        {state === "uploading" && (
-          <div className="text-center py-8">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-2xl text-gray-600 mt-4">Uploading...</p>
-          </div>
-        )}
-
-        {state === "done" && (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <p className="text-3xl font-semibold text-green-700">Thank you!</p>
-            <p className="text-xl text-gray-600 mt-2">Your recording has been submitted.</p>
-            <button
-              onClick={handleReRecord}
-              className="mt-6 px-8 py-3 bg-gray-200 text-gray-700 text-xl rounded-xl hover:bg-gray-300 transition-colors"
-            >
-              Record another
-            </button>
-          </div>
-        )}
-
-        {state === "error" && (
-          <div className="text-center py-6">
-            <p className="text-xl text-red-600 mb-4">{errorMsg}</p>
-            <button
-              onClick={handleReRecord}
-              className="px-8 py-3 bg-primary text-white text-xl rounded-xl hover:bg-primary-hover transition-colors"
-            >
-              Try again
-            </button>
-          </div>
-        )}
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white border border-gray-100 rounded-xl shadow-md p-6 max-w-2xl mx-auto"
+    >
+      <div className="flex items-center gap-3 mb-2">
+        <span className="relative flex h-3 w-3">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
+        </span>
+        <span className="text-sm font-semibold text-gray-900">
+          Recording &middot; stage {Math.min(stageIdx + 1, stages.length)} of {stages.length}
+        </span>
       </div>
+
+      <div className="mb-4">
+        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-full transition-all"
+            style={{
+              width: `${overallPct}%`,
+              background: stageColor(stageIdx, stages.length),
+            }}
+          />
+        </div>
+        <div className="flex justify-between text-xs text-gray-500 mt-1">
+          <span>{elapsed.toFixed(1)}s</span>
+          <span>~{totalTarget}s total</span>
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={stageIdx}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          className="bg-[#FBF8F2] border border-[#ECE6D9] rounded-lg p-5"
+        >
+          <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+            Stage {Math.min(stageIdx + 1, stages.length)}
+          </div>
+          <div className="text-base font-semibold text-gray-900 leading-snug">
+            {cur?.text}
+          </div>
+          {cur?.instruction && (
+            <div className="text-sm text-gray-600 mt-2">{cur.instruction}</div>
+          )}
+          <div className="mt-4 h-1.5 bg-white border border-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full transition-all"
+              style={{
+                width: `${stagePct}%`,
+                background: stageColor(stageIdx, stages.length),
+              }}
+            />
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      <div className="mt-5 flex justify-end">
+        <button
+          type="button"
+          onClick={onStop}
+          className="text-sm font-semibold text-gray-700 underline hover:text-gray-900"
+        >
+          Stop early
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+
+function UploadingPanel() {
+  return (
+    <div className="bg-white border border-gray-100 rounded-xl shadow-md p-8 max-w-2xl mx-auto text-center">
+      <div className="inline-block h-8 w-8 border-4 border-gray-200 border-t-primary rounded-full animate-spin mb-3" />
+      <div className="text-sm font-semibold text-gray-900">
+        Uploading recording&hellip;
+      </div>
+      <div className="text-xs text-gray-600 mt-1">Almost done.</div>
     </div>
   );
 }
 
-/**
- * Convert a WebM audio Blob to WAV format using AudioContext.
- */
-async function convertToWav(webmBlob) {
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  try {
-    const arrayBuffer = await webmBlob.arrayBuffer();
-    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
-    // Downsample to 16kHz mono for smaller files and backend compatibility
-    const targetRate = 16000;
-    const offlineCtx = new OfflineAudioContext(1, audioBuffer.duration * targetRate, targetRate);
-    const source = offlineCtx.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(offlineCtx.destination);
-    source.start(0);
-    const rendered = await offlineCtx.startRendering();
-
-    // Encode as 16-bit PCM WAV
-    const pcm = rendered.getChannelData(0);
-    const wavBuffer = encodeWav(pcm, targetRate);
-    return new Blob([wavBuffer], { type: "audio/wav" });
-  } finally {
-    audioCtx.close();
-  }
+function SuccessPanel() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-white border border-gray-100 rounded-xl shadow-md p-8 max-w-2xl mx-auto text-center"
+    >
+      <div
+        className="mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-3"
+        style={{ background: "var(--bg-sage-tint)", color: "var(--sage-ink)" }}
+      >
+        <svg viewBox="0 0 20 20" width="22" height="22" fill="currentColor">
+          <path
+            fillRule="evenodd"
+            d="M16.7 5.3a1 1 0 010 1.4l-7 7a1 1 0 01-1.4 0l-3.5-3.5a1 1 0 111.4-1.4l2.8 2.8 6.3-6.3a1 1 0 011.4 0z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </div>
+      <h2 className="text-base font-semibold text-gray-900 mb-1">Thank you.</h2>
+      <p className="text-sm text-gray-600">
+        Your recording was sent to your nursing team. You can close this page.
+      </p>
+    </motion.div>
+  );
 }
 
-function encodeWav(samples, sampleRate) {
-  const numSamples = samples.length;
-  const buffer = new ArrayBuffer(44 + numSamples * 2);
-  const view = new DataView(buffer);
 
-  // WAV header
-  writeString(view, 0, "RIFF");
-  view.setUint32(4, 36 + numSamples * 2, true);
-  writeString(view, 8, "WAVE");
-  writeString(view, 12, "fmt ");
-  view.setUint32(16, 16, true); // chunk size
-  view.setUint16(20, 1, true); // PCM
-  view.setUint16(22, 1, true); // mono
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * 2, true); // byte rate
-  view.setUint16(32, 2, true); // block align
-  view.setUint16(34, 16, true); // bits per sample
-  writeString(view, 36, "data");
-  view.setUint32(40, numSamples * 2, true);
-
-  // PCM samples (clamped to int16)
-  let offset = 44;
-  for (let i = 0; i < numSamples; i++) {
-    const s = Math.max(-1, Math.min(1, samples[i]));
-    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
-    offset += 2;
-  }
-
-  return buffer;
-}
-
-function writeString(view, offset, string) {
-  for (let i = 0; i < string.length; i++) {
-    view.setUint8(offset + i, string.charCodeAt(i));
-  }
+function ErrorPanel({ message, onRetry }) {
+  return (
+    <div className="bg-white border border-gray-100 rounded-xl shadow-md p-8 max-w-2xl mx-auto text-center">
+      <div
+        className="mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-3"
+        style={{ background: "#FEE3E3", color: "#A33" }}
+      >
+        <svg viewBox="0 0 20 20" width="22" height="22" fill="currentColor">
+          <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 5h2v6H9V5zm0 8h2v2H9v-2z" />
+        </svg>
+      </div>
+      <h2 className="text-base font-semibold text-gray-900 mb-1">
+        Something went wrong
+      </h2>
+      <p className="text-sm text-gray-600 mb-4">{message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="bg-primary text-white font-semibold rounded-md px-5 py-2 hover:bg-orange-500"
+      >
+        Try again
+      </button>
+    </div>
+  );
 }
