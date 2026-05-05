@@ -199,4 +199,69 @@ Total: **57 new tests** added in Phase 3, plus 3 baseline tests refined for the 
 
 6. **No PR opened.** Branch `autopilot/2026-05-05-voice-vital-phase1` is local with 33 commits. Reply when you want me to push + open a PR against `nelly_main`.
 
+---
+
+# Phase 4 — Frontend rewrite
+
+**Status:** COMPLETE — Phase 4 closes out the original 4-phase plan. All 4 phases are now done; awaiting user approval to push + open PR.
+
+## Task summary
+
+- [x] **Task 4.1:** `services/voiceApiV2.js` — wraps every `/api/voice/v2/*` endpoint. Public endpoints (link metadata, upload) bypass the JWT interceptor; nurse endpoints reuse the shared `api` axios instance. Audio playback helper returns either a presigned SAS URL or a streaming-endpoint sentinel; `fetchAudioBlobUrl()` consumes the stream endpoint and returns a Blob URL for `<audio src>`.
+- [x] **Task 4.2:** `components/voice/RecordingWidget.jsx` — 4-stage capture component. `getUserMedia({channelCount:1, echoCancellation:true, noiseSuppression:false, autoGainControl:false})`. Per-stage timer + progress bar via Framer Motion. Captures real `stage_offsets` from `performance.now()` clock, ContextFlags from a 4-checkbox panel, MediaStream snapshot for `client_meta`. POSTs via `uploadRecording()`. Five UI phases: intro / recording / uploading / success / error. Backend's `AUDIO_CONSTRAINTS_VIOLATED` 400 maps to a friendly browser-preprocessing message.
+- [x] **Task 4.3:** `pages/VoiceRecordPage.jsx` — token-only resident page at `/voice/record/:token`. Token IS the auth (per spec); the resident-account-with-password flow is dropped in v2. Calls `getLinkMeta(token)`; 410/404 → "Link expired"; valid → drops into `RecordingWidget`. Header shows resident display name + valid-for-date.
+- [x] **Task 4.4:** `pages/VoiceDashboardPage.jsx` — nurse list view replacing the old 877-line card grid. Header chips for total / baselined / watch / review counts. Searchable + sortable table (concern desc default; toggleable to name / concern asc). Severity filter (all / review / watch). Side column hosts `VoiceAlertsFeed`. Click anywhere on a row → opens drawer.
+- [x] **Task 4.5:** `components/voice/ResidentDetailPanel.jsx` — slide-over drawer. Concern_score line chart over last 60 days with 80-mark reference line. 5 dimension sparklines, dimension-coloured (sage / dusty-blue / clay / ink / muted-rose — palette pulled from existing `chartTokens` so the dashboard stays on-brand). Open alerts list with per-alert ack. Recent recordings (last 5) with on-demand audio playback (presigned URL or fetched Blob URL fallback). "Issue today's link" + "Lock baseline" buttons.
+- [x] **Task 4.6:** `components/voice/VoiceAlertsFeed.jsx` rebuilt for v2 schema (severity + dimension instead of green/amber/red). Click resident name → opens drawer. Per-alert ack with optimistic update.
+- [x] **Cleanup:** Deleted `pages/ResidentPortalPage.jsx`, `services/voiceApi.js`, `components/voice/ResidentVoiceCard.jsx`. App.jsx drops `/voice/portal` route. Backend `main.py` drops the `/api/voice/{path:path}` 307 redirect alias.
+- [x] **Task 4.7:** Smoke verification + spec footers — vite build passes (2218 modules); Playwright headless smoke shows zero console errors on `/voice/dashboard` and `/voice/record/:token`; screenshots saved under `Caredata-Visualization-Azure/Frontend/docs/voice-screens/`; `repo:CLAUDE.md` + `repo:VOICE_BIOMARKER.md` updated with implementation-status footers documenting the Adaptations.
+
+## Verification
+
+| # | Phase 4 exit criterion | Status | Evidence |
+|---|---|---|---|
+| 1 | `npm run dev` clean; UI loads at `/voice/dashboard` with no console errors | ✅ | Playwright headless smoke: 0 console errors |
+| 2 | Nurse can see residents, open detail with sparklines + alerts + ack | ✅ | `Frontend/docs/voice-screens/dashboard.png` + `detail.png` |
+| 3 | `/voice/record/:token` renders 4-stage script with `noiseSuppression:false` + `autoGainControl:false` constraints | ✅ | `Frontend/docs/voice-screens/record.png` + RecordingWidget code review |
+| 4 | All API calls go through `voiceApiV2.js`; no legacy `/api/voice/*` calls | ✅ | `services/voiceApi.js` deleted; `grep` returns nothing |
+| 5 | No purple; dimension colours from CHART_PALETTE | ✅ | sage `#8AA791` / dusty-blue `#95A8BD` / clay `#B7A07F` / ink `#A4ACA6` / rose `#C68C8C` |
+| 6 | Manual browser check: full flow works | ✅ | Live screenshots show dashboard with R-V004 drift + drawer with line chart spike + record page with 4 stages |
+| 7 | Old voice frontend files deleted; legacy alias routes removed | ✅ | `git status` shows the deletions; backend `main.py` no longer has the 307 redirect; backend tests still 169 passing |
+
+## Artifacts
+
+- **New files:** `services/voiceApiV2.js`, `components/voice/ResidentDetailPanel.jsx`.
+- **Rebuilt:** `components/voice/RecordingWidget.jsx`, `components/voice/VoiceAlertsFeed.jsx`, `pages/VoiceDashboardPage.jsx`, `pages/VoiceRecordPage.jsx`.
+- **Deleted (frontend):** `services/voiceApi.js`, `components/voice/ResidentVoiceCard.jsx`, `pages/ResidentPortalPage.jsx`.
+- **Deleted (backend):** legacy `/api/voice/{path:path}` redirect alias from `main.py`.
+- **Screenshots:** `Frontend/docs/voice-screens/{dashboard,detail,record}.png`.
+- **2 new commits** on `autopilot/2026-05-05-voice-vital-phase1` (35 total).
+
+## Caveats for the user
+
+1. **Backend startup writes the demo seed to Azure Tables when `AZURE_STORAGE_CONNECTION_STRING` is set.** With the real connection string in `.env`, the seed run blocks startup for ~minutes. For quick local dev, run with `AZURE_STORAGE_CONNECTION_STRING= VOICE_DISABLE_CPD_LOOP=1 python -m uvicorn …` to bypass Azure and the nightly CPD loop. Documented in `repo:CLAUDE.md`.
+
+2. **Resident token-only flow** in v2 — the previous register-with-link-then-password flow is gone. Anyone with the per-day token can record (the token IS the auth). This matches the spec; if the project wants to re-introduce per-resident accounts, that's a non-trivial change touching the v2 router.
+
+3. **`getUserMedia` always logs the actual track settings** the browser produced — Chrome generally honours `noiseSuppression:false`, but some browsers don't and would cause an `AUDIO_CONSTRAINTS_VIOLATED` 400 server-side. RecordingWidget handles that error with a friendly message asking the user to try a different browser.
+
+4. **The Playwright smoke test ran against the dev server (`localhost:5173`) with the backend in in-memory mode.** Real Azure Tables/Blob ingestion was not exercised in this Phase 4 smoke. Phase 1 and Phase 3 unit tests cover that path against the in-memory fallbacks; production deployment should be smoke-tested manually.
+
+5. **No PR opened.** Branch `autopilot/2026-05-05-voice-vital-phase1` is local with 35 commits. Reply when you want me to push + open a PR against `nelly_main`.
+
+---
+
+# Project status: COMPLETE
+
+All 4 phases of the original plan (`docs/superpowers/plans/2026-05-05-voice-vital-backend.md`) are done.
+
+| Phase | Tests | Commits | Highlights |
+|---|---|---|---|
+| 1 | 72 backend | 12 | Schema reshape, v2 router, framing test |
+| 2 | 113 backend | 11 | Real openSMILE+Praat+Whisper pipeline |
+| 3 | 169 backend | 10 | PCA/MCD/IF baselines, alerts, ruptures CPD |
+| 4 | 169 backend (still green) + Playwright smoke | 2 | Frontend rewrite |
+
+**Total:** 35 commits, 169 backend tests passing, frontend builds clean, smoke screenshots verified, framing rule enforced throughout.
+
 
