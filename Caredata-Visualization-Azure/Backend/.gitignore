@@ -28,3 +28,10 @@ dist/
 # Local databases
 *.db
 *.sqlite3
+
+# Voice biomarker model cache (downloaded by scripts/download_voice_models.py)
+models/
+voice_uploads/
+
+# Pytest
+.pytest_cache/
