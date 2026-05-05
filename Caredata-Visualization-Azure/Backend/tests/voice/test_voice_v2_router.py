@@ -247,7 +247,7 @@ def test_issue_link_is_idempotent_per_date(seeded_resident, client, nurse_token)
 # ---------------------------------------------------------------------------
 
 
-def test_lock_baseline_phase1_stub_returns_insufficient_recordings(
+def test_lock_baseline_409_when_no_features_yet(
     seeded_resident, client, nurse_token
 ):
     r = client.post(
@@ -257,6 +257,40 @@ def test_lock_baseline_phase1_stub_returns_insufficient_recordings(
     assert r.status_code == 409
     body = r.json()
     assert body["detail"]["code"] == "INSUFFICIENT_RECORDINGS"
+
+
+def test_lock_baseline_succeeds_with_enough_features(
+    seeded_resident, client, nurse_token
+):
+    """Seed 12 synthetic feature rows for the resident, then lock."""
+    from app.services import voice_features_db
+    from tests.voice.test_voice_baseline import _synthetic_features
+
+    profile_id = seeded_resident["profile_id"]
+    for i in range(12):
+        voice_features_db.create_features(
+            profile_id=profile_id,
+            recording_id=f"rec-{i}",
+            features=_synthetic_features(i),
+        )
+
+    r = client.post(
+        "/api/voice/v2/n/residents/R1/lock-baseline",
+        headers={"Authorization": f"Bearer {nurse_token}"},
+    )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["baseline_locked"] is True
+    assert body["version"] == 1
+    assert body["baseline_blob_uri"]
+    assert body["recordings_used"] == 10  # BASELINE_RECORDINGS_REQUIRED
+
+    # Profile flagged
+    from app.services import voice_profile_db
+    p = voice_profile_db.get_by_resident_id("R1")
+    assert p["baseline_locked_at"]
+    assert p["baseline_version"] == 1
+    assert p["baseline_blob_uri"]
 
 
 # ---------------------------------------------------------------------------

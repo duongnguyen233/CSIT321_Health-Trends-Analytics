@@ -150,3 +150,29 @@ def get_features(profile_id: str, recording_id: str) -> dict | None:
             return None
     rec = _in_memory.get(profile_id, {}).get(recording_id)
     return dict(rec) if rec else None
+
+
+def list_features(profile_id: str, *, limit: int | None = None) -> list[dict]:
+    """Return all stored features for a profile, oldest first.
+
+    Phase 3 baseline fitting consumes the oldest N recordings; ordering by
+    `extracted_at` ascending makes the deterministic-input contract explicit.
+    """
+    table = _get_table()
+    if table:
+        try:
+            entities = list(
+                table.query_entities(
+                    query_filter=f"PartitionKey eq '{_partition(profile_id)}'"
+                )
+            )
+            items = [_entity_to_dict(e) for e in entities]
+        except Exception as e:
+            logger.warning("list_features: %s", e)
+            return []
+    else:
+        items = [dict(r) for r in _in_memory.get(profile_id, {}).values()]
+    items.sort(key=lambda x: x.get("extracted_at") or "")
+    if limit is not None:
+        items = items[:limit]
+    return items

@@ -44,6 +44,10 @@ def _entity_to_dict(e: dict) -> dict:
         "baseline_recording_count": e.get("baseline_recording_count", 0),
         "last_recording_date": e.get("last_recording_date"),
         "created_at": e.get("created_at"),
+        # Phase 3 baseline fields
+        "baseline_locked_at": e.get("baseline_locked_at"),
+        "baseline_version": e.get("baseline_version", 0),
+        "baseline_blob_uri": e.get("baseline_blob_uri") or e.get("baseline_blob_key"),
     }
 
 

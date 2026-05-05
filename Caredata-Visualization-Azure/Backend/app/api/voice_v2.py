@@ -46,6 +46,7 @@ from app.core.config import settings
 from app.services import (
     voice_analysis_db,
     voice_audio_blob,
+    voice_baseline,
     voice_features_db,
     voice_link_db,
     voice_profile_db,
@@ -323,7 +324,11 @@ def lock_baseline(
     profile = voice_profile_db.get_by_resident_id(resident_id)
     if profile is None:
         raise HTTPException(404, "resident profile not found")
-    have = len(voice_recording_db.list_recordings(profile["profile_id"]))
+
+    # Use *features* (not just recordings) — only recordings that completed
+    # the pipeline have feature dicts and can feed PCA/MCD/IF.
+    feature_rows = voice_features_db.list_features(profile["profile_id"])
+    have = len(feature_rows)
     if have < BASELINE_RECORDINGS_REQUIRED:
         raise HTTPException(
             status_code=409,
@@ -333,12 +338,41 @@ def lock_baseline(
                 "need": BASELINE_RECORDINGS_REQUIRED,
             },
         )
-    # Phase 3 lands the real fit. Phase 1 just acknowledges that we *would*.
+
+    # Take the oldest BASELINE_RECORDINGS_REQUIRED features so the lock is
+    # deterministic regardless of when the nurse hits the button.
+    enrolment = feature_rows[:BASELINE_RECORDINGS_REQUIRED]
+
+    try:
+        bundle = voice_baseline.fit_baseline(enrolment)
+    except ValueError as e:
+        raise HTTPException(409, {"code": "FIT_FAILED", "detail": str(e)})
+
+    next_version = int(profile.get("baseline_version") or 0) + 1
+    bundle["version"] = next_version
+    blob_uri = voice_baseline.save_baseline(
+        profile["profile_id"], next_version, bundle
+    )
+
+    locked_at = datetime.now(timezone.utc).isoformat()
+    voice_profile_db.update_profile(profile["profile_id"], {
+        "baseline_locked_at": locked_at,
+        "baseline_version": next_version,
+        "baseline_blob_uri": blob_uri,
+        "baseline_blob_key": blob_uri,  # back-compat with the spec field name
+    })
+
+    logger.info(
+        "baseline locked profile_id=%s version=%d uri=%s recordings=%d",
+        profile["profile_id"], next_version, blob_uri, len(enrolment),
+    )
+
     return {
-        "baseline_locked": False,
-        "reason": "phase_1_stub",
-        "recordings_have": have,
-        "recordings_need": BASELINE_RECORDINGS_REQUIRED,
+        "baseline_locked": True,
+        "version": next_version,
+        "baseline_blob_uri": blob_uri,
+        "locked_at": locked_at,
+        "recordings_used": len(enrolment),
     }
 
 
