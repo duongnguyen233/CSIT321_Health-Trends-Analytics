@@ -860,3 +860,40 @@ This mirrors the build plan but is reframed as backend tasks.
 ---
 
 *End of CLAUDE.md. Update this file in every PR that changes the contract.*
+
+---
+
+## Implementation status (2026-05-05)
+
+This document is the **philosophy + spec**, not the implemented contract. The Caredata Voice Biomarker tab was rebuilt against this spec across Phases 1-4 of the autopilot run; the in-tree plan + per-phase logs live at:
+
+- `docs/superpowers/plans/2026-05-05-voice-vital-backend.md` — plan + Adaptations table
+- `docs/superpowers/logs/2026-05-05-voice-vital-phase1.md` — full per-phase log
+
+### Adaptations applied (binding — these override the spec where they conflict)
+
+| Spec says | Project did | Why |
+|---|---|---|
+| Postgres + Alembic + JSONB | Azure Table Storage with in-memory fallback | Project's existing data layer; no new infra |
+| arq + Redis worker | FastAPI `BackgroundTasks` | Same reason |
+| WavLM-base ONNX (1670-d feature vector) | **Skipped** — score vector is eGeMAPS+Praat+linguistic+DDK ≈ 108-d | Too heavy for current backend host; eGeMAPS+Praat carry the dominant signal |
+| Container Apps + Bicep | Existing SWA + backend deployment | Out of scope |
+| `arq.cron` for nightly CPD | `asyncio.create_task` loop scheduled at FastAPI startup | No queue; built-in scheduling acceptable for MVP |
+| Resident token-only flow | Resident token-only flow (Phase 4 cutover) | Spec |
+
+### Implemented contract (the in-tree truth — see `repo:Caredata-Visualization-Azure/Backend/app/api/voice_v2.py`)
+
+- `GET  /api/voice/v2/r/{token}` — link metadata (public)
+- `POST /api/voice/v2/upload` — multipart with `token` + `audio` + `stage_offsets` + `context_flags` + `client_meta`; rejects 400 `AUDIO_CONSTRAINTS_VIOLATED` if `noise_suppression!==false` or `auto_gain_control!==false`
+- `POST /api/voice/v2/n/residents/{id}/issue-link?date=...` — idempotent per (resident, date)
+- `POST /api/voice/v2/n/residents/{id}/lock-baseline` — fits PCA(<=32)+MinCovDet+IsolationForest, persists joblib bundle to Azure Blob `model-artifacts/residents/{profile_id}/baseline_v{n}.joblib`
+- `GET  /api/voice/v2/n/residents` — list with last-5 scores + latest open alert
+- `GET  /api/voice/v2/n/residents/{id}/scores?days=60`
+- `GET  /api/voice/v2/n/residents/{id}/recordings/{rid}/audio` — presigned SAS URL or stream sentinel
+- `GET  /api/voice/v2/n/residents/{id}/recordings/{rid}/stream` — direct stream fallback
+- `GET  /api/voice/v2/n/alerts?status=open|all&limit=&cursor=` — paginated dim-alerts
+- `POST /api/voice/v2/n/alerts/{id}/ack`
+
+### Hard rule: no disease names
+
+`tests/voice/test_framing.py` scans every `app/api/voice*.py` and `app/services/voice_*.py` for forbidden neurological/psychiatric labels and fails the suite if any appear. Lines that legitimately need to mention a disclaimer can opt-out via the `# FRAMING_OK` marker.
