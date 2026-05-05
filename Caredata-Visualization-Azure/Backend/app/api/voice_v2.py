@@ -55,6 +55,7 @@ from app.services import (
 )
 from app.services.jwt_auth import get_current_user
 from app.services.voice_processor_v2 import LowSnrError, extract_all
+from app.services.voice_score import score_recording
 
 
 router = APIRouter(prefix="/api/voice/v2", tags=["Voice Biomarker v2"])
@@ -251,6 +252,50 @@ def _process_recording_v2(recording_id: str, profile_id: str) -> None:
         voice_recording_db.set_quality_metrics(
             profile_id, recording_id, snr_db=features.get("snr_db"),
         )
+
+        # Score against baseline if locked. Without a baseline we still
+        # write a placeholder Score row with concern_score=0 so the
+        # time-series charts on the dashboard have continuity.
+        profile = voice_profile_db.get_by_id(profile_id) or {}
+        baseline_uri = profile.get("baseline_blob_uri")
+        if baseline_uri:
+            try:
+                from app.services import voice_baseline
+
+                baseline = voice_baseline.load_baseline(baseline_uri)
+                if baseline is not None:
+                    score = score_recording(features, baseline)
+                    voice_score_db.create_score(
+                        profile_id=profile_id,
+                        recording_id=recording_id,
+                        concern_score=score["concern_score"],
+                        subscores=score["subscores"],
+                        mahalanobis=score["mahalanobis"],
+                        iforest=score["iforest"],
+                        feature_deltas=score["feature_deltas"],
+                    )
+                else:
+                    logger.warning(
+                        "baseline_blob_uri present but load failed profile_id=%s",
+                        profile_id,
+                    )
+            except Exception:
+                logger.exception(
+                    "scoring failed recording_id=%s profile_id=%s",
+                    recording_id, profile_id,
+                )
+        else:
+            # Pre-baseline enrolment recording — placeholder zero score
+            voice_score_db.create_score(
+                profile_id=profile_id,
+                recording_id=recording_id,
+                concern_score=0.0,
+                subscores={
+                    "phonatory": 0.0, "articulatory": 0.0, "prosodic": 0.0,
+                    "respiratory": 0.0, "linguistic": 0.0,
+                },
+            )
+
         voice_recording_db.update_status(profile_id, recording_id, "done")
         logger.info(
             "v2 pipeline done recording_id=%s profile_id=%s snr=%.2f",
