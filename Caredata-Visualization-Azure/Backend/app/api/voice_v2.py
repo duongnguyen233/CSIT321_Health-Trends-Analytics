@@ -54,6 +54,7 @@ from app.services import (
     voice_score_db,
 )
 from app.services.jwt_auth import get_current_user
+from app.services.voice_alerts import evaluate_alerts
 from app.services.voice_processor_v2 import LowSnrError, extract_all
 from app.services.voice_score import score_recording
 
@@ -201,6 +202,52 @@ async def upload(
 # ---------------------------------------------------------------------------
 
 
+def _evaluate_and_persist_alerts(
+    *,
+    profile_id: str,
+    resident_id: str,
+    recording_id: str,
+    today_score: dict,
+    today_context_flags: dict,
+) -> None:
+    """Pull recent history, evaluate alert rules, persist any non-suppressed alerts."""
+    history_scores = voice_score_db.list_scores(profile_id, limit=4)
+    # The latest score in list_scores is *this* recording (just inserted) —
+    # filter it out so `history` is strictly prior recordings.
+    history = [s for s in history_scores if s.get("recording_id") != recording_id][:3]
+
+    history_flags: list[dict] = []
+    for s in history:
+        rec = voice_recording_db.get_recording(profile_id, s.get("recording_id") or "")
+        history_flags.append((rec or {}).get("context_flags") or {})
+
+    candidates = evaluate_alerts(
+        today_score=today_score,
+        history=history,
+        today_context_flags=today_context_flags,
+        history_context_flags=history_flags,
+    )
+    for cand in candidates:
+        if cand.suppressed:
+            logger.info(
+                "alert suppressed profile_id=%s severity=%s dimension=%s reason=%s",
+                profile_id, cand.severity, cand.dimension, cand.suppression_reason,
+            )
+            continue
+        voice_analysis_db.create_dim_alert(
+            profile_id=profile_id,
+            resident_id=resident_id,
+            recording_id=recording_id,
+            severity=cand.severity,
+            dimension=cand.dimension,
+            summary=cand.summary,
+        )
+        logger.info(
+            "alert created profile_id=%s severity=%s dimension=%s",
+            profile_id, cand.severity, cand.dimension,
+        )
+
+
 def _process_recording_v2(recording_id: str, profile_id: str) -> None:
     """Phase 2 pipeline runner.
 
@@ -273,6 +320,13 @@ def _process_recording_v2(recording_id: str, profile_id: str) -> None:
                         mahalanobis=score["mahalanobis"],
                         iforest=score["iforest"],
                         feature_deltas=score["feature_deltas"],
+                    )
+                    _evaluate_and_persist_alerts(
+                        profile_id=profile_id,
+                        resident_id=profile.get("resident_id") or "",
+                        recording_id=recording_id,
+                        today_score=score | {"recording_id": recording_id},
+                        today_context_flags=rec.get("context_flags") or {},
                     )
                 else:
                     logger.warning(
