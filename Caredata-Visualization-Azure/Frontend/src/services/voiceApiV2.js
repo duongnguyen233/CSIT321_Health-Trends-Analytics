@@ -93,6 +93,20 @@ export async function listResidents() {
 }
 
 
+/**
+ * Create a voice profile for a new resident. Idempotent — calling with an
+ * existing resident_id returns the existing profile with 200 instead of 201.
+ */
+export async function createResident({ resident_id, display_name, facility_id = "default" }) {
+  const res = await api.post("/api/voice/v2/n/residents", {
+    resident_id,
+    display_name,
+    facility_id,
+  });
+  return res.data; // profile dict
+}
+
+
 export async function getScores(residentId, days = 60) {
   const res = await api.get(
     `/api/voice/v2/n/residents/${encodeURIComponent(residentId)}/scores`,

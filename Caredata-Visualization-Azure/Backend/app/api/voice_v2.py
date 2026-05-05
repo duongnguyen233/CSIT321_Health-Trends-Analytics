@@ -30,9 +30,10 @@ from fastapi import (
     Form,
     HTTPException,
     Query,
+    Response,
     UploadFile,
 )
-from pydantic import ValidationError
+from pydantic import BaseModel, Field, ValidationError
 
 from app.api.voice_prompts import get_script
 from app.api.voice_schemas import (
@@ -361,6 +362,47 @@ def _process_recording_v2(recording_id: str, profile_id: str) -> None:
             recording_id, profile_id,
         )
         voice_recording_db.update_status(profile_id, recording_id, "failed")
+
+
+# ---------------------------------------------------------------------------
+# Nurse — create resident (voice profile)
+# ---------------------------------------------------------------------------
+
+
+class CreateResidentBody(BaseModel):
+    resident_id: str = Field(min_length=1, max_length=64)
+    display_name: str = Field(min_length=1, max_length=128)
+    facility_id: str = "default"
+
+
+@router.post("/n/residents", status_code=201)
+def create_resident_for_voice(
+    body: CreateResidentBody,
+    response: Response,
+    current_user: dict = Depends(get_current_user),
+):
+    """Create a voice profile for a new resident.
+
+    Idempotent on `resident_id` — if a profile already exists, returns it
+    with 200 instead of 201 so the nurse can re-add an existing resident
+    without an error. The v2 token-only flow doesn't need a password, so
+    the profile is created with an empty password hash.
+    """
+    existing = voice_profile_db.get_by_resident_id(body.resident_id)
+    if existing is not None:
+        response.status_code = 200
+        return existing
+
+    profile = voice_profile_db.create_profile(
+        resident_id=body.resident_id,
+        facility_id=body.facility_id,
+        display_name=body.display_name,
+    )
+    logger.info(
+        "voice profile created resident_id=%s facility=%s by=%s",
+        body.resident_id, body.facility_id, current_user.get("sub", ""),
+    )
+    return profile
 
 
 # ---------------------------------------------------------------------------

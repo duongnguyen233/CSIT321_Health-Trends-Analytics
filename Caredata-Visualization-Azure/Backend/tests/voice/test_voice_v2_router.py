@@ -212,6 +212,58 @@ def test_upload_404_when_resident_profile_missing(client):
 # ---------------------------------------------------------------------------
 
 
+def test_create_resident_creates_profile(client, nurse_token):
+    r = client.post(
+        "/api/voice/v2/n/residents",
+        headers={"Authorization": f"Bearer {nurse_token}"},
+        json={"resident_id": "R-NEW", "display_name": "New Resident"},
+    )
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["resident_id"] == "R-NEW"
+    assert body["display_name"] == "New Resident"
+    assert "profile_id" in body
+
+
+def test_create_resident_is_idempotent_returning_existing_profile(
+    seeded_resident, client, nurse_token
+):
+    """Re-adding an existing resident_id returns the existing profile, not 201."""
+    r = client.post(
+        "/api/voice/v2/n/residents",
+        headers={"Authorization": f"Bearer {nurse_token}"},
+        json={"resident_id": "R1", "display_name": "Margaret Test"},
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body["profile_id"] == seeded_resident["profile_id"]
+
+
+def test_create_resident_requires_nurse_jwt(client):
+    r = client.post(
+        "/api/voice/v2/n/residents",
+        json={"resident_id": "R-X", "display_name": "Anon"},
+    )
+    assert r.status_code == 401
+
+
+def test_create_resident_then_issue_link_succeeds(client, nurse_token):
+    """End-to-end: nurse adds a brand-new resident, then issues a link."""
+    create = client.post(
+        "/api/voice/v2/n/residents",
+        headers={"Authorization": f"Bearer {nurse_token}"},
+        json={"resident_id": "R-FRESH", "display_name": "Fresh Resident"},
+    )
+    assert create.status_code == 201
+
+    issue = client.post(
+        "/api/voice/v2/n/residents/R-FRESH/issue-link?date=2026-05-06",
+        headers={"Authorization": f"Bearer {nurse_token}"},
+    )
+    assert issue.status_code == 200
+    assert "token" in issue.json()
+
+
 def test_issue_link_requires_nurse_jwt(seeded_resident, client):
     r = client.post("/api/voice/v2/n/residents/R1/issue-link?date=2026-05-06")
     assert r.status_code == 401

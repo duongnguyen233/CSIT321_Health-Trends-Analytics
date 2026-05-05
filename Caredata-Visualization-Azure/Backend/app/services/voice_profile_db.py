@@ -55,10 +55,15 @@ def create_profile(
     resident_id: str,
     facility_id: str,
     display_name: str,
-    password_hash: str,
+    password_hash: str = "",
     consent_status: str = "active",
 ) -> dict:
-    """Create a new resident voice profile. Returns profile dict."""
+    """Create a new resident voice profile. Returns profile dict.
+
+    `password_hash` defaults to empty for v2 token-only enrolment; legacy
+    callers may continue to pass a real bcrypt hash for the v1 resident-
+    portal flow.
+    """
     profile_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
     entity = {

@@ -8,7 +8,11 @@
  */
 import { useEffect, useState } from "react";
 
-import { buildRecordLinkUrl, issueLink } from "../../services/voiceApiV2";
+import {
+  buildRecordLinkUrl,
+  createResident,
+  issueLink,
+} from "../../services/voiceApiV2";
 
 
 function todayIso() {
@@ -22,11 +26,24 @@ export default function IssueLinksDialog({
   onClose,
   onIssued,
 }) {
+  const [residentList, setResidentList] = useState(residents);
   const [selected, setSelected] = useState(() => new Set(preselect));
   const [targetDate, setTargetDate] = useState(todayIso());
   const [issued, setIssued] = useState([]); // [{resident_id, display_name, url}]
   const [issuing, setIssuing] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+
+  // Inline "add new resident" form state
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newResidentId, setNewResidentId] = useState("");
+  const [newDisplayName, setNewDisplayName] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState(null);
+
+  // Keep local list in sync if parent reloads
+  useEffect(() => {
+    setResidentList(residents);
+  }, [residents]);
 
   // Esc-to-close
   useEffect(() => {
@@ -45,11 +62,58 @@ export default function IssueLinksDialog({
   }
 
   function selectAll() {
-    setSelected(new Set(residents.map((r) => r.resident_id)));
+    setSelected(new Set(residentList.map((r) => r.resident_id)));
   }
 
   function clearAll() {
     setSelected(new Set());
+  }
+
+  async function handleAddResident(e) {
+    e?.preventDefault?.();
+    const rid = newResidentId.trim();
+    const name = newDisplayName.trim();
+    if (!rid || !name) {
+      setAddError("Please enter both an ID and a display name.");
+      return;
+    }
+    setAdding(true);
+    setAddError(null);
+    try {
+      const profile = await createResident({
+        resident_id: rid,
+        display_name: name,
+      });
+      // Insert (or replace) in the local list
+      const next = residentList.filter(
+        (r) => r.resident_id !== profile.resident_id
+      );
+      next.unshift({
+        profile_id: profile.profile_id,
+        resident_id: profile.resident_id,
+        display_name: profile.display_name,
+        baseline_locked_at: null,
+        baseline_version: 0,
+        last_recording_date: null,
+        latest_concern_score: null,
+        latest_subscores: null,
+      });
+      setResidentList(next);
+      // Auto-select
+      const nextSelected = new Set(selected);
+      nextSelected.add(profile.resident_id);
+      setSelected(nextSelected);
+      // Reset form
+      setNewResidentId("");
+      setNewDisplayName("");
+      setShowAddForm(false);
+      // Tell parent to reload its master list
+      onIssued?.();
+    } catch (err) {
+      setAddError(err?.response?.data?.detail || err?.message || "Failed to add resident.");
+    } finally {
+      setAdding(false);
+    }
   }
 
   async function handleIssue() {
@@ -59,7 +123,7 @@ export default function IssueLinksDialog({
     const out = [];
     try {
       for (const rid of selected) {
-        const r = residents.find((x) => x.resident_id === rid);
+        const r = residentList.find((x) => x.resident_id === rid);
         const link = await issueLink(rid, targetDate);
         out.push({
           resident_id: rid,
@@ -190,10 +254,140 @@ export default function IssueLinksDialog({
                 </span>
               </div>
 
+              {/* New-resident inline form */}
+              {showAddForm ? (
+                <form
+                  onSubmit={handleAddResident}
+                  style={{
+                    background: "var(--bg-sage-tint)",
+                    border: "1px solid var(--line-soft)",
+                    borderRadius: 12,
+                    padding: 12,
+                    marginBottom: 10,
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                      color: "var(--sage-ink)",
+                      marginBottom: 6,
+                    }}
+                  >
+                    Add a new resident
+                  </p>
+                  <div className="flex flex-wrap gap-2 items-end">
+                    <label className="flex-1 min-w-[140px]">
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: "var(--ink-700)",
+                          fontWeight: 500,
+                          display: "block",
+                          marginBottom: 4,
+                        }}
+                      >
+                        Resident ID
+                      </span>
+                      <input
+                        type="text"
+                        value={newResidentId}
+                        onChange={(e) => setNewResidentId(e.target.value)}
+                        autoFocus
+                        placeholder="e.g. R-V005"
+                        style={{
+                          background: "var(--bg-white)",
+                          border: "1px solid var(--line)",
+                          borderRadius: 8,
+                          padding: "7px 10px",
+                          fontSize: 13,
+                          color: "var(--ink-900)",
+                          width: "100%",
+                        }}
+                      />
+                    </label>
+                    <label className="flex-1 min-w-[160px]">
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: "var(--ink-700)",
+                          fontWeight: 500,
+                          display: "block",
+                          marginBottom: 4,
+                        }}
+                      >
+                        Display name
+                      </span>
+                      <input
+                        type="text"
+                        value={newDisplayName}
+                        onChange={(e) => setNewDisplayName(e.target.value)}
+                        placeholder="e.g. Joan Wilson"
+                        style={{
+                          background: "var(--bg-white)",
+                          border: "1px solid var(--line)",
+                          borderRadius: 8,
+                          padding: "7px 10px",
+                          fontSize: 13,
+                          color: "var(--ink-900)",
+                          width: "100%",
+                        }}
+                      />
+                    </label>
+                    <button
+                      type="submit"
+                      disabled={adding}
+                      className="cd-btn cd-btn-primary"
+                      style={{ fontSize: 12, padding: "7px 12px" }}
+                    >
+                      {adding ? "Adding…" : "Add"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAddForm(false);
+                        setAddError(null);
+                      }}
+                      className="cd-btn cd-btn-ghost"
+                      style={{ fontSize: 12, padding: "7px 12px" }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  {addError && (
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: "#7A2424",
+                        marginTop: 6,
+                      }}
+                    >
+                      {addError}
+                    </div>
+                  )}
+                </form>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(true)}
+                  className="cd-btn cd-btn-soft mb-2"
+                  style={{
+                    fontSize: 12,
+                    padding: "7px 12px",
+                    width: "100%",
+                    justifyContent: "center",
+                  }}
+                >
+                  + Add a new resident
+                </button>
+              )}
+
               {/* Select-all toolbar */}
               <div className="flex items-center justify-between mb-2">
                 <span style={{ fontSize: 12, color: "var(--ink-500)" }}>
-                  {selected.size} of {residents.length} selected
+                  {selected.size} of {residentList.length} selected
                 </span>
                 <div className="flex gap-2">
                   <button
@@ -230,7 +424,7 @@ export default function IssueLinksDialog({
                   overflow: "hidden",
                 }}
               >
-                {residents.length === 0 && (
+                {residentList.length === 0 && (
                   <li
                     style={{
                       padding: 16,
@@ -242,7 +436,7 @@ export default function IssueLinksDialog({
                     No residents yet.
                   </li>
                 )}
-                {residents.map((r) => {
+                {residentList.map((r) => {
                   const checked = selected.has(r.resident_id);
                   return (
                     <li
