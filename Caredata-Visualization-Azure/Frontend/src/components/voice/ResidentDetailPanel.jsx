@@ -1,15 +1,7 @@
 /**
  * ResidentDetailPanel — slide-over drawer for a single resident.
- *
- * Renders:
- *  - concern_score line chart (Recharts) over the last `days` window
- *  - 5 small sub-score sparklines, one per dimension, dimension-coloured
- *  - recent recordings list with audio playback (presigned URL or
- *    Blob-URL streaming fallback)
- *  - alerts list with ack button
- *  - Lock-baseline button (disabled until 10+ feature rows exist —
- *    we proxy this off recordings count for the dashboard, the backend
- *    enforces the real check)
+ * Styled to match the Caredata design system (cream + paper surfaces,
+ * sage/clay tints, cd-btn utilities, Instrument Serif headings).
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -34,14 +26,20 @@ import {
 } from "../../services/voiceApiV2";
 
 
-// Dimension colours pulled from chartTokens palette so we don't introduce
-// new colour-tokens here. Mapping is stable across charts.
 const DIMENSION_COLOURS = {
-  phonatory: "#8AA791",     // sage-ink — vocal quality
-  articulatory: "#95A8BD",  // dusty-blue — speech clarity
-  prosodic: "#B7A07F",      // clay — speech rhythm
-  respiratory: "#A4ACA6",   // ink — breath support
-  linguistic: "#C68C8C",    // muted rose — language fluency
+  phonatory: "var(--sage)",
+  articulatory: "#95A8BD",
+  prosodic: "var(--clay)",
+  respiratory: "#A4ACA6",
+  linguistic: "#C68C8C",
+};
+
+const DIMENSION_HEX = {
+  phonatory: "#8AA791",
+  articulatory: "#95A8BD",
+  prosodic: "#B7A07F",
+  respiratory: "#A4ACA6",
+  linguistic: "#C68C8C",
 };
 
 const DIMENSION_LABELS = {
@@ -55,7 +53,12 @@ const DIMENSION_LABELS = {
 const DIMENSIONS = ["phonatory", "articulatory", "prosodic", "respiratory", "linguistic"];
 
 
-export default function ResidentDetailPanel({ resident, onClose, onAckedAlert, onBaselineLocked }) {
+export default function ResidentDetailPanel({
+  resident,
+  onClose,
+  onAckedAlert,
+  onBaselineLocked,
+}) {
   const [scoresPayload, setScoresPayload] = useState({ scores: [] });
   const [alertsPayload, setAlertsPayload] = useState({ alerts: [] });
   const [issuingLink, setIssuingLink] = useState(false);
@@ -73,9 +76,10 @@ export default function ResidentDetailPanel({ resident, onClose, onAckedAlert, o
         ]);
         if (!cancelled) {
           setScoresPayload(s);
-          // Filter to this resident only
           const my = (a.alerts || []).filter(
-            (x) => x.profile_id === resident.profile_id || x.resident_id === resident.resident_id
+            (x) =>
+              x.profile_id === resident.profile_id ||
+              x.resident_id === resident.resident_id
           );
           setAlertsPayload({ alerts: my });
         }
@@ -89,7 +93,6 @@ export default function ResidentDetailPanel({ resident, onClose, onAckedAlert, o
     };
   }, [resident.resident_id, resident.profile_id]);
 
-  // Sort scores by scored_at ascending for charts
   const series = useMemo(() => {
     const arr = (scoresPayload.scores || []).slice();
     arr.sort((a, b) => (a.scored_at || "").localeCompare(b.scored_at || ""));
@@ -161,48 +164,82 @@ export default function ResidentDetailPanel({ resident, onClose, onAckedAlert, o
       className="fixed inset-0 z-50 flex"
       role="dialog"
       aria-label="Resident detail"
+      style={{ background: "rgba(31, 38, 34, 0.4)" }}
     >
-      {/* backdrop */}
       <button
         type="button"
         onClick={onClose}
-        className="flex-1 bg-black/30"
+        className="flex-1"
         aria-label="Close"
+        style={{ background: "transparent" }}
       />
-      {/* drawer */}
       <aside
-        className="w-full max-w-2xl bg-white h-full overflow-y-auto shadow-xl"
-        style={{ borderLeft: "1px solid var(--line)" }}
+        className="w-full max-w-2xl h-full overflow-y-auto"
+        style={{
+          background: "var(--bg-cream)",
+          borderLeft: "1px solid var(--line)",
+          boxShadow: "var(--shadow-sm)",
+        }}
       >
-        <div className="px-6 py-5 border-b border-gray-100 flex items-start justify-between gap-4">
+        {/* Header */}
+        <div
+          className="flex items-start justify-between gap-4 sticky top-0 z-10"
+          style={{
+            background: "var(--bg-cream)",
+            padding: "20px 24px 16px",
+            borderBottom: "1px solid var(--line-soft)",
+          }}
+        >
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <span className="cd-chip mb-2">
+              <span className="dot" />
+              Resident · {resident.resident_id}
+            </span>
+            <h2
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: 26,
+                letterSpacing: "-0.01em",
+                color: "var(--ink-900)",
+                lineHeight: 1.15,
+                marginTop: 6,
+              }}
+            >
               {resident.display_name}
             </h2>
-            <div className="text-xs text-gray-500 mt-0.5">
-              ID: {resident.resident_id}
+            <div style={{ fontSize: 12, color: "var(--ink-500)", marginTop: 4 }}>
               {baselineLocked
-                ? ` · Baseline v${resident.baseline_version}`
-                : " · No baseline yet"}
+                ? `Baseline locked v${resident.baseline_version} · ${
+                    resident.baseline_locked_at?.slice(0, 10) || ""
+                  }`
+                : "No baseline yet"}
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-900 text-xl leading-none px-2"
+            aria-label="Close"
+            style={{
+              background: "transparent",
+              fontSize: 22,
+              lineHeight: 1,
+              color: "var(--ink-500)",
+              padding: "0 4px",
+            }}
           >
             ×
           </button>
         </div>
 
-        <div className="px-6 py-5 space-y-6">
+        <div style={{ padding: "20px 24px" }} className="space-y-6">
           {/* Action row */}
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={handleIssueLink}
               disabled={issuingLink}
-              className="bg-primary text-white text-sm font-semibold rounded-md px-4 py-2 hover:bg-orange-500 disabled:opacity-50"
+              className="cd-btn cd-btn-primary"
+              style={{ fontSize: 13 }}
             >
               {issuingLink ? "Issuing…" : "Issue today's link"}
             </button>
@@ -215,11 +252,10 @@ export default function ResidentDetailPanel({ resident, onClose, onAckedAlert, o
                   ? "Baseline already locked"
                   : `Requires 10+ scored recordings (currently ${recordingCount})`
               }
-              className="text-sm font-semibold rounded-md px-4 py-2 disabled:opacity-50"
+              className="cd-btn cd-btn-soft"
               style={{
-                background: "var(--bg-cream)",
-                color: "var(--ink-900)",
-                border: "1px solid var(--line)",
+                fontSize: 13,
+                opacity: !canLockBaseline ? 0.5 : 1,
               }}
             >
               {lockingBaseline
@@ -231,15 +267,50 @@ export default function ResidentDetailPanel({ resident, onClose, onAckedAlert, o
           </div>
 
           {recentLink && (
-            <div className="bg-[#FBF8F2] border border-[#ECE6D9] rounded-lg p-3 text-sm">
-              <div className="font-semibold text-gray-900 mb-1">Today&rsquo;s link</div>
-              <code className="block break-all text-xs text-gray-700">
+            <div
+              style={{
+                background: "var(--bg-sage-tint)",
+                border: "1px solid var(--line-soft)",
+                borderRadius: "var(--r-md)",
+                padding: 12,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 12,
+                  color: "var(--sage-ink)",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  marginBottom: 4,
+                }}
+              >
+                Today&rsquo;s link
+              </div>
+              <code
+                className="block break-all"
+                style={{
+                  fontSize: 11,
+                  color: "var(--ink-700)",
+                  fontFamily: "var(--font-mono)",
+                  background: "var(--bg-white)",
+                  border: "1px solid var(--line-soft)",
+                  borderRadius: 8,
+                  padding: "6px 10px",
+                }}
+              >
                 {recentLink.url}
               </code>
               <button
                 type="button"
                 onClick={() => navigator.clipboard?.writeText(recentLink.url)}
-                className="mt-2 text-xs font-semibold underline text-gray-700 hover:text-gray-900"
+                style={{
+                  marginTop: 8,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: "var(--ink-700)",
+                  textDecoration: "underline",
+                }}
               >
                 Copy URL
               </button>
@@ -247,52 +318,88 @@ export default function ResidentDetailPanel({ resident, onClose, onAckedAlert, o
           )}
 
           {statusMsg && (
-            <div className="text-sm text-gray-700 bg-gray-50 border border-gray-100 rounded-md p-3">
+            <div
+              style={{
+                fontSize: 13,
+                color: "var(--ink-700)",
+                background: "var(--bg-paper)",
+                border: "1px solid var(--line-soft)",
+                borderRadius: 8,
+                padding: "10px 12px",
+              }}
+            >
               {statusMsg}
             </div>
           )}
 
-          {/* Concern score line */}
+          {/* Concern score */}
           <Section title="Concern score (last 60 days)">
             {series.length === 0 ? (
               <Empty>No recordings yet.</Empty>
             ) : (
-              <div style={{ width: "100%", height: 180 }}>
-                <ResponsiveContainer>
-                  <LineChart data={series}>
-                    <XAxis
-                      dataKey="idx"
-                      tick={{ fontSize: 10, fill: "#6B7570" }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      domain={[0, 100]}
-                      tick={{ fontSize: 10, fill: "#6B7570" }}
-                      axisLine={false}
-                      tickLine={false}
-                      width={28}
-                    />
-                    <Tooltip
-                      contentStyle={{ fontSize: 11 }}
-                      labelFormatter={(_, payload) => payload?.[0]?.payload?.scored_at?.slice(0, 10) || ""}
-                    />
-                    <ReferenceLine y={80} stroke="#C68C8C" strokeDasharray="4 4" />
-                    <Line
-                      type="monotone"
-                      dataKey="concern_score"
-                      stroke="#ff7b00"
-                      strokeWidth={2}
-                      dot={false}
-                      isAnimationActive={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+              <div
+                style={{
+                  background: "var(--bg-white)",
+                  border: "1px solid var(--line)",
+                  borderRadius: "var(--r-md)",
+                  padding: 12,
+                  paddingRight: 8,
+                }}
+              >
+                <div style={{ width: "100%", height: 180 }}>
+                  <ResponsiveContainer>
+                    <LineChart data={series}>
+                      <XAxis
+                        dataKey="idx"
+                        tick={{ fontSize: 10, fill: "var(--ink-500)" }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        domain={[0, 100]}
+                        tick={{ fontSize: 10, fill: "var(--ink-500)" }}
+                        axisLine={false}
+                        tickLine={false}
+                        width={28}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          fontSize: 11,
+                          background: "var(--bg-white)",
+                          border: "1px solid var(--line)",
+                          borderRadius: 8,
+                        }}
+                        labelFormatter={(_, payload) =>
+                          payload?.[0]?.payload?.scored_at?.slice(0, 10) || ""
+                        }
+                      />
+                      <ReferenceLine
+                        y={80}
+                        stroke="#C68C8C"
+                        strokeDasharray="4 4"
+                        label={{
+                          value: "review",
+                          fontSize: 10,
+                          fill: "#7A2424",
+                          position: "right",
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="concern_score"
+                        stroke="var(--ink-900)"
+                        strokeWidth={2}
+                        dot={false}
+                        isAnimationActive={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             )}
           </Section>
 
-          {/* Sub-score sparklines */}
+          {/* Sub-scores */}
           <Section title="Dimension sub-scores">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {DIMENSIONS.map((dim) => (
@@ -301,7 +408,7 @@ export default function ResidentDetailPanel({ resident, onClose, onAckedAlert, o
                   label={DIMENSION_LABELS[dim]}
                   dim={dim}
                   series={series}
-                  colour={DIMENSION_COLOURS[dim]}
+                  colour={DIMENSION_HEX[dim]}
                 />
               ))}
             </div>
@@ -316,25 +423,56 @@ export default function ResidentDetailPanel({ resident, onClose, onAckedAlert, o
                 {alertsPayload.alerts.map((a) => (
                   <li
                     key={a.alert_id}
-                    className="border border-gray-100 rounded-lg p-3"
+                    style={{
+                      background: "var(--bg-white)",
+                      border: "1px solid var(--line-soft)",
+                      borderRadius: 12,
+                      padding: 14,
+                    }}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <SeverityChip severity={a.severity} />
-                          <span className="text-xs font-semibold text-gray-700">
+                          <span
+                            style={{
+                              fontSize: 11,
+                              color: "var(--ink-700)",
+                              fontWeight: 600,
+                            }}
+                          >
                             {DIMENSION_LABELS[a.dimension] || a.dimension}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-800">{a.summary}</p>
-                        <div className="text-xs text-gray-500 mt-1">
+                        <p
+                          style={{
+                            fontSize: 13,
+                            color: "var(--ink-900)",
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          {a.summary}
+                        </p>
+                        <div
+                          style={{
+                            fontSize: 10,
+                            color: "var(--ink-500)",
+                            marginTop: 4,
+                          }}
+                        >
                           {a.created_at?.slice(0, 16).replace("T", " ")}
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleAck(a.alert_id)}
-                        className="text-xs font-semibold text-gray-700 underline hover:text-gray-900 shrink-0"
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 500,
+                          color: "var(--ink-700)",
+                          textDecoration: "underline",
+                          flexShrink: 0,
+                        }}
                       >
                         Acknowledge
                       </button>
@@ -345,7 +483,7 @@ export default function ResidentDetailPanel({ resident, onClose, onAckedAlert, o
             )}
           </Section>
 
-          {/* Recent recordings with playback */}
+          {/* Recordings */}
           <Section title="Recent recordings">
             {series.length === 0 ? (
               <Empty>No recordings yet.</Empty>
@@ -377,7 +515,16 @@ export default function ResidentDetailPanel({ resident, onClose, onAckedAlert, o
 function Section({ title, children }) {
   return (
     <section>
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-700 mb-2">
+      <h3
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          color: "var(--ink-500)",
+          marginBottom: 10,
+        }}
+      >
         {title}
       </h3>
       {children}
@@ -387,19 +534,56 @@ function Section({ title, children }) {
 
 
 function Empty({ children }) {
-  return <div className="text-sm text-gray-500 italic">{children}</div>;
+  return (
+    <div
+      style={{
+        fontSize: 13,
+        color: "var(--ink-500)",
+        fontStyle: "italic",
+        background: "var(--bg-white)",
+        border: "1px dashed var(--line-soft)",
+        borderRadius: 12,
+        padding: 14,
+      }}
+    >
+      {children}
+    </div>
+  );
 }
 
 
 function Sparkline({ label, dim, series, colour }) {
   const last = series[series.length - 1]?.[dim] ?? 0;
   return (
-    <div className="border border-gray-100 rounded-lg p-3">
+    <div
+      style={{
+        background: "var(--bg-white)",
+        border: "1px solid var(--line-soft)",
+        borderRadius: 12,
+        padding: 12,
+      }}
+    >
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-semibold text-gray-700">{label}</span>
         <span
-          className="text-xs font-mono px-1.5 py-0.5 rounded"
-          style={{ background: colour + "33", color: "#1F2622" }}
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: "var(--ink-700)",
+          }}
+        >
+          {label}
+        </span>
+        <span
+          className="tabular-nums"
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            padding: "2px 8px",
+            borderRadius: 6,
+            background: colour + "20",
+            color: "var(--ink-900)",
+            fontFamily: "var(--font-serif)",
+          }}
         >
           {Math.round(last)}
         </span>
@@ -426,15 +610,23 @@ function Sparkline({ label, dim, series, colour }) {
 
 function SeverityChip({ severity }) {
   const styles = {
-    info:   { bg: "#E7F1EA", fg: "#3D5746" },
-    watch:  { bg: "#F4E5C9", fg: "#7A5A1F" },
+    info: { bg: "var(--bg-sage-tint)", fg: "var(--sage-ink)" },
+    watch: { bg: "#F4E5C9", fg: "#7A5A1F" },
     review: { bg: "#F4D7D7", fg: "#7A2424" },
   };
   const s = styles[severity] || styles.info;
   return (
     <span
-      className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded"
-      style={{ background: s.bg, color: s.fg }}
+      style={{
+        fontSize: 9,
+        textTransform: "uppercase",
+        fontWeight: 700,
+        padding: "2px 7px",
+        borderRadius: 999,
+        background: s.bg,
+        color: s.fg,
+        letterSpacing: "0.06em",
+      }}
     >
       {severity}
     </span>
@@ -448,9 +640,12 @@ function RecordingRow({ residentId, recordingId, scoredAt, concern }) {
   const [errMsg, setErrMsg] = useState(null);
   const objectUrlRef = useRef(null);
 
-  useEffect(() => () => {
-    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    },
+    []
+  );
 
   async function handleLoad() {
     setLoading(true);
@@ -465,21 +660,30 @@ function RecordingRow({ residentId, recordingId, scoredAt, concern }) {
         setPlayUrl(blobUrl);
       }
     } catch (e) {
-      setErrMsg(e?.response?.status === 404 ? "Audio not available." : "Could not load audio.");
+      setErrMsg(
+        e?.response?.status === 404 ? "Audio not available." : "Could not load audio."
+      );
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <li className="border border-gray-100 rounded-lg p-3">
+    <li
+      style={{
+        background: "var(--bg-white)",
+        border: "1px solid var(--line-soft)",
+        borderRadius: 12,
+        padding: 12,
+      }}
+    >
       <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="text-sm text-gray-900 font-medium">
+          <div style={{ fontSize: 13, color: "var(--ink-900)", fontWeight: 500 }}>
             {scoredAt?.slice(0, 16).replace("T", " ") || recordingId}
           </div>
-          <div className="text-xs text-gray-500">
-            Concern: {Math.round(concern)}/100
+          <div style={{ fontSize: 11, color: "var(--ink-500)", marginTop: 2 }}>
+            Concern {Math.round(concern)}/100
           </div>
         </div>
         {playUrl ? (
@@ -489,13 +693,21 @@ function RecordingRow({ residentId, recordingId, scoredAt, concern }) {
             type="button"
             onClick={handleLoad}
             disabled={loading}
-            className="text-xs font-semibold text-gray-700 underline hover:text-gray-900"
+            style={{
+              fontSize: 12,
+              fontWeight: 500,
+              color: "var(--ink-700)",
+              textDecoration: "underline",
+              opacity: loading ? 0.5 : 1,
+            }}
           >
             {loading ? "Loading…" : "Play"}
           </button>
         )}
       </div>
-      {errMsg && <div className="text-xs text-red-600 mt-1">{errMsg}</div>}
+      {errMsg && (
+        <div style={{ fontSize: 11, color: "#7A2424", marginTop: 4 }}>{errMsg}</div>
+      )}
     </li>
   );
 }

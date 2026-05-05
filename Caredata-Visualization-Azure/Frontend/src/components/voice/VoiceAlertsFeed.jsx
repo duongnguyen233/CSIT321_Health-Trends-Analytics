@@ -1,13 +1,7 @@
 /**
  * VoiceAlertsFeed (v2) — sidebar feed of open alerts ordered newest first.
- *
- * Props:
- *   alerts        Array of dim-alert objects from /api/voice/v2/n/alerts
- *   residents     Array of residents from /api/voice/v2/n/residents
- *                 (used to surface display_name on the row)
- *   onOpen        (resident) => void — called when the resident row is clicked
- *   onAfterAck    () => void — called after an ack succeeds so the parent
- *                 can reload data
+ * Styled to match the rest of the Caredata UI (cd-surface, sage/clay/ink
+ * tints, Geist + Instrument Serif typography).
  */
 import { useMemo, useState } from "react";
 
@@ -45,12 +39,44 @@ export default function VoiceAlertsFeed({ alerts = [], residents = [], onOpen, o
   }
 
   return (
-    <div className="bg-white border border-gray-100 rounded-lg p-4">
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-700 mb-3">
-        Open alerts ({alerts.length})
-      </h3>
+    <div
+      style={{
+        background: "var(--bg-white)",
+        border: "1px solid var(--line)",
+        borderRadius: "var(--r-lg)",
+        padding: 16,
+      }}
+    >
+      <div className="flex items-baseline justify-between mb-3">
+        <h3
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            color: "var(--ink-500)",
+          }}
+        >
+          Open alerts
+        </h3>
+        <span
+          className="tabular-nums"
+          style={{ fontSize: 13, fontWeight: 500, color: "var(--ink-700)" }}
+        >
+          {alerts.length}
+        </span>
+      </div>
+
       {alerts.length === 0 ? (
-        <p className="text-sm text-gray-500 italic">No open alerts.</p>
+        <p
+          style={{
+            fontSize: 13,
+            color: "var(--ink-500)",
+            fontStyle: "italic",
+          }}
+        >
+          No open alerts.
+        </p>
       ) : (
         <ul className="space-y-2">
           {alerts.slice(0, 12).map((a) => {
@@ -58,11 +84,22 @@ export default function VoiceAlertsFeed({ alerts = [], residents = [], onOpen, o
             return (
               <li
                 key={a.alert_id}
-                className="border border-gray-100 rounded-md p-3"
+                style={{
+                  border: "1px solid var(--line-soft)",
+                  borderRadius: 12,
+                  padding: 12,
+                  background: "var(--bg-paper)",
+                }}
               >
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1.5">
                   <SeverityChip severity={a.severity} />
-                  <span className="text-xs text-gray-700 font-semibold">
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: "var(--ink-700)",
+                      fontWeight: 600,
+                    }}
+                  >
                     {DIMENSION_LABELS[a.dimension] || a.dimension}
                   </span>
                 </div>
@@ -70,23 +107,44 @@ export default function VoiceAlertsFeed({ alerts = [], residents = [], onOpen, o
                   type="button"
                   onClick={() => resident && onOpen?.(resident)}
                   disabled={!resident}
-                  className="text-sm font-semibold text-gray-900 hover:underline disabled:no-underline text-left w-full"
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: "var(--ink-900)",
+                    textAlign: "left",
+                    width: "100%",
+                    background: "transparent",
+                  }}
                   title={resident ? "Open resident detail" : a.resident_id}
                 >
                   {resident?.display_name || a.resident_id || "—"}
                 </button>
-                <p className="text-xs text-gray-700 mt-1 leading-snug">
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: "var(--ink-700)",
+                    marginTop: 4,
+                    lineHeight: 1.45,
+                  }}
+                >
                   {a.summary}
                 </p>
                 <div className="flex items-center justify-between mt-2">
-                  <span className="text-[10px] text-gray-500">
+                  <span style={{ fontSize: 10, color: "var(--ink-500)" }}>
                     {a.created_at?.slice(0, 16).replace("T", " ")}
                   </span>
                   <button
                     type="button"
                     onClick={() => handleAck(a.alert_id)}
                     disabled={!!acking[a.alert_id]}
-                    className="text-[11px] font-semibold underline text-gray-700 hover:text-gray-900 disabled:opacity-50"
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 500,
+                      color: "var(--ink-700)",
+                      textDecoration: "underline",
+                      background: "transparent",
+                      opacity: acking[a.alert_id] ? 0.5 : 1,
+                    }}
                   >
                     {acking[a.alert_id] ? "Acking…" : "Acknowledge"}
                   </button>
@@ -103,15 +161,23 @@ export default function VoiceAlertsFeed({ alerts = [], residents = [], onOpen, o
 
 function SeverityChip({ severity }) {
   const styles = {
-    info:   { bg: "#E7F1EA", fg: "#3D5746" },
-    watch:  { bg: "#F4E5C9", fg: "#7A5A1F" },
+    info: { bg: "var(--bg-sage-tint)", fg: "var(--sage-ink)" },
+    watch: { bg: "#F4E5C9", fg: "#7A5A1F" },
     review: { bg: "#F4D7D7", fg: "#7A2424" },
   };
   const s = styles[severity] || styles.info;
   return (
     <span
-      className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded"
-      style={{ background: s.bg, color: s.fg }}
+      style={{
+        fontSize: 9,
+        textTransform: "uppercase",
+        fontWeight: 700,
+        padding: "2px 7px",
+        borderRadius: 999,
+        background: s.bg,
+        color: s.fg,
+        letterSpacing: "0.06em",
+      }}
     >
       {severity}
     </span>
