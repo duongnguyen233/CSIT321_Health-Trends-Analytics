@@ -498,14 +498,131 @@ def get_scores(
 # ---------------------------------------------------------------------------
 
 
+@router.get("/n/residents")
+def list_residents_for_nurse(
+    current_user: dict = Depends(get_current_user),
+):
+    """Return all voice profiles enriched with last-5 scores + latest alert.
+
+    Drives the nurse dashboard list view.
+    """
+    profiles: list[dict] = []
+    table = voice_profile_db._get_table()
+    if table:
+        try:
+            entities = list(
+                table.query_entities(query_filter="PartitionKey eq 'resident'")
+            )
+            profiles = [voice_profile_db._entity_to_dict(e) for e in entities]
+        except Exception as ex:
+            logger.warning("list_residents_for_nurse Tables fetch failed: %s", ex)
+    else:
+        profiles = [dict(p) for p in voice_profile_db._in_memory.values()]
+
+    out = []
+    for p in profiles:
+        scores = voice_score_db.list_scores(p["profile_id"], limit=5)
+        latest_alerts = voice_analysis_db.list_dim_alerts(
+            profile_id=p["profile_id"], open_only=True,
+        )
+        latest_alert = latest_alerts[0] if latest_alerts else None
+        latest_score = scores[0] if scores else None
+        out.append({
+            "profile_id": p["profile_id"],
+            "resident_id": p.get("resident_id"),
+            "display_name": p.get("display_name"),
+            "baseline_locked_at": p.get("baseline_locked_at"),
+            "baseline_version": p.get("baseline_version", 0),
+            "last_recording_date": p.get("last_recording_date"),
+            "latest_concern_score": (
+                latest_score.get("concern_score") if latest_score else None
+            ),
+            "latest_subscores": (
+                latest_score.get("subscores") if latest_score else None
+            ),
+            "scores_last_5": scores,
+            "latest_alert": latest_alert,
+        })
+    return {"residents": out}
+
+
+@router.get("/n/residents/{resident_id}/recordings/{recording_id}/audio")
+def get_recording_audio_url(
+    resident_id: str,
+    recording_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """Return a 5-minute presigned URL for the recording's audio blob.
+
+    For in-memory blobs (dev fallback) we return a sentinel URL pointing at
+    a streaming endpoint Phase 4 frontend can call directly. For real Azure
+    blobs we hand back a SAS-signed URL.
+    """
+    profile = voice_profile_db.get_by_resident_id(resident_id)
+    if profile is None:
+        raise HTTPException(404, "resident profile not found")
+    rec = voice_recording_db.get_recording(profile["profile_id"], recording_id)
+    if rec is None:
+        raise HTTPException(404, "recording not found")
+    blob_uri = rec.get("audio_blob_uri") or ""
+    if not blob_uri:
+        raise HTTPException(404, "audio not available")
+    presigned = voice_audio_blob.presigned_audio_url(blob_uri, minutes=5)
+    if presigned is not None:
+        return {"url": presigned, "kind": "presigned", "expires_in_s": 300}
+    # In-memory fallback: tell caller to fetch via the streaming endpoint
+    return {
+        "url": f"/api/voice/v2/n/residents/{resident_id}/recordings/{recording_id}/stream",
+        "kind": "stream",
+        "expires_in_s": None,
+    }
+
+
+@router.get("/n/residents/{resident_id}/recordings/{recording_id}/stream")
+def stream_recording_audio(
+    resident_id: str,
+    recording_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """Stream audio bytes directly. Used when Azure presigned URLs aren't available
+    (dev / in-memory fallback). The presigned-URL endpoint redirects here
+    transparently for those cases."""
+    from fastapi.responses import StreamingResponse
+    import io as _io
+
+    profile = voice_profile_db.get_by_resident_id(resident_id)
+    if profile is None:
+        raise HTTPException(404, "resident profile not found")
+    rec = voice_recording_db.get_recording(profile["profile_id"], recording_id)
+    if rec is None:
+        raise HTTPException(404, "recording not found")
+    audio = voice_audio_blob.download_audio(rec.get("audio_blob_uri") or "")
+    if not audio:
+        raise HTTPException(404, "audio not available")
+    return StreamingResponse(_io.BytesIO(audio), media_type="audio/webm")
+
+
 @router.get("/n/alerts")
 def list_alerts(
     status: str = Query("open", pattern="^(open|all)$"),
+    limit: int = Query(50, ge=1, le=500),
+    cursor: int = Query(0, ge=0),
     current_user: dict = Depends(get_current_user),
 ):
+    """Paginated list of dimension alerts.
+
+    `cursor` is a 0-indexed offset; `limit` caps the page size.
+    """
     open_only = status == "open"
-    alerts = voice_analysis_db.list_dim_alerts(open_only=open_only)
-    return {"status": status, "alerts": alerts}
+    all_alerts = voice_analysis_db.list_dim_alerts(open_only=open_only)
+    page = all_alerts[cursor:cursor + limit]
+    next_cursor = cursor + limit if cursor + limit < len(all_alerts) else None
+    return {
+        "status": status,
+        "alerts": page,
+        "next_cursor": next_cursor,
+        "total": len(all_alerts),
+    }
 
 
 @router.post("/n/alerts/{alert_id}/ack")
