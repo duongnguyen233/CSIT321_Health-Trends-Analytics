@@ -205,3 +205,158 @@ def acknowledge_alert(profile_id: str, analysis_id: str, acknowledged_by: str) -
         a["acknowledged_at"] = now
         return True
     return False
+
+
+# ---------------------------------------------------------------------------
+# Dimension-tagged alerts (Phase 1 schema, per VOICE_BIOMARKER.md \xa76)
+#
+# These coexist with the legacy `alert_level` field on Analysis rows. Phase 3
+# scoring writes both: an Analysis row (back-compat) AND one or more
+# DimensionAlert rows (severity = info|watch|review, dimension = phonatory|
+# articulatory|prosodic|respiratory|linguistic).
+#
+# Stored in the SAME Azure table as legacy analyses but under a distinct
+# PartitionKey prefix (`dim-alert-<profile_id>`) so they don't pollute the
+# legacy queries.
+# ---------------------------------------------------------------------------
+
+VALID_SEVERITIES: tuple[str, ...] = ("info", "watch", "review")
+VALID_DIMENSIONS: tuple[str, ...] = (
+    "phonatory", "articulatory", "prosodic", "respiratory", "linguistic"
+)
+
+_dim_alerts_in_memory: dict[str, dict[str, dict]] = {}  # profile_id -> {alert_id -> alert}
+
+
+def _dim_partition(profile_id: str) -> str:
+    return f"dim-alert-{profile_id}"
+
+
+def _dim_alert_to_dict(e: dict) -> dict:
+    return {
+        "alert_id": e.get("alert_id") or e.get("RowKey"),
+        "profile_id": (e.get("PartitionKey") or "").removeprefix("dim-alert-")
+        or e.get("profile_id"),
+        "resident_id": e.get("resident_id"),
+        "recording_id": e.get("recording_id"),
+        "severity": e.get("severity"),
+        "dimension": e.get("dimension"),
+        "summary": e.get("summary"),
+        "created_at": e.get("created_at"),
+        "ack_by": e.get("ack_by"),
+        "ack_at": e.get("ack_at"),
+    }
+
+
+def create_dim_alert(
+    *,
+    profile_id: str,
+    resident_id: str,
+    recording_id: str,
+    severity: str,
+    dimension: str,
+    summary: str,
+) -> dict:
+    """Persist a dimension-tagged alert. Raises ValueError on bad enum values."""
+    if severity not in VALID_SEVERITIES:
+        raise ValueError(f"invalid severity: {severity!r}")
+    if dimension not in VALID_DIMENSIONS:
+        raise ValueError(f"invalid dimension: {dimension!r}")
+    alert_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    entity = {
+        "alert_id": alert_id,
+        "profile_id": profile_id,
+        "resident_id": resident_id,
+        "recording_id": recording_id,
+        "severity": severity,
+        "dimension": dimension,
+        "summary": summary,
+        "created_at": now,
+        "ack_by": None,
+        "ack_at": None,
+    }
+    table = _get_table()
+    if table:
+        try:
+            table.upsert_entity({
+                "PartitionKey": _dim_partition(profile_id),
+                "RowKey": alert_id,
+                **entity,
+            })
+            return entity
+        except Exception as e:
+            logger.warning("create_dim_alert: %s", e)
+            raise
+    if profile_id not in _dim_alerts_in_memory:
+        _dim_alerts_in_memory[profile_id] = {}
+    _dim_alerts_in_memory[profile_id][alert_id] = entity
+    return entity
+
+
+def list_dim_alerts(
+    *,
+    profile_id: str | None = None,
+    open_only: bool = True,
+) -> list[dict]:
+    """List dimension alerts. If profile_id is None, returns alerts for all profiles."""
+    table = _get_table()
+    if table:
+        try:
+            if profile_id:
+                qf = f"PartitionKey eq '{_dim_partition(profile_id)}'"
+            else:
+                # Tables doesn't support startswith; fall back to filtering in app.
+                qf = None
+            entities = list(
+                table.query_entities(query_filter=qf) if qf else table.list_entities()
+            )
+            entities = [
+                e for e in entities
+                if (e.get("PartitionKey") or "").startswith("dim-alert-")
+            ]
+            items = [_dim_alert_to_dict(e) for e in entities]
+        except Exception as e:
+            logger.warning("list_dim_alerts: %s", e)
+            return []
+    else:
+        if profile_id:
+            items = [dict(a) for a in _dim_alerts_in_memory.get(profile_id, {}).values()]
+        else:
+            items = [
+                dict(a)
+                for profile in _dim_alerts_in_memory.values()
+                for a in profile.values()
+            ]
+    if open_only:
+        items = [a for a in items if not a.get("ack_at")]
+    items.sort(key=lambda x: x.get("created_at") or "", reverse=True)
+    return items
+
+
+def ack_dim_alert(
+    *,
+    profile_id: str,
+    alert_id: str,
+    ack_by: str,
+) -> bool:
+    """Mark a dim-alert as acknowledged. Returns True if updated."""
+    now = datetime.now(timezone.utc).isoformat()
+    table = _get_table()
+    if table:
+        try:
+            e = table.get_entity(
+                partition_key=_dim_partition(profile_id), row_key=alert_id
+            )
+            e["ack_by"] = ack_by
+            e["ack_at"] = now
+            table.upsert_entity(e)
+            return True
+        except Exception:
+            return False
+    a = _dim_alerts_in_memory.get(profile_id, {}).get(alert_id)
+    if a:
+        a["ack_by"] = ack_by
+        a["ack_at"] = now
+        return True
+    return False
