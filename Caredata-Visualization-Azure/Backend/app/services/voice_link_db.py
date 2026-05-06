@@ -2,20 +2,39 @@
 Store and retrieve voice recording links in Azure Table Storage.
 PartitionKey="link", RowKey=token. In-memory fallback when Azure not configured.
 
-Per VOICE_BIOMARKER.md \xa76, each link is scoped to a single calendar date
-(`valid_for_date`). The (resident_id, valid_for_date) pair acts as an
-idempotency key for the nurse's `issue-link` endpoint.
+Two flavours of link coexist on the same table:
+
+- **Persistent link** (`is_persistent=True`): exactly one per resident,
+  never expires, never marked used. Created automatically when the
+  voice profile is created. The resident keeps this URL forever and
+  reuses it for every daily recording. This is the model the project
+  actually uses today.
+
+- **Daily link** (`is_persistent=False`): single-use, scoped to a
+  `valid_for_date`. Kept around because the spec describes it and a
+  small number of older callers still rely on it.
+
+`get_persistent_link_for_resident(resident_id)` returns the persistent
+row if one exists; `create_persistent_link(resident_id, facility_id,
+generated_by)` is idempotent and always returns the same row.
 """
 import logging
 import os
 import uuid
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 TABLE_NAME = "voicelinks"
 _in_memory: dict[str, dict] = {}  # token -> link dict
+
+
+# Far-future expiry stamp used for persistent links. We still set one so
+# the existing `expires_at`-aware code paths stay simple — but in practice
+# callers should look at `is_persistent` to decide whether the link can
+# still be used.
+_FAR_FUTURE = (datetime(2099, 12, 31, tzinfo=timezone.utc)).isoformat()
 
 
 def _get_table():
@@ -91,7 +110,81 @@ def _entity_to_dict(e: dict) -> dict:
         "used": e.get("used", False),
         "used_at": e.get("used_at"),
         "created_at": e.get("created_at"),
+        "is_persistent": bool(e.get("is_persistent", False)),
     }
+
+
+def create_persistent_link(
+    resident_id: str,
+    facility_id: str = "default",
+    generated_by: str = "system",
+) -> dict:
+    """Create the resident's permanent recording link, or return the
+    existing one if it already exists. One row per resident.
+
+    The token never expires and never gets marked used; the resident
+    reuses the same URL every day for their daily check-in.
+    """
+    existing = get_persistent_link_for_resident(resident_id)
+    if existing is not None:
+        return existing
+
+    token = uuid.uuid4().hex
+    now = datetime.now(timezone.utc).isoformat()
+    entity = {
+        "token": token,
+        "resident_id": resident_id,
+        "facility_id": facility_id,
+        "generated_by": generated_by,
+        "expires_at": _FAR_FUTURE,
+        "valid_for_date": date.today().isoformat(),  # informational only
+        "used": False,
+        "used_at": None,
+        "created_at": now,
+        "is_persistent": True,
+    }
+    table = _get_table()
+    if table:
+        try:
+            table.upsert_entity({
+                "PartitionKey": "link",
+                "RowKey": token,
+                **entity,
+            })
+            return entity
+        except Exception as e:
+            logger.warning("create_persistent_link: %s", e)
+            raise
+    _in_memory[token] = entity
+    return entity
+
+
+def get_persistent_link_for_resident(resident_id: str) -> dict | None:
+    """Return the resident's persistent link row, or None if not yet created."""
+    table = _get_table()
+    if table:
+        try:
+            entities = list(table.query_entities(
+                query_filter=(
+                    f"PartitionKey eq 'link' and resident_id eq '{resident_id}' "
+                    f"and is_persistent eq true"
+                )
+            ))
+            if not entities:
+                return None
+            entities.sort(key=lambda e: e.get("created_at") or "", reverse=True)
+            return _entity_to_dict(entities[0])
+        except Exception as ex:
+            logger.warning("get_persistent_link_for_resident: %s", ex)
+            return None
+    matches = [
+        v for v in _in_memory.values()
+        if v.get("resident_id") == resident_id and v.get("is_persistent")
+    ]
+    if not matches:
+        return None
+    matches.sort(key=lambda v: v.get("created_at") or "", reverse=True)
+    return _entity_to_dict(matches[0])
 
 
 def get_link(token: str) -> dict | None:

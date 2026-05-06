@@ -177,6 +177,20 @@ export async function fetchAudioBlobUrl(residentId, recordingId) {
 
 
 // ---------------------------------------------------------------------------
+// Recording status (public endpoint — for the resident's "Thank you" poll)
+// ---------------------------------------------------------------------------
+
+
+export async function getRecordingStatus(recordingId, token) {
+  const res = await axios.get(
+    `${API_BASE_URL}/api/voice/v2/recordings/${encodeURIComponent(recordingId)}/status`,
+    { params: { token } }
+  );
+  return res.data;
+}
+
+
+// ---------------------------------------------------------------------------
 // Convenience: build a recording link URL the nurse can copy/paste
 // ---------------------------------------------------------------------------
 

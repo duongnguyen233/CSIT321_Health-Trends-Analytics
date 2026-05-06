@@ -72,12 +72,22 @@ MAX_AUDIO_BYTES = 5 * 1024 * 1024  # 5 MB
 
 
 def _link_is_expired(link: dict) -> bool:
+    # Persistent links never expire — by definition.
+    if link.get("is_persistent"):
+        return False
     expires_at = link.get("expires_at") or ""
     try:
         exp = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
     except (ValueError, TypeError):
         return True
     return datetime.now(timezone.utc) > exp
+
+
+def _link_is_consumed(link: dict) -> bool:
+    """Persistent links are never 'used up'; daily links are after one upload."""
+    if link.get("is_persistent"):
+        return False
+    return bool(link.get("used"))
 
 
 def _validation_400(prefix: str, errors):
@@ -97,7 +107,7 @@ def get_link_metadata(token: str):
     link = voice_link_db.get_link(token)
     if link is None:
         raise HTTPException(404, "link not found")
-    if link.get("used"):
+    if _link_is_consumed(link):
         raise HTTPException(410, "link already used")
     if _link_is_expired(link):
         raise HTTPException(410, "link expired")
@@ -131,7 +141,7 @@ async def upload(
     link = voice_link_db.get_link(token)
     if link is None:
         raise HTTPException(404, "link not found")
-    if link.get("used") or _link_is_expired(link):
+    if _link_is_consumed(link) or _link_is_expired(link):
         raise HTTPException(410, "link unavailable")
 
     # 2. Parse + validate JSON form fields. `client_meta` enforces the
@@ -183,7 +193,8 @@ async def upload(
         context_flags=flags.model_dump(),
         client_meta=meta.model_dump(),
     )
-    voice_link_db.mark_used(token)
+    if not link.get("is_persistent"):
+        voice_link_db.mark_used(token)
 
     # 6. Enqueue background processing. Phase 1 leaves the heavy pipeline as a
     #    placeholder — the recording status flips to 'done' with the existing
@@ -196,6 +207,48 @@ async def upload(
     )
 
     return UploadResponse(recording_id=recording_id, status="queued")
+
+
+# ---------------------------------------------------------------------------
+# Public — recording status (for the resident's "Thank you" page polling)
+# ---------------------------------------------------------------------------
+
+
+@router.get("/recordings/{recording_id}/status")
+def get_recording_status(recording_id: str, token: str):
+    """Return the current processing status for a recording.
+
+    Auth: pass the same per-day or persistent token the resident used to
+    upload. We look the recording up by its token's resident_id so this
+    endpoint is safe to call from the public resident page.
+
+    Response:
+        { status: "uploaded"|"processing"|"done"|"failed",
+          snr_db: float|null,
+          fail_reason: str|null }
+    """
+    link = voice_link_db.get_link(token)
+    if link is None:
+        raise HTTPException(404, "link not found")
+    profile = voice_profile_db.get_by_resident_id(link["resident_id"])
+    if profile is None:
+        raise HTTPException(404, "resident not found")
+    rec = voice_recording_db.get_recording(profile["profile_id"], recording_id)
+    if rec is None:
+        raise HTTPException(404, "recording not found")
+    snr = rec.get("snr_db")
+    fail_reason = None
+    if rec.get("status") == "failed":
+        if snr is not None and snr < 0:
+            fail_reason = "low_audio_quality"
+        else:
+            fail_reason = "processing_error"
+    return {
+        "recording_id": recording_id,
+        "status": rec.get("status"),
+        "snr_db": snr,
+        "fail_reason": fail_reason,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -399,6 +452,12 @@ def create_resident_for_voice(
     """
     existing = voice_profile_db.get_by_resident_id(body.resident_id)
     if existing is not None:
+        # Make sure even older profiles get a persistent link.
+        voice_link_db.create_persistent_link(
+            resident_id=body.resident_id,
+            facility_id=existing.get("facility_id") or body.facility_id,
+            generated_by=current_user.get("sub", "system"),
+        )
         response.status_code = 200
         return existing
 
@@ -407,8 +466,16 @@ def create_resident_for_voice(
         facility_id=body.facility_id,
         display_name=body.display_name,
     )
+    # One persistent recording link, created at the same time as the profile
+    # so the nurse can copy it immediately and the resident can keep using
+    # the same URL forever.
+    voice_link_db.create_persistent_link(
+        resident_id=body.resident_id,
+        facility_id=body.facility_id,
+        generated_by=current_user.get("sub", "system"),
+    )
     logger.info(
-        "voice profile created resident_id=%s facility=%s by=%s",
+        "voice profile created resident_id=%s facility=%s by=%s (persistent link issued)",
         body.resident_id, body.facility_id, current_user.get("sub", ""),
     )
     return profile
@@ -578,9 +645,22 @@ def list_residents_for_nurse(
         )
         latest_alert = latest_alerts[0] if latest_alerts else None
         latest_score = scores[0] if scores else None
+        # Persistent link: one per resident, never expires. We create on
+        # demand if the profile is older than the persistent-link feature
+        # so existing residents get one without manual migration.
+        rid = p.get("resident_id")
+        plink = (
+            voice_link_db.get_persistent_link_for_resident(rid)
+            or voice_link_db.create_persistent_link(
+                resident_id=rid,
+                facility_id=p.get("facility_id") or "default",
+                generated_by="auto-backfill",
+            )
+            if rid else None
+        )
         out.append({
             "profile_id": p["profile_id"],
-            "resident_id": p.get("resident_id"),
+            "resident_id": rid,
             "display_name": p.get("display_name"),
             "baseline_locked_at": p.get("baseline_locked_at"),
             "baseline_version": p.get("baseline_version", 0),
@@ -593,6 +673,7 @@ def list_residents_for_nurse(
             ),
             "scores_last_5": scores,
             "latest_alert": latest_alert,
+            "persistent_link_token": plink.get("token") if plink else None,
         })
     return {"residents": out}
 

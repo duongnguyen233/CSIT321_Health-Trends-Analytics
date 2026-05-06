@@ -1,8 +1,23 @@
 import asyncio
+import logging
 import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+
+# Make sure our app-level loggers actually surface in stdout. Without this
+# uvicorn's default config drops everything below WARNING from third-party
+# loggers, which silently swallowed background-task tracebacks during
+# debugging. INFO is the right floor for production too.
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
+# uvicorn's access log already handles its own formatting; downgrade so we
+# don't get duplicate request rows.
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 from app.api import auth, health_scan, mydata, upload_csv, qi, gpms, voice_v2
 from app.services.voice_changepoint import cpd_loop_forever

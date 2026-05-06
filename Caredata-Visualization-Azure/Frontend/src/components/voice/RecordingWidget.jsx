@@ -19,7 +19,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { uploadRecording } from "../../services/voiceApiV2";
+import { getRecordingStatus, uploadRecording } from "../../services/voiceApiV2";
 
 
 const AUDIO_CONSTRAINTS = {
@@ -39,9 +39,10 @@ function stageColor(idx, total) {
 
 
 export default function RecordingWidget({ token, stages, onComplete, onError }) {
-  const [phase, setPhase] = useState("intro"); // intro | recording | uploading | success | error
+  const [phase, setPhase] = useState("intro"); // intro | recording | uploading | processing | success | failed | error
   const [stageIdx, setStageIdx] = useState(0);
   const [elapsed, setElapsed] = useState(0);
+  const [failReason, setFailReason] = useState(null);
   const [contextFlags, setContextFlags] = useState({
     cold: false,
     dentures_out: false,
@@ -178,8 +179,39 @@ export default function RecordingWidget({ token, stages, onComplete, onError }) 
         contextFlags,
         clientMeta,
       });
-      setPhase("success");
-      onComplete?.(out);
+      // The upload returned 202 (queued). Now poll the recording-status
+      // endpoint until processing completes — the resident sees the real
+      // outcome (done / low-quality / processing-error) instead of a
+      // misleading "Thank you" while the BG task crashes silently.
+      setPhase("processing");
+      const recordingId = out.recording_id;
+      let final = null;
+      for (let i = 0; i < 25; i++) {
+        await new Promise((r) => setTimeout(r, 2000));
+        try {
+          const st = await getRecordingStatus(recordingId, token);
+          if (st.status === "done") { final = "done"; break; }
+          if (st.status === "failed") {
+            final = "failed";
+            setFailReason(st.fail_reason || "processing_error");
+            break;
+          }
+        } catch {
+          /* keep polling */
+        }
+      }
+      if (final === "done") {
+        setPhase("success");
+        onComplete?.(out);
+      } else if (final === "failed") {
+        setPhase("failed");
+        onError?.(new Error("recording_failed"));
+      } else {
+        // Still processing after 50s — let the resident go but tell them
+        // their recording is being analysed.
+        setPhase("success");
+        onComplete?.(out);
+      }
     } catch (e) {
       const code = e?.response?.data?.detail?.code;
       const msg =
@@ -229,8 +261,23 @@ export default function RecordingWidget({ token, stages, onComplete, onError }) 
       />
     );
   }
-  if (phase === "uploading") return <UploadingPanel />;
+  if (phase === "uploading") return <UploadingPanel label="Uploading recording…" />;
+  if (phase === "processing") return <UploadingPanel label="Analysing your recording…" />;
   if (phase === "success") return <SuccessPanel />;
+  if (phase === "failed")
+    return (
+      <ErrorPanel
+        message={
+          failReason === "low_audio_quality"
+            ? "We couldn't hear you clearly. Please try again somewhere quieter, with the device closer to you."
+            : "Something went wrong while analysing your recording. Please try again."
+        }
+        onRetry={() => {
+          setFailReason(null);
+          setPhase("intro");
+        }}
+      />
+    );
   return <ErrorPanel message={errorMsg} onRetry={() => setPhase("intro")} />;
 }
 
@@ -403,13 +450,11 @@ function RecordingPanel({ stages, stageIdx, elapsed, totalTarget, onStop }) {
 }
 
 
-function UploadingPanel() {
+function UploadingPanel({ label = "Uploading recording…" }) {
   return (
     <div className="bg-white border border-gray-100 rounded-xl shadow-md p-8 max-w-2xl mx-auto text-center">
       <div className="inline-block h-8 w-8 border-4 border-gray-200 border-t-primary rounded-full animate-spin mb-3" />
-      <div className="text-sm font-semibold text-gray-900">
-        Uploading recording&hellip;
-      </div>
+      <div className="text-sm font-semibold text-gray-900">{label}</div>
       <div className="text-xs text-gray-600 mt-1">Almost done.</div>
     </div>
   );

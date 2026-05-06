@@ -218,11 +218,10 @@ def seed_v2_demo_data() -> None:
                 "baseline_recording_count": BASELINE_COUNT,
                 "baseline_established": True,
             })
-            voice_link_db.create_link(
-                resident_id=demo["resident_id"], facility_id="default",
-                generated_by="demo-nurse",
-                expires_at=(datetime.now(timezone.utc) + timedelta(days=2)).isoformat(),
-                valid_for_date=today.isoformat(),
+            voice_link_db.create_persistent_link(
+                resident_id=demo["resident_id"],
+                facility_id="default",
+                generated_by="demo-seed",
             )
             continue
 

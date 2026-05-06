@@ -11,7 +11,7 @@ import Footer from "../components/common/Footer";
 import ResidentDetailPanel from "../components/voice/ResidentDetailPanel";
 import VoiceAlertsFeed from "../components/voice/VoiceAlertsFeed";
 import IssueLinksDialog from "../components/voice/IssueLinksDialog";
-import { listAlerts, listResidents } from "../services/voiceApiV2";
+import { buildRecordLinkUrl, listAlerts, listResidents } from "../services/voiceApiV2";
 
 
 const DIMENSIONS = ["phonatory", "articulatory", "prosodic", "respiratory", "linguistic"];
@@ -324,14 +324,14 @@ function Sidebar({ activeView, setActiveView, summary, onIssueLinks }) {
           className="cd-btn cd-btn-primary w-full justify-center"
           style={{ fontSize: 13, padding: "9px 12px" }}
         >
-          Issue daily links
+          Resident links
         </button>
         <p
           className="mt-2"
           style={{ fontSize: 11, color: "var(--ink-500)", lineHeight: 1.4 }}
         >
-          Generate per-resident recording links for today and copy them to
-          deliver to residents.
+          One permanent link per resident. Copy and share once — they
+          reuse the same URL for every daily check-in.
         </p>
       </div>
     </aside>
@@ -375,7 +375,7 @@ function PageHeader({ quarterLabel, onIssueLinks, onRefresh, loading }) {
           className="cd-btn cd-btn-primary"
           style={{ fontSize: 13 }}
         >
-          Issue daily links
+          Resident links
         </button>
         <button
           type="button"
@@ -648,21 +648,7 @@ function ResidentsTable({ rows, alertsByProfile, loading, onOpen, onIssueLink })
                 </td>
                 <td style={{ ...cellBody(16, 14), textAlign: "right" }}>
                   <div className="flex justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onIssueLink(r);
-                      }}
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 500,
-                        color: "var(--ink-700)",
-                        textDecoration: "underline",
-                      }}
-                    >
-                      Issue link
-                    </button>
+                    <CopyLinkButton resident={r} />
                     <button
                       type="button"
                       onClick={(e) => {
@@ -704,6 +690,36 @@ function cellBody(padX, padY) {
     padding: `${padY}px ${padX}px`,
     verticalAlign: "middle",
   };
+}
+
+
+function CopyLinkButton({ resident }) {
+  const [copied, setCopied] = useState(false);
+  const token = resident.persistent_link_token;
+  if (!token) return null;
+  const url = buildRecordLinkUrl(token);
+  return (
+    <button
+      type="button"
+      onClick={async (e) => {
+        e.stopPropagation();
+        try {
+          await navigator.clipboard.writeText(url);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        } catch {}
+      }}
+      title={url}
+      style={{
+        fontSize: 12,
+        fontWeight: 500,
+        color: copied ? "var(--sage-ink)" : "var(--ink-700)",
+        textDecoration: "underline",
+      }}
+    >
+      {copied ? "Copied!" : "Copy link"}
+    </button>
+  );
 }
 
 

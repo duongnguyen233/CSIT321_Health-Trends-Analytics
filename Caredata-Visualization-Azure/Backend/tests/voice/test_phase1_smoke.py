@@ -155,16 +155,15 @@ def test_phase1_full_flow(client):
     audio_back = voice_audio_blob.download_audio(rec["audio_blob_uri"])
     assert audio_back is not None and len(audio_back) > 1000  # real WAV bytes
 
-    # 6. Reusing the same token now returns 410
+    # 6. Persistent-link semantics: the SAME token is reusable for the next
+    #    daily check-in. Each upload produces a new recording_id; the link
+    #    itself is never marked used.
     again = _upload(client, token)
-    assert again.status_code == 410
+    assert again.status_code == 202
+    assert again.json()["recording_id"] != recording_id
 
-    # 7. AUDIO_CONSTRAINTS_VIOLATED on noise_suppression=true with a fresh link
-    fresh = client.post(
-        f"/api/voice/v2/n/residents/R-V001/issue-link?date={today}",
-        headers={"Authorization": f"Bearer {nurse_jwt}"},
-    )
-    fresh_token = fresh.json()["token"]
+    # 7. AUDIO_CONSTRAINTS_VIOLATED on noise_suppression=true with the same link
+    fresh_token = token
     bad_meta = dict(VALID_META, noise_suppression=True)
     r_ns = _upload(client, fresh_token, client_meta=bad_meta)
     assert r_ns.status_code == 400
