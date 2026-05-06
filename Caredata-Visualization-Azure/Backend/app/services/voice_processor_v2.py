@@ -35,6 +35,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import os
+
 import numpy as np
 
 from app.services import voice_audio
@@ -48,7 +50,10 @@ from app.services import voice_whisper
 logger = logging.getLogger(__name__)
 
 
-SNR_FAIL_THRESHOLD_DB = 6.0
+# Default SNR floor below which a recording is rejected. Override via the
+# VOICE_SNR_FAIL_THRESHOLD_DB env var (used by tests and by deployments
+# that want a stricter or looser quality gate).
+SNR_FAIL_THRESHOLD_DB = float(os.environ.get("VOICE_SNR_FAIL_THRESHOLD_DB", "6.0"))
 
 
 class LowSnrError(RuntimeError):

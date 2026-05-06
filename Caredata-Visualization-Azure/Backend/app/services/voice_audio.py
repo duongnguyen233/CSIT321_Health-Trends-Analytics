@@ -68,14 +68,17 @@ def ffmpeg_available() -> bool:
 def transcode_to_wav(input_bytes: bytes, target_sr: int = TARGET_SR) -> bytes:
     """Convert any audio input bytes to 16 kHz mono PCM s16le WAV bytes.
 
-    Uses ffmpeg via subprocess piping (no temp files). If ffmpeg is not
-    available, falls back to a soundfile read + scipy resample for inputs
-    that soundfile/libsndfile can already decode (i.e. WAV/FLAC/OGG, but
-    NOT WebM/Opus). Browser uploads are WebM by default, so production
-    really does need ffmpeg.
+    Three-tier decoder:
+      1. system ffmpeg via subprocess piping (fastest when available)
+      2. PyAV (`av` package) — bundles libav, decodes WebM/Opus/MP4/etc
+         without requiring ffmpeg on PATH. This is the primary path on
+         Windows machines where the user hasn't run `winget install
+         Gyan.FFmpeg`.
+      3. soundfile/libsndfile direct decode for WAV/FLAC/OGG inputs.
 
-    Raises FFmpegError on conversion failure.
+    Raises FFmpegError if all three fail.
     """
+    # Tier 1: system ffmpeg
     if ffmpeg_available():
         try:
             res = subprocess.run(
@@ -92,11 +95,18 @@ def transcode_to_wav(input_bytes: bytes, target_sr: int = TARGET_SR) -> bytes:
             )
             return res.stdout
         except subprocess.CalledProcessError as e:
-            raise FFmpegError(
-                f"ffmpeg exited {e.returncode}: {e.stderr.decode('utf-8', 'replace')[:500]}"
-            ) from e
+            logger.warning(
+                "system ffmpeg exited %d; falling through to PyAV", e.returncode
+            )
+            # fall through to PyAV
 
-    # Fallback: try soundfile direct decode + librosa resample
+    # Tier 2: PyAV (libav bundled with the `av` wheel)
+    try:
+        return _transcode_with_pyav(input_bytes, target_sr)
+    except Exception as e:
+        logger.info("PyAV decode failed (%s); falling through to soundfile", e)
+
+    # Tier 3: soundfile/libsndfile (only handles WAV/FLAC/OGG input)
     try:
         import librosa
 
@@ -106,14 +116,54 @@ def transcode_to_wav(input_bytes: bytes, target_sr: int = TARGET_SR) -> bytes:
         data = data.astype(np.float32)
         if sr != target_sr:
             data = librosa.resample(data, orig_sr=sr, target_sr=target_sr)
-        # Encode back to PCM s16le WAV
         buf = io.BytesIO()
         sf.write(buf, data, target_sr, subtype="PCM_16", format="WAV")
         return buf.getvalue()
-    except Exception as e:  # pragma: no cover - depends on input format
+    except Exception as e:
         raise FFmpegError(
-            f"ffmpeg unavailable and soundfile fallback failed: {e!r}"
+            f"all transcode tiers failed (final soundfile error: {e!r})"
         ) from e
+
+
+def _transcode_with_pyav(input_bytes: bytes, target_sr: int) -> bytes:
+    """Decode any libav-supported container (WebM/Opus, MP4/AAC, OGG, ...)
+    -> mono float32 -> resample -> WAV bytes. Uses PyAV's audio resampler
+    so it works without an external ffmpeg install.
+    """
+    import av
+
+    in_buf = io.BytesIO(input_bytes)
+    container = av.open(in_buf)
+    try:
+        stream = next(s for s in container.streams if s.type == "audio")
+    except StopIteration:
+        container.close()
+        raise FFmpegError("input has no audio stream")
+
+    resampler = av.AudioResampler(format="s16", layout="mono", rate=target_sr)
+    chunks: list[np.ndarray] = []
+
+    for frame in container.decode(stream):
+        for resampled in resampler.resample(frame):
+            arr = resampled.to_ndarray()
+            # to_ndarray returns shape (channels, samples) for "s16" packed
+            # planar — mono comes out as (1, N). Flatten to (N,).
+            chunks.append(arr.reshape(-1))
+
+    # Drain any buffered samples
+    for resampled in resampler.resample(None):
+        arr = resampled.to_ndarray()
+        chunks.append(arr.reshape(-1))
+
+    container.close()
+
+    if not chunks:
+        raise FFmpegError("PyAV produced no audio samples")
+
+    pcm = np.concatenate(chunks).astype(np.int16)
+    out = io.BytesIO()
+    sf.write(out, pcm, target_sr, subtype="PCM_16", format="WAV")
+    return out.getvalue()
 
 
 def load_wav(wav_bytes: bytes) -> tuple[np.ndarray, int]:

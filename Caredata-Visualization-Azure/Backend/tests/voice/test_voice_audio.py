@@ -64,6 +64,45 @@ def test_transcode_handles_pure_silence_input():
     assert audio.size > 0
 
 
+def test_transcode_decodes_browser_style_webm_opus_via_pyav():
+    """Regression: browser uploads are WebM/Opus; libsndfile cannot decode
+    those, and many machines have no system ffmpeg. The transcoder must
+    fall back to PyAV's bundled libav so the worker pipeline still works.
+
+    Without this, /api/voice/v2/upload accepts the file (202) but the
+    background task crashes and the recording silently fails — the
+    nurse dashboard never updates."""
+    import io
+    import av
+    import numpy as np
+
+    # Synthesise a 1.5 s 440 Hz tone, encode it as WebM/Opus exactly the
+    # way Chrome's MediaRecorder would.
+    sr = 48000
+    t = np.arange(int(1.5 * sr)) / sr
+    audio = (0.3 * np.sin(2 * np.pi * 440 * t)).astype(np.float32)
+    buf = io.BytesIO()
+    out = av.open(buf, mode="w", format="webm")
+    stream = out.add_stream("libopus", rate=sr)
+    stream.layout = "mono"
+    frame = av.AudioFrame.from_ndarray(audio[None, :], format="flt", layout="mono")
+    frame.rate = sr
+    for packet in stream.encode(frame):
+        out.mux(packet)
+    for packet in stream.encode(None):
+        out.mux(packet)
+    out.close()
+    webm_bytes = buf.getvalue()
+    assert len(webm_bytes) > 0
+
+    wav_bytes = voice_audio.transcode_to_wav(webm_bytes)
+    decoded, decoded_sr = voice_audio.load_wav(wav_bytes)
+    assert decoded_sr == 16000
+    assert decoded.dtype == np.float32
+    # Duration ~1.5s, allow ~50ms slack for codec framing
+    assert 1.4 <= decoded.size / decoded_sr <= 1.6
+
+
 # ---------------------------------------------------------------------------
 # vad_segments
 # ---------------------------------------------------------------------------

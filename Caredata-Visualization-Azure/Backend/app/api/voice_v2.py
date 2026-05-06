@@ -288,8 +288,17 @@ def _process_recording_v2(recording_id: str, profile_id: str) -> None:
                 profile_id, recording_id, snr_db=e.snr_db
             )
             voice_recording_db.update_status(profile_id, recording_id, "failed")
-            # Phase 3 may want to surface this to the nurse dashboard via a
-            # context_flag-style annotation; today we just record the SNR.
+            return
+        except Exception:
+            # Belt-and-braces: ANY failure inside extract_all (transcode,
+            # feature extraction, Whisper) marks the recording failed
+            # rather than leaving it stuck at "processing". Logged with
+            # full traceback so the nurse / dev can investigate.
+            logger.exception(
+                "feature extraction crashed recording_id=%s profile_id=%s",
+                recording_id, profile_id,
+            )
+            voice_recording_db.update_status(profile_id, recording_id, "failed")
             return
 
         voice_features_db.create_features(
