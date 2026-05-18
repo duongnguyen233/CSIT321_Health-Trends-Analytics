@@ -1,0 +1,879 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 7, Benchmarking (preview) | CareData promo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --cream:#F6F2EB;
+  --paper:#FBF8F2;
+  --line-soft:#EAE3D2;
+  --line:#E1DBCC;
+  --ink-900:#1F2622;
+  --ink-700:#3D4743;
+  --ink-500:#6B7570;
+  --ink-300:#A4ABA4;
+  --sage:#9FB4A0;
+  --sage-bright:#B8D1B5;
+  --sage-ink:#4B6A55;
+  --sage-tint:#EEF1EC;
+  --clay:#C8B89B;
+  --clay-ink:#836B47;
+  --clay-bright:#D4C4A8;
+  --dusty-blue:#A6B6C4;
+  --status-bad:#B86F62;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background:#0E1211;
+  color:var(--cream);
+  font-family:"Geist",ui-sans-serif,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.frame-wrap{
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;     /* 4K canvas-fill */
+  perspective:2400px;
+  perspective-origin:50% 50%;
+}
+.stage{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.10), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%, rgba(200,184,155,0.05), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  overflow:hidden;
+}
+
+.grain{
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.05;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+.footer{
+  position:absolute; bottom:38px; left:60px;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--cream); opacity:0.45;
+  z-index:60;
+}
+
+/* TOP reveal text — sits ABOVE the screen, centred horizontally */
+.top-text{
+  position:absolute;
+  top:6%;
+  left:50%;
+  transform:translateX(-50%);
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:72px;
+  line-height:1.05;
+  letter-spacing:-0.025em;
+  color:var(--cream);
+  z-index:15;
+  white-space:nowrap;
+  opacity:0;
+  text-align:center;
+  text-shadow:0 2px 30px rgba(0,0,0,0.35);
+  will-change:transform, opacity, filter;
+}
+.top-text .accent{ color:var(--sage-bright); font-style:italic; }
+
+/* App card — centred horizontally, pushed down to leave room for the top text */
+.app-card{
+  position:absolute;
+  top:25%; left:32%;
+  width:36%; height:68%;
+  border-radius:12px;
+  overflow:hidden;
+  background:var(--cream);
+  box-shadow:
+    0 60px 120px rgba(0,0,0,0.55),
+    0 30px 60px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.04);
+  z-index:10;
+  opacity:0;
+  display:flex; flex-direction:column;
+  font-family:"Geist", sans-serif;
+  color:var(--ink-900);
+  transform-style:preserve-3d;
+  will-change:transform, opacity, filter;
+}
+
+/* Top nav */
+.topnav{
+  height:42px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px;
+  background:var(--cream);
+  border-bottom:1px solid rgba(31,38,34,0.06);
+}
+.brand-mini{ display:flex; align-items:center; gap:8px; }
+.brand-mini-mark{
+  width:22px; height:22px;
+  background:linear-gradient(145deg, oklch(0.72 0.06 150) 0%, oklch(0.78 0.05 180) 100%);
+  border-radius:5px; position:relative; flex-shrink:0;
+}
+.brand-mini-mark svg{ position:absolute; inset:4px; }
+.brand-mini-text{ display:flex; flex-direction:column; line-height:1.05; }
+.brand-mini-text .nm{ font-weight:600; font-size:10px; color:var(--ink-900); letter-spacing:-0.01em;}
+.brand-mini-text .tg{ font-weight:400; font-size:7px; color:var(--ink-500); margin-top:1px; letter-spacing:0.02em;}
+
+.nav-items{
+  display:flex; align-items:center; gap:3px;
+  font-weight:500; font-size:9.5px;
+  color:var(--ink-700);
+}
+.nav-item{ padding:4px 9px; border-radius:999px; }
+.nav-item.active{ background:var(--ink-900); color:var(--cream); }
+
+.nav-user{
+  display:flex; align-items:center; gap:5px;
+  padding:3px 8px 3px 3px;
+  border:1px solid var(--line); border-radius:999px;
+  background:var(--paper);
+  font-size:9px;
+}
+.nav-user-avatar{
+  width:18px; height:18px; border-radius:50%;
+  background:var(--sage-tint); color:var(--sage-ink);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:600; font-size:8.5px;
+}
+
+/* Main */
+.main{
+  flex:1; min-width:0;
+  padding:18px 24px 20px;
+  display:flex; flex-direction:column;
+  gap:12px;
+  overflow:hidden;
+}
+
+.eyebrow{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:2px 8px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--paper);
+  font-size:8.5px; font-weight:500;
+  color:var(--ink-500);
+  align-self:flex-start;
+}
+.eyebrow::before{
+  content:""; width:5px; height:5px; border-radius:50%; background:var(--sage-ink);
+}
+
+.head-row{
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:14px;
+}
+.head-l{ flex:1; min-width:0; }
+.h1-app{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:32px;
+  line-height:1.04;
+  letter-spacing:-0.02em;
+  color:var(--ink-900);
+  margin-bottom:4px;
+}
+.sub-app{
+  font-size:10.5px; line-height:1.5; color:var(--ink-500);
+  max-width:420px;
+}
+.source{
+  font-size:8.5px; color:var(--ink-500);
+  text-align:right;
+}
+.source .nm{ color:var(--sage-ink); font-weight:600; }
+
+/* Filter row */
+.filter-row{
+  display:flex; align-items:center; gap:18px;
+  padding:8px 0 4px;
+  border-top:1px solid rgba(31,38,34,0.06);
+  border-bottom:1px solid rgba(31,38,34,0.06);
+  font-size:9px;
+}
+.filter-group{
+  display:flex; align-items:center; gap:6px;
+}
+.filter-label{ color:var(--ink-500); font-weight:500; }
+.filter-pills{ display:flex; gap:3px; }
+.filter-pill{
+  padding:3px 9px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  font-size:8.5px; font-weight:500;
+  color:var(--ink-700);
+  background:#fff;
+}
+.filter-pill.active{
+  background:var(--ink-900); color:var(--cream);
+  border-color:var(--ink-900);
+}
+
+/* KPI row */
+.kpi-row{
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;
+}
+.kpi{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:9px 12px 10px;
+}
+.kpi-eye{
+  font-size:7px; letter-spacing:0.16em; text-transform:uppercase;
+  color:var(--ink-500); font-weight:600;
+  margin-bottom:5px;
+}
+.kpi-num{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:26px;
+  line-height:1;
+  color:var(--ink-900);
+  letter-spacing:-0.02em;
+  font-variant-numeric:tabular-nums;
+}
+.kpi.percentile .kpi-num{ color:var(--clay-ink); }
+.kpi.above .kpi-num{ color:var(--status-bad); }
+.kpi.below .kpi-num{ color:var(--sage-ink); }
+.kpi-foot{
+  font-size:8px; color:var(--ink-500);
+  margin-top:4px;
+}
+
+/* Big bar comparison chart */
+.chart-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:14px 18px 16px;
+  flex:1;
+  display:flex; flex-direction:column;
+  min-height:0;
+  overflow:hidden;
+}
+.chart-h{
+  font-size:11px; font-weight:600; color:var(--ink-900);
+  margin-bottom:2px;
+}
+.chart-sub{
+  font-size:8.5px; color:var(--ink-500); margin-bottom:8px;
+}
+.chart-legend{
+  display:flex; gap:14px;
+  font-size:8px; color:var(--ink-700);
+  margin-bottom:8px;
+}
+.chart-legend .lg{
+  display:flex; align-items:center; gap:5px;
+}
+.chart-legend .lg-sw{
+  width:10px; height:5px; border-radius:2px;
+}
+.chart-legend .lg-sw.sage{ background:var(--sage); }
+.chart-legend .lg-sw.clay{ background:var(--clay); }
+.chart-legend .lg-sw.tick{ background:transparent; border-left:2px solid var(--ink-700); width:0; height:8px; }
+
+/* Bar rows */
+.bar-list{
+  flex:1;
+  display:flex; flex-direction:column;
+  gap:4px;
+  overflow:hidden;
+}
+.bar-row{
+  display:grid;
+  grid-template-columns:90px 1fr 35px 30px;
+  gap:10px;
+  align-items:center;
+  font-size:9px;
+}
+.bar-name{
+  font-weight:500;
+  color:var(--ink-700);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.bar-track{
+  position:relative;
+  height:11px;
+  border-radius:6px;
+  background:var(--paper);
+  overflow:visible;
+}
+.bar-fill{
+  position:absolute; top:0; left:0; bottom:0;
+  width:100%;
+  border-radius:6px;
+  transform-origin:left center;
+  transform:scaleX(0);
+  will-change:transform;
+}
+.bar-fill.sage{
+  background:linear-gradient(90deg, var(--sage), var(--sage-bright));
+}
+.bar-fill.clay{
+  background:var(--clay);
+}
+.bar-fill.flagged{
+  background:linear-gradient(90deg, var(--clay), var(--clay-bright));
+}
+.bar-tick{
+  position:absolute;
+  top:-3px; bottom:-3px;
+  width:2px;
+  background:var(--ink-700);
+  border-radius:1px;
+  opacity:0;
+}
+.bar-val{
+  font-family:"Geist Mono", monospace;
+  font-size:8.5px; font-weight:600;
+  color:var(--ink-900);
+  text-align:right;
+}
+.bar-pct{
+  font-family:"Geist Mono", monospace;
+  font-size:8.5px;
+  color:var(--ink-500);
+  text-align:right;
+}
+.bar-row.flagged .bar-name{ color:var(--clay-ink); font-weight:600; }
+.bar-row.flagged .bar-pct{ color:var(--clay-ink); font-weight:600; }
+
+/* Horizontal SCAN BEAM — sweeps top→bottom across the dashboard, sage glow.
+   Positioned absolute inside .app-card so it's clipped to the card. */
+.scan-beam{
+  position:absolute;
+  left:0; right:0;
+  top:0;
+  height:6px;
+  background:linear-gradient(90deg,
+    transparent 0%,
+    rgba(184,209,181,0.85) 12%,
+    rgba(232,248,222,1.0) 50%,
+    rgba(184,209,181,0.85) 88%,
+    transparent 100%);
+  box-shadow:
+    0 0 24px rgba(184,209,181,0.95),
+    0 0 60px rgba(184,209,181,0.55),
+    0 0 120px rgba(184,209,181,0.30);
+  z-index:40;
+  pointer-events:none;
+  opacity:0;
+  filter:blur(0.5px);
+  will-change:transform, opacity;
+}
+/* Soft glow trail under the beam — fading sage tint that follows the line */
+.scan-trail{
+  position:absolute;
+  left:0; right:0;
+  top:0;
+  height:80px;
+  background:linear-gradient(180deg,
+    rgba(184,209,181,0.18) 0%,
+    rgba(184,209,181,0.06) 60%,
+    transparent 100%);
+  z-index:39;
+  pointer-events:none;
+  opacity:0;
+  will-change:transform, opacity;
+}
+
+/* Percentile floating badge */
+.percentile-badge{
+  position:absolute;
+  top:18%; right:8%;
+  background:var(--ink-900);
+  color:var(--cream);
+  border-radius:14px;
+  padding:18px 24px 20px;
+  z-index:25;
+  box-shadow:
+    0 0 0 1px rgba(184,209,181,0.30),
+    0 0 60px rgba(184,209,181,0.20),
+    0 30px 60px rgba(0,0,0,0.45);
+  opacity:0;
+  will-change:transform, opacity;
+  text-align:left;
+  min-width:180px;
+}
+.percentile-badge .pb-eye{
+  font-size:8px; letter-spacing:0.18em; text-transform:uppercase;
+  color:var(--sage-bright); font-weight:600;
+  margin-bottom:6px;
+}
+.percentile-badge .pb-num{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:48px;
+  line-height:1;
+  letter-spacing:-0.02em;
+  color:var(--cream);
+  font-variant-numeric:tabular-nums;
+}
+.percentile-badge .pb-num .ord{
+  font-size:22px;
+  vertical-align:super;
+  margin-left:1px;
+  color:var(--sage-bright);
+}
+.percentile-badge .pb-foot{
+  font-size:9px; color:rgba(246,242,235,0.65);
+  margin-top:6px;
+}
+
+/* Hud */
+.hud{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  background:rgba(15,15,17,0.85);
+  color:#EAE3D2; font-family:"Geist Mono", monospace; font-size:11px;
+  padding:8px 14px; border-radius:999px;
+  display:flex; gap:14px; align-items:center; z-index:100;
+  letter-spacing:0.06em;
+}
+.hud button{
+  appearance:none; border:1px solid #555; background:transparent; color:#EAE3D2;
+  font-family:inherit; font-size:11px; padding:3px 10px; border-radius:999px; cursor:pointer;
+}
+.hud button:hover{ background:#222; }
+.hud .timer{ font-variant-numeric:tabular-nums; min-width:46px; }
+</style>
+</head>
+<body>
+
+<div class="frame-wrap" id="frame">
+  <div class="stage">
+    <div class="grain"></div>
+    <div class="footer">CSIT321&nbsp;CAPSTONE</div>
+
+    <!-- Top reveal text -->
+    <div class="top-text" id="topText">How does <span class="accent">Bayside</span> compare to <span class="accent">peers?</span></div>
+
+    <div class="app-card" id="appCard">
+      <!-- Top nav -->
+      <div class="topnav">
+        <div class="brand-mini">
+          <span class="brand-mini-mark">
+            <svg viewBox="0 0 18 18"><path d="M0,11 L3,11 L5,7 L7.5,14 L10,3 L12.5,11 L18,11" fill="none" stroke="#FBF8F2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div class="brand-mini-text">
+            <span class="nm">CareData</span>
+            <span class="tg">Health Analytics Portal</span>
+          </div>
+        </div>
+        <div class="nav-items">
+          <span class="nav-item">Dashboard</span>
+          <span class="nav-item">Data Entry</span>
+          <span class="nav-item">Voice Screening</span>
+          <span class="nav-item">Reports</span>
+          <span class="nav-item active">Benchmarking</span>
+        </div>
+        <div class="nav-user">
+          <span class="nav-user-avatar">N</span>
+          <span>Nelly</span>
+        </div>
+      </div>
+
+      <div class="main">
+        <div class="head-row">
+          <div class="head-l">
+            <span class="eyebrow" id="elEyebrow">Benchmarking</span>
+            <h1 class="h1-app" id="elH1">Facility vs national</h1>
+            <p class="sub-app" id="elSub">Bayside rates compared against AIHW published national medians, all 14 indicators.</p>
+          </div>
+          <div class="source" id="elSource">
+            Source<br><span class="nm">AIHW QI Report 2024</span>
+          </div>
+        </div>
+
+        <!-- Filter row -->
+        <div class="filter-row" id="elFilters">
+          <div class="filter-group">
+            <span class="filter-label">Peer group:</span>
+            <span class="filter-pills">
+              <span class="filter-pill active">Metro</span>
+              <span class="filter-pill">Regional</span>
+              <span class="filter-pill">Rural</span>
+            </span>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Size:</span>
+            <span class="filter-pills">
+              <span class="filter-pill active">All sizes</span>
+              <span class="filter-pill">&lt; 60</span>
+              <span class="filter-pill">60–120</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- KPI row -->
+        <div class="kpi-row" id="elKpiRow">
+          <div class="kpi above">
+            <div class="kpi-eye">Above national</div>
+            <div class="kpi-num" data-end="3" data-counter>0</div>
+            <div class="kpi-foot">flagged indicators</div>
+          </div>
+          <div class="kpi below">
+            <div class="kpi-eye">Below national</div>
+            <div class="kpi-num" data-end="11" data-counter>0</div>
+            <div class="kpi-foot">performing better</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-eye">At national</div>
+            <div class="kpi-num" data-end="0" data-counter>0</div>
+            <div class="kpi-foot">within ±0.5%</div>
+          </div>
+          <div class="kpi percentile">
+            <div class="kpi-eye">Facility percentile</div>
+            <div class="kpi-num"><span data-end="62" data-counter>0</span><span style="font-size:14px; color:var(--clay-ink);">nd</span></div>
+            <div class="kpi-foot">overall ranking</div>
+          </div>
+        </div>
+
+        <!-- Bar chart -->
+        <div class="chart-card" id="chartCard">
+          <div class="chart-h">Facility vs national median, all 14 indicators</div>
+          <div class="chart-sub">Sage = better than national. Clay = above national (worse). Tick = AIHW national median.</div>
+          <div class="chart-legend">
+            <span class="lg"><span class="lg-sw sage"></span>Bayside facility</span>
+            <span class="lg"><span class="lg-sw clay"></span>Above national (flagged)</span>
+            <span class="lg"><span class="lg-sw tick"></span>National median</span>
+          </div>
+
+          <div class="bar-list" id="barList">
+            <!-- 14 indicators: name, facility-bar, value, percentile -->
+            <div class="bar-row">
+              <span class="bar-name">Pressure injuries</span>
+              <span class="bar-track"><span class="bar-fill sage" data-pct="0.21"></span><span class="bar-tick" data-pct="0.85"></span></span>
+              <span class="bar-val">2.1%</span><span class="bar-pct">25th</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">Falls (major)</span>
+              <span class="bar-track"><span class="bar-fill sage" data-pct="0.17"></span><span class="bar-tick" data-pct="0.83"></span></span>
+              <span class="bar-val">1.4%</span><span class="bar-pct">28th</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">Unplanned weight loss</span>
+              <span class="bar-track"><span class="bar-fill sage" data-pct="0.34"></span><span class="bar-tick" data-pct="0.51"></span></span>
+              <span class="bar-val">3.4%</span><span class="bar-pct">38th</span>
+            </div>
+            <div class="bar-row flagged">
+              <span class="bar-name">Polypharmacy</span>
+              <span class="bar-track"><span class="bar-fill flagged" data-pct="0.92"></span><span class="bar-tick" data-pct="0.49"></span></span>
+              <span class="bar-val">38%</span><span class="bar-pct">88th</span>
+            </div>
+            <div class="bar-row flagged">
+              <span class="bar-name">Antipsychotic</span>
+              <span class="bar-track"><span class="bar-fill flagged" data-pct="0.41"></span><span class="bar-tick" data-pct="0.18"></span></span>
+              <span class="bar-val">8.2%</span><span class="bar-pct">81st</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">ADL decline</span>
+              <span class="bar-track"><span class="bar-fill sage" data-pct="0.50"></span><span class="bar-tick" data-pct="0.55"></span></span>
+              <span class="bar-val">22%</span><span class="bar-pct">45th</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">Incontinence (IAD)</span>
+              <span class="bar-track"><span class="bar-fill sage" data-pct="0.27"></span><span class="bar-tick" data-pct="0.46"></span></span>
+              <span class="bar-val">2.65%</span><span class="bar-pct">32nd</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">Restrictive practices</span>
+              <span class="bar-track"><span class="bar-fill sage" data-pct="0.43"></span><span class="bar-tick" data-pct="0.52"></span></span>
+              <span class="bar-val">12.9%</span><span class="bar-pct">42nd</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">Hospitalisation</span>
+              <span class="bar-track"><span class="bar-fill sage" data-pct="0.21"></span><span class="bar-tick" data-pct="0.45"></span></span>
+              <span class="bar-val">6.3%</span><span class="bar-pct">29th</span>
+            </div>
+            <div class="bar-row flagged">
+              <span class="bar-name">Allied health gap</span>
+              <span class="bar-track"><span class="bar-fill flagged" data-pct="0.82"></span><span class="bar-tick" data-pct="0.55"></span></span>
+              <span class="bar-val">22%</span><span class="bar-pct">79th</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">Consumer experience</span>
+              <span class="bar-track"><span class="bar-fill sage" data-pct="0.71"></span><span class="bar-tick" data-pct="0.65"></span></span>
+              <span class="bar-val">19.3</span><span class="bar-pct">62nd</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">Quality of life</span>
+              <span class="bar-track"><span class="bar-fill sage" data-pct="0.65"></span><span class="bar-tick" data-pct="0.62"></span></span>
+              <span class="bar-val">16.5</span><span class="bar-pct">58th</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">Workforce</span>
+              <span class="bar-track"><span class="bar-fill sage" data-pct="0.95"></span><span class="bar-tick" data-pct="0.71"></span></span>
+              <span class="bar-val">100%</span><span class="bar-pct">95th</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">Enrolled nursing</span>
+              <span class="bar-track"><span class="bar-fill sage" data-pct="0.91"></span><span class="bar-tick" data-pct="0.74"></span></span>
+              <span class="bar-val">91%</span><span class="bar-pct">85th</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Horizontal scan beam (sweeps the dashboard top→bottom) -->
+      <div class="scan-trail" id="scanTrail"></div>
+      <div class="scan-beam" id="scanBeam"></div>
+
+      <!-- Floating percentile badge that slides in -->
+      <div class="percentile-badge" id="percentileBadge">
+        <div class="pb-eye">Bayside ranks</div>
+        <div class="pb-num"><span data-end="62" data-counter id="pbNum">0</span><span class="ord">nd</span></div>
+        <div class="pb-foot">percentile · 24 metro peers</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hud">
+  <button id="replay">REPLAY</button>
+  <span class="timer" id="timer">0.00s</span>
+  <span style="opacity:.6">Scene 07 / Benchmarking</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+function fit(){
+  const wrap = document.getElementById('frame');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  /* zoom not transform: scale — natively rasterise at projected resolution; prevents 4K pixel break on 3D-rotated descendants. See ~/.claude/skills/hyperframes-video/rendering.md */
+  wrap.style.zoom = s;
+}
+fit();
+window.addEventListener('resize', fit);
+
+let tl;
+
+function build(){
+  const barFills = Array.from(document.querySelectorAll('.bar-fill'));
+  const barTicks = Array.from(document.querySelectorAll('.bar-tick'));
+  const flaggedRows = Array.from(document.querySelectorAll('.bar-row.flagged'));
+  const counters = Array.from(document.querySelectorAll('[data-counter]'));
+
+  /* === Initial state === */
+  /* Screen flies in from far, tilts FORWARD on X axis only (top toward viewer, no L/R tilt) */
+  gsap.set('#appCard', {
+    opacity: 0,
+    transformPerspective: 2400,
+    transformOrigin: '50% 50%',
+    scale: 0.08,
+    rotationX: 24, rotationY: 0, rotationZ: 0,
+    filter: 'blur(14px)',
+    boxShadow:
+      '0 0 0 2px rgba(184,209,181,0.65),' +
+      '0 0 80px rgba(184,209,181,0.70),' +
+      '0 0 200px rgba(184,209,181,0.50),' +
+      '0 60px 120px rgba(0,0,0,0.55)'
+  });
+
+  gsap.set('#topText', { opacity: 0, y: -30, filter: 'blur(8px)' });
+
+  gsap.set('#elEyebrow', { opacity: 0, y: 8 });
+  gsap.set('#elH1', { opacity: 0, y: 14 });
+  gsap.set('#elSub', { opacity: 0, y: 10 });
+  gsap.set('#elSource', { opacity: 0, y: 8 });
+  gsap.set('#elFilters', { opacity: 0, y: 8 });
+  gsap.set('#elKpiRow .kpi', { opacity: 0, y: 12 });
+  gsap.set('#chartCard', { opacity: 0, y: 14 });
+  gsap.set(barFills, { scaleX: 0 });
+  gsap.set(barTicks, { opacity: 0, scaleY: 0 });
+  gsap.set('#percentileBadge', { opacity: 0, scale: 0.85, y: 14 });
+
+  /* Scan beam — start at top, hidden */
+  gsap.set('#scanBeam',  { opacity: 0, y: 0 });
+  gsap.set('#scanTrail', { opacity: 0, y: -80 });
+
+  counters.forEach(c => { c.textContent = '0'; });
+
+  tl = gsap.timeline({
+    paused: true,
+    onUpdate: () => {
+      document.getElementById('timer').textContent = tl.time().toFixed(2) + 's';
+    }
+  });
+
+  /* ============================================================
+     TOTAL ~5.0s — beat-locked at 120 BPM (0.5s per beat). +0.5s extra hold.
+        b1  0.00      Screen begins fly-in from afar (0.50s landing)
+        b1+ 0.20      Top text begins sliding down from above
+        b2  0.50      Screen + text settled (on beat)
+        b2-b3  0.50-1.00   Header + filters + KPI cards + chart scaffold appear
+        b3-b4  1.00-1.50   Brief on-beat hold — empty dashboard registers
+        b4  1.50      HORIZONTAL SCAN BEAM begins
+        b6  2.50      Scan beam complete (1.00s — slower, more deliberate)
+        b6-b7  2.50-3.00   Bars FILL (sage + clay flagged) — fast cascade
+        b7-b8  3.00-3.50   National ticks pop + 3 flagged rows pulse clay
+        b8  3.50      "62nd percentile" badge slides in
+        b9-b10 4.00-4.50   Hold (+0.5s more pause for the contrast to land)
+        b10 4.50      EXIT — screen flies RIGHT, text fades up
+        b11 5.00      Scene end
+     ============================================================ */
+
+  /* === Phase A (b1-b2): Fly-in lands ON BEAT at 0.50s === */
+  tl.to('#appCard', {
+    opacity: 1,
+    scale: 1.0,
+    rotationX: -10, rotationY: 0, rotationZ: 0,
+    filter: 'blur(0px)',
+    boxShadow:
+      '0 0 0 0px rgba(184,209,181,0.0),' +
+      '0 0 0px rgba(184,209,181,0.0),' +
+      '0 0 0px rgba(184,209,181,0.0),' +
+      '0 60px 120px rgba(0,0,0,0.55)',
+    duration: 0.50,
+    ease: 'power3.out'
+  }, 0);
+
+  tl.to('#topText', {
+    opacity: 1, y: 0,
+    filter: 'blur(0px)',
+    duration: 0.40, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 0.15);
+
+  /* === Phase B (b2-b3): Header + filter row + KPI scaffold (0.50–1.00) === */
+  tl.to('#elEyebrow', { opacity: 1, y: 0, duration: 0.22, ease: 'power2.out' }, 0.50);
+  tl.to('#elH1', { opacity: 1, y: 0, duration: 0.30, ease: 'power3.out' }, 0.55);
+  tl.to('#elSub', { opacity: 1, y: 0, duration: 0.24, ease: 'power2.out' }, 0.65);
+  tl.to('#elSource', { opacity: 1, y: 0, duration: 0.24, ease: 'power2.out' }, 0.60);
+  tl.to('#elFilters', { opacity: 1, y: 0, duration: 0.26, ease: 'power2.out' }, 0.70);
+
+  tl.to('#elKpiRow .kpi', {
+    opacity: 1, y: 0,
+    duration: 0.30, stagger: 0.04, ease: 'power3.out'
+  }, 0.78);
+
+  tl.to('#chartCard', { opacity: 1, y: 0, duration: 0.30, ease: 'power3.out' }, 0.85);
+
+  /* Counter roll-ups (land before the scan begins on b4) */
+  counters.forEach((c) => {
+    const end = parseFloat(c.dataset.end);
+    const obj = { v: 0 };
+    tl.to(obj, {
+      v: end,
+      duration: 0.55, ease: 'power2.out',
+      onUpdate: () => { c.textContent = Math.round(obj.v); }
+    }, 0.92);
+  });
+
+  /* === Phase C (b4-b6): HORIZONTAL SCAN BEAM sweeps top→bottom (1.50–2.50, slower 1.00s) === */
+  tl.to('#scanBeam',  { opacity: 1, duration: 0.10, ease: 'power2.out' }, 1.50);
+  tl.to('#scanTrail', { opacity: 1, duration: 0.10, ease: 'power2.out' }, 1.50);
+  tl.to('#scanBeam', {
+    y: 730,
+    duration: 0.92, ease: 'power2.inOut'
+  }, 1.55);
+  tl.to('#scanTrail', {
+    y: 730 - 80,
+    duration: 0.92, ease: 'power2.inOut'
+  }, 1.55);
+  tl.to('#scanBeam',  { opacity: 0, duration: 0.10, ease: 'power2.in' }, 2.40);
+  tl.to('#scanTrail', { opacity: 0, duration: 0.10, ease: 'power2.in' }, 2.40);
+
+  /* === Phase D (b6-b7): Bars FILL after the scan (2.50–3.00) === */
+  barFills.forEach((bar, i) => {
+    const pct = parseFloat(bar.dataset.pct);
+    tl.to(bar, {
+      scaleX: pct,
+      duration: 0.42, ease: 'cubic-bezier(.22,.85,.30,1)'
+    }, 2.50 + i * 0.018);
+  });
+
+  /* National median ticks pop in along each bar */
+  barTicks.forEach((tick, i) => {
+    const pct = parseFloat(tick.dataset.pct);
+    tick.style.left = (pct * 100) + '%';
+    tl.to(tick, {
+      opacity: 1, scaleY: 1,
+      duration: 0.16, ease: 'back.out(1.6)'
+    }, 2.70 + i * 0.015);
+  });
+
+  /* === Phase E (b7-b8): Three flagged bars pulse (3.00–3.50) === */
+  tl.to(flaggedRows, {
+    keyframes: [
+      { backgroundColor: 'rgba(200,184,155,0.22)', duration: 0.16 },
+      { backgroundColor: 'rgba(200,184,155,0.0)',  duration: 0.28 }
+    ],
+    stagger: 0.06, ease: 'power2.inOut'
+  }, 3.00);
+
+  /* === Phase F (b8-b9): 62nd percentile badge slides in ON BEAT (3.50) === */
+  tl.to('#percentileBadge', {
+    opacity: 1, scale: 1.0, y: 0,
+    duration: 0.40, ease: 'back.out(1.4)'
+  }, 3.50);
+
+  /* === Phase G (b9-b10): HOLD — pause for the contrast to land (4.00–4.85) === */
+
+  /* === Phase H: EXIT at 4.85 — shifted +0.35s so exit lands at ~5.35, leaving
+     only ~0.15s blank tail before durSec=5.5 (was 0.50s, user complaint). */
+  tl.to('#topText', {
+    opacity: 0, y: -30, filter: 'blur(8px)',
+    duration: 0.40, ease: 'power3.in'
+  }, 4.85);
+  tl.to('#appCard', {
+    x: 1900,
+    rotationY: 32,
+    rotationZ: -8,
+    filter: 'blur(8px)',
+    duration: 0.50, ease: 'power3.in'
+  }, 4.85);
+  tl.to('#appCard', { opacity: 0, duration: 0.08 }, 5.27);
+}
+
+function play(){
+  if (!tl) build();
+  tl.restart();
+  tl.play();
+}
+
+document.getElementById('replay').addEventListener('click', play);
+
+// IFRAME-AWARE BOOTSTRAP — patched by shared/patch-scenes.mjs
+window.addEventListener('load', () => {
+  const start = () => { build(); if (window.parent === window) play(); };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+  } else {
+    start();
+  }
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === 'play'  && typeof play === 'function')                          play();
+  if (t === 'pause' && typeof tl   !== 'undefined' && tl)                    tl.pause();
+  if (t === 'reset' && typeof tl   !== 'undefined' && tl) { tl.seek(0); tl.pause(); }
+});
+</script>
+</body>
+</html>

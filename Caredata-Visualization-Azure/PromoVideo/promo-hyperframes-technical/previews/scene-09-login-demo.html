@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 09 - Demo: Login and Register (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+  --win-bg:       #FFFFFF;
+  --win-chrome:   #F2EEE4;
+  --win-border:   #E2DCCC;
+}
+
+body {
+  background: var(--paper);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.frame-wrap {
+  position: relative;
+  width: 1920px; height: 1080px;
+  transform-origin: 0 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--paper);
+}
+
+/* ===== Stage: light paper ===== */
+.stage {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(60vw 50vw at 50% 35%, rgba(159,180,160,0.09), transparent 70%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* paper grain */
+.grain {
+  position: absolute; inset: 0;
+  pointer-events: none; opacity: 0.35;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size: 420px 420px;
+}
+
+/* ===== Watermarks ===== */
+.watermark-bl {
+  position: absolute; bottom: 36px; left: 64px;
+  font-family: "Geist Mono", monospace; font-weight: 500;
+  font-size: 11px; letter-spacing: 0.20em;
+  color: var(--ink-500); opacity: 0.55; z-index: 60;
+  pointer-events: none;
+}
+.watermark-tr {
+  position: absolute; top: 42px; right: 64px;
+  font-family: "Geist Mono", monospace; font-weight: 500;
+  font-size: 11px; letter-spacing: 0.18em;
+  color: var(--ink-500); opacity: 0.55;
+  z-index: 60; pointer-events: none;
+}
+
+/* ===== Top Nav (authenticated state) ===== */
+#top-nav {
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 60px;
+  background: white;
+  border-bottom: 1px solid var(--win-border);
+  display: flex; align-items: center;
+  padding: 0 40px;
+  z-index: 40;
+  opacity: 0;
+}
+
+#top-nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  margin-right: auto;
+}
+
+#top-nav-ekg {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, oklch(0.72 0.06 150), oklch(0.78 0.05 180));
+  position: relative; flex-shrink: 0;
+}
+#top-nav-ekg .ekg-line {
+  position: absolute; inset: 7px;
+  background: white;
+  clip-path: polygon(0 60%, 18% 60%, 28% 40%, 42% 75%, 56% 20%, 70% 60%,
+                     100% 60%, 100% 65%, 68% 65%, 56% 30%, 42% 82%, 28% 50%,
+                     18% 65%, 0 65%);
+}
+
+#top-nav-wordmark {
+  font-family: "Geist", sans-serif;
+  font-weight: 600; font-size: 18px;
+  color: var(--ink-900);
+}
+
+#top-nav-links {
+  display: flex; align-items: center; gap: 32px;
+}
+.nav-item {
+  font-family: "Geist", sans-serif;
+  font-weight: 500; font-size: 14px;
+  color: var(--ink-500);
+  cursor: default;
+  padding-bottom: 2px;
+}
+.nav-item.active {
+  color: var(--sage-ink);
+  border-bottom: 2px solid var(--sage-ink);
+  padding-bottom: 0;
+}
+
+/* ===== Browser window ===== */
+#browser {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 1400px; height: 780px;
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.08);
+  overflow: hidden;
+  z-index: 20;
+  opacity: 0;
+}
+
+/* Browser chrome */
+.browser-chrome {
+  height: 48px;
+  background: #F0EDE6;
+  border-bottom: 1px solid #DDD8CC;
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.traffic-lights {
+  position: absolute;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tl {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+}
+.tl-red    { background: #EE6B5B; }
+.tl-yellow { background: #F4BC47; }
+.tl-green  { background: #62C554; }
+
+.address-bar {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 560px; height: 28px;
+  background: #FBF8F2;
+  border: 1px solid #DDD8CC;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+}
+.address-bar .lock-icon {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.address-bar .url-text {
+  font-family: "Geist Mono", monospace;
+  font-size: 13px;
+  color: var(--ink-500);
+  white-space: nowrap;
+}
+
+/* Browser content area */
+.browser-content {
+  height: calc(780px - 48px);
+  background: var(--paper);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== Login Card ===== */
+#login-card {
+  width: 540px; height: 480px;
+  background: white;
+  border: 1px solid var(--win-border);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(31,38,34,0.10);
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Brand mark */
+.card-brand-mark {
+  width: 56px; height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, oklch(0.72 0.06 150), oklch(0.78 0.05 180));
+  position: relative;
+  flex-shrink: 0;
+}
+.card-brand-mark .ekg-inner {
+  position: absolute; inset: 10px;
+  background: var(--paper);
+  clip-path: polygon(0 60%, 18% 60%, 28% 40%, 42% 75%, 56% 20%, 70% 60%,
+                     100% 60%, 100% 65%, 68% 65%, 56% 30%, 42% 82%, 28% 50%,
+                     18% 65%, 0 65%);
+}
+
+.card-app-name {
+  font-family: "Geist", sans-serif;
+  font-weight: 600; font-size: 36px;
+  color: var(--ink-900);
+  margin-top: 16px;
+  text-align: center;
+}
+.card-subtitle {
+  font-family: "Geist", sans-serif;
+  font-weight: 400; font-size: 15px;
+  color: var(--ink-500);
+  text-align: center;
+}
+.card-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--paper-edge);
+  margin: 24px 0;
+}
+.card-sign-in-label {
+  font-family: "Geist", sans-serif;
+  font-weight: 500; font-size: 14px;
+  color: var(--ink-500);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Google OAuth Button */
+#oauth-btn {
+  width: 100%; height: 52px;
+  background: white;
+  border: 1px solid #DADCE0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: default;
+  transition: transform 0.15s ease;
+}
+#oauth-btn .oauth-label {
+  font-family: "Geist", sans-serif;
+  font-weight: 500; font-size: 15px;
+  color: #3C4043;
+}
+
+/* Or separator */
+.or-separator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 16px 0;
+}
+.or-line {
+  flex: 1;
+  height: 1px;
+  background: var(--paper-edge);
+}
+.or-text {
+  font-family: "Geist", sans-serif;
+  font-weight: 400; font-size: 13px;
+  color: var(--ink-300);
+}
+
+/* Email input mock */
+.email-input-mock {
+  width: 100%; height: 44px;
+  border: 1px solid #DDD;
+  border-radius: 6px;
+  padding: 0 14px;
+  font-family: "Geist", sans-serif;
+  font-weight: 400; font-size: 14px;
+  color: var(--ink-300);
+  background: white;
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+/* Email continue button */
+.email-continue-btn {
+  width: 100%; height: 48px;
+  background: var(--sage);
+  color: white;
+  font-family: "Geist", sans-serif;
+  font-weight: 600; font-size: 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== JWT Chip ===== */
+#jwt-chip {
+  position: absolute;
+  top: 80px; right: 120px;
+  background: var(--sage-tint);
+  border: 1px solid rgba(75,106,85,0.28);
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 15px;
+  color: var(--sage-ink);
+  z-index: 30;
+  opacity: 0;
+  white-space: nowrap;
+}
+
+/* ===== Cursor ===== */
+#cursor {
+  position: absolute;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0;
+}
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE · GROUP W08 / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO · CARE-DATA · 09 / 18</div>
+
+  <!-- ===== Top Navigation (authenticated state) ===== -->
+  <div id="top-nav">
+    <div id="top-nav-brand">
+      <div id="top-nav-ekg"><div class="ekg-line"></div></div>
+      <span id="top-nav-wordmark">CareData</span>
+    </div>
+    <div id="top-nav-links">
+      <span class="nav-item active">Dashboard</span>
+      <span class="nav-item">Data Entry</span>
+      <span class="nav-item">QI Reports</span>
+      <span class="nav-item">Benchmarking</span>
+      <span class="nav-item">Voice Screening</span>
+      <span class="nav-item">Settings</span>
+    </div>
+  </div>
+
+  <!-- ===== JWT Chip ===== -->
+  <div id="jwt-chip">JWT issued &nbsp;·&nbsp; exp: 3600s &nbsp;·&nbsp; alg: HS256</div>
+
+  <!-- ===== macOS-style Browser Window ===== -->
+  <div id="browser">
+    <!-- Browser Chrome -->
+    <div class="browser-chrome">
+      <div class="traffic-lights">
+        <div class="tl tl-red"></div>
+        <div class="tl tl-yellow"></div>
+        <div class="tl tl-green"></div>
+      </div>
+      <div class="address-bar">
+        <span class="lock-icon">🔒</span>
+        <span class="url-text">app.caredata.io/login</span>
+      </div>
+    </div>
+
+    <!-- Browser Content -->
+    <div class="browser-content">
+      <!-- Login Card -->
+      <div id="login-card">
+        <!-- Brand mark -->
+        <div class="card-brand-mark">
+          <div class="ekg-inner"></div>
+        </div>
+
+        <div class="card-app-name">CareData</div>
+        <div class="card-subtitle">Health Analytics Portal</div>
+
+        <div class="card-divider"></div>
+
+        <div class="card-sign-in-label">Sign in to continue</div>
+
+        <!-- Google OAuth Button -->
+        <div id="oauth-btn">
+          <svg width="20" height="20" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.5 0 6.3 1.2 8.5 3.2l6.3-6.3C34.8 3.1 29.8 1 24 1 14.9 1 7.2 6.5 3.5 14.3l7.3 5.7C12.6 13.7 17.9 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.5 24c0-1.5-.1-3-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.4 5.7C43.5 37.1 46.5 31 46.5 24z"/>
+            <path fill="#FBBC05" d="M10.8 28.5C10.3 27 10 25.5 10 24s.3-3 .8-4.5L3.5 14.3C1.3 18 0 21.9 0 26c0 4.1 1.3 8 3.5 11.7l7.3-5.7z"/>
+            <path fill="#34A853" d="M24 47c5.8 0 10.7-1.9 14.3-5.2l-7.4-5.7c-1.9 1.3-4.4 2.1-6.9 2.1-6.1 0-11.4-4.1-13.2-9.7l-7.3 5.7C7.2 41.5 14.9 47 24 47z"/>
+          </svg>
+          <span class="oauth-label">Sign in with Google</span>
+        </div>
+
+        <!-- Or separator -->
+        <div class="or-separator">
+          <div class="or-line"></div>
+          <span class="or-text">or</span>
+          <div class="or-line"></div>
+        </div>
+
+        <!-- Email input mock -->
+        <div class="email-input-mock">Email address</div>
+
+        <!-- Email continue button -->
+        <div class="email-continue-btn">Continue with email</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Cursor ===== -->
+  <div id="cursor">
+    <svg width="24" height="32" viewBox="0 0 24 32" fill="none">
+      <path d="M3 3l18 14-8 1-4 11L3 3z" fill="white" stroke="#1F2622" stroke-width="1.5"/>
+    </svg>
+  </div>
+
+  <!-- SFX -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3" preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function() {
+  await document.fonts.ready;
+
+  /* ===== Zoom fit — zoom not transform:scale; transform-origin:0 0 ===== */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((vw - fw) / 2) + 'px';
+    frame.style.top  = ((vh - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* ===== Element refs ===== */
+  const browser  = document.getElementById('browser');
+  const jwtChip  = document.getElementById('jwt-chip');
+  const topNav   = document.getElementById('top-nav');
+  const oauthBtn = document.getElementById('oauth-btn');
+  const cursor   = document.getElementById('cursor');
+
+  const sfxType   = document.getElementById('sfx-type');
+  const sfxWhoosh = document.getElementById('sfx-whoosh');
+  const sfxClick  = document.getElementById('sfx-click');
+
+  /* ===== SFX helper ===== */
+  function playSfx(el, vol) {
+    try { el.volume = (vol !== undefined ? vol : 1.0); el.currentTime = 0; el.play(); } catch (_) {}
+  }
+
+  /* ===== Easing presets ===== */
+  const easeSettle = 'cubic-bezier(0.16,0.85,0.30,1)';
+
+  /* ===== Compute oauth-btn position in frame coordinates =====
+     Browser: centered at (960, 540), size 1400x780
+     Browser content starts at top: 48 (chrome height)
+     Login card: centered in content area (732px tall), width 540px height 480px
+       card top offset in browser: 48 + (732 - 480)/2 = 48 + 126 = 174
+       card left offset in browser: (1400 - 540)/2 = 430
+     oauth-btn sits inside card:
+       card padding-top = 48px
+       brand-mark 56px + margin-top 16px + app-name line-height ~44px + subtitle ~20px
+       + divider area (24 + 1 + 24) + sign-in-label (20px height + margin-bottom 20px)
+       = 48 + 56 + 16 + 44 + 20 + 69 + 34 = ~287px from card top to oauth-btn top
+       oauth-btn center-y relative to card = 287 + 52/2 = 313
+     oauth-btn center in frame:
+       x = 260 (browser left within frame) + 430 (card left in browser) + 270 (card half-width) = 960
+       y = 150 (browser top in frame, approx) + 174 (card top in browser) + 313 = 637
+     We set initial cursor at (960, 800) — below the button, then animate up to (960, 637).
+  ===== */
+  const BTN_X = 960;
+  const BTN_Y = 637;
+
+  /* ===== Initial state ===== */
+  gsap.set(browser,  { opacity: 0, y: 40 });
+  gsap.set(jwtChip,  { opacity: 0, x: 20 });
+  gsap.set(topNav,   { opacity: 0, y: -20 });
+  gsap.set(cursor,   { opacity: 0, x: 960, y: 800 });
+
+  /* ===== Timeline (20 s) ===== */
+  const tl = gsap.timeline();
+
+  /* 0.5 s: browser slides up */
+  tl.call(() => playSfx(sfxWhoosh, 0.6), null, 0.5);
+  tl.to(browser, {
+    opacity: 1, y: 0, duration: 0.55, ease: easeSettle
+  }, 0.5);
+
+  /* 1.5 s: cursor appears at starting position */
+  tl.to(cursor, {
+    opacity: 1, duration: 0.2, ease: 'sine.out'
+  }, 1.5);
+
+  /* 2.5 s: cursor moves toward oauth-btn */
+  tl.to(cursor, {
+    x: BTN_X, y: BTN_Y, duration: 0.6, ease: easeSettle
+  }, 2.5);
+
+  /* 3.0 s: click — oauth-btn scale press + sfx */
+  tl.call(() => playSfx(sfxClick, 0.9), null, 3.0);
+  tl.to(oauthBtn, { scale: 0.97, duration: 0.08, ease: 'power2.in' }, 3.0);
+  tl.to(oauthBtn, { scale: 1.0, duration: 0.15, ease: 'back.out(2)' }, 3.08);
+
+  /* 3.5 s: jwt-chip slides in from right */
+  tl.call(() => playSfx(sfxWhoosh, 0.4), null, 3.5);
+  tl.to(jwtChip, {
+    opacity: 1, x: 0, duration: 0.4, ease: easeSettle
+  }, 3.5);
+
+  /* 5.0 s: cursor fades out */
+  tl.to(cursor, { opacity: 0, duration: 0.3, ease: 'sine.out' }, 5.0);
+
+  /* 5.5 s: browser slides up and out */
+  tl.to(browser, {
+    opacity: 0, y: -30, duration: 0.4, ease: 'power2.in'
+  }, 5.5);
+
+  /* 6.0 s: top-nav slides down — authenticated state revealed */
+  tl.call(() => playSfx(sfxWhoosh, 0.65), null, 6.0);
+  tl.to(topNav, {
+    opacity: 1, y: 0, duration: 0.5, ease: easeSettle
+  }, 6.0);
+
+  /* 6.0 - 20.0 s: hold with top-nav visible showing authenticated state */
+  /* Timeline ends naturally at 20 s */
+
+})();
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

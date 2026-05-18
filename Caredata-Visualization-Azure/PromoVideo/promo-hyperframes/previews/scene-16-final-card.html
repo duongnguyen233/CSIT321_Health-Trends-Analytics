@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 16, Final Card (preview) | CareData promo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --cream:#F6F2EB;
+  --paper:#FBF8F2;
+  --ink-900:#1F2622;
+  --ink-700:#3D4743;
+  --ink-500:#6B7570;
+  --ink-300:#A4ABA4;
+  --sage:#9FB4A0;
+  --sage-bright:#B8D1B5;
+  --sage-ink:#4B6A55;
+  --sage-tint:#EEF1EC;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background:#0E1211;
+  color:var(--cream);
+  font-family:"Geist",ui-sans-serif,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.frame-wrap{
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;     /* 4K canvas-fill */
+}
+.stage{
+  position:absolute; inset:0;
+  background:#FFFFFF;        /* starts white (carry-over from Scene 15) */
+  overflow:hidden;
+}
+
+/* The dark stage with sage radial glow — sits beneath the white initially.
+   Becomes visible as the ink seed bursts and the white is removed. */
+.dark-stage{
+  position:absolute; inset:0;
+  z-index:1;
+  background:
+    radial-gradient(58vw 50vw at 50% 50%, rgba(159,180,160,0.18), transparent 65%),
+    radial-gradient(45vw 50vw at 8%  0%,  rgba(184,209,181,0.06), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(159,180,160,0.06), transparent 65%),
+    linear-gradient(150deg, #0E1211 0%, #161B17 50%, #0E1211 100%);
+}
+
+/* The white layer — fades out as the ink seed bursts */
+.white-bg{
+  position:absolute; inset:0;
+  z-index:2;
+  background:#FFFFFF;
+  will-change:opacity;
+}
+
+/* Carry-over Scene 15 tagline 2 — visible at t=0, fades during the ink burst */
+.s15-tagline{
+  position:absolute;
+  top:50%; left:50%;
+  text-align:center;
+  z-index:6;
+  white-space:nowrap;
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  line-height:0.94;
+  letter-spacing:-0.028em;
+  will-change:opacity, transform;
+}
+.s15-tagline .line{ font-size:104px; color:var(--ink-900); }
+.s15-tagline .italic{ font-style:italic; color:var(--sage-ink); }
+
+/* === Ink seed — the burst that wipes the white and reveals dark stage === */
+.ink-seed{
+  position:absolute;
+  top:50%; left:50%;
+  width:120px; height:120px;
+  margin-left:-60px; margin-top:-60px;
+  border-radius:50%;
+  background:var(--ink-900);
+  z-index:8;
+  opacity:0;
+  transform:scale(0.05);
+  box-shadow:
+    0 0 60px rgba(31,38,34,0.35),
+    inset 0 0 30px rgba(0,0,0,0.25);
+  will-change:transform, opacity, background-color;
+}
+
+/* Grain on dark stage */
+.grain{
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.05;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+  z-index:5;
+}
+
+/* === Brand lockup — mark and text are SIBLINGS positioned independently
+   so the M16 drop can land at frame centre and the M12 slide-left + text
+   fade-in produce a combined visual that's centred. === */
+
+/* The BrandMark — uses the same inline SVG pattern as Scene 2 (and the mini-mark
+   across the rest of the video) so the EKG line thickness matches consistently.
+   Was a CSS clip-path polygon with a thinner gap that read off-brand. */
+.mark{
+  position:absolute;
+  top:50%; left:50%;
+  width:160px; height:160px;
+  z-index:21;
+  border-radius:36px;
+  overflow:visible;
+  filter:
+    drop-shadow(0 28px 60px rgba(0,0,0,0.45))
+    drop-shadow(0 0 0 1px rgba(255,255,255,0.06));
+  will-change:transform, opacity, filter;
+}
+.mark svg{ width:100%; height:100%; display:block; }
+
+.brand-text{
+  position:absolute;
+  top:50%; left:50%;
+  display:flex; flex-direction:column;
+  gap:8px;
+  z-index:20;
+  opacity:0;
+  will-change:opacity, transform;
+}
+.brand-text .word{
+  font-family:"Geist", sans-serif;
+  font-weight:600;
+  font-size:104px;
+  letter-spacing:-0.025em;
+  color:var(--cream);
+  line-height:0.95;
+}
+.brand-text .tag{
+  font-family:"Geist", sans-serif;
+  font-weight:400;
+  font-size:22px;
+  color:var(--ink-300);
+  letter-spacing:0.02em;
+  margin-top:2px;
+}
+.brand-text .url{
+  font-family:"Geist Mono", monospace;
+  font-size:18px;
+  color:var(--sage-bright);
+  letter-spacing:0.04em;
+  margin-top:14px;
+  display:inline-flex; align-items:center; gap:8px;
+}
+.brand-text .url::before{
+  content:''; width:6px; height:6px; border-radius:50%; background:var(--sage-bright);
+  box-shadow:0 0 12px rgba(184,209,181,0.7);
+}
+
+/* Footer (bottom-left, mono) */
+.footer-cap{
+  position:absolute;
+  bottom:48px; left:60px;
+  font-family:"Geist Mono", monospace;
+  font-size:12px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--ink-500);
+  z-index:30;
+  opacity:0;
+  will-change:opacity;
+}
+.footer-cap .sep{ margin:0 10px; color:var(--ink-700); }
+
+/* Hud */
+.hud{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  background:rgba(15,15,17,0.85);
+  color:#EAE3D2; font-family:"Geist Mono", monospace; font-size:11px;
+  padding:8px 14px; border-radius:999px;
+  display:flex; gap:14px; align-items:center; z-index:100;
+  letter-spacing:0.06em;
+}
+.hud button{
+  appearance:none; border:1px solid #555; background:transparent; color:#EAE3D2;
+  font-family:inherit; font-size:11px; padding:3px 10px; border-radius:999px; cursor:pointer;
+}
+.hud button:hover{ background:#222; }
+.hud .timer{ font-variant-numeric:tabular-nums; min-width:46px; }
+</style>
+</head>
+<body>
+
+<div class="frame-wrap" id="frame">
+  <div class="stage">
+    <!-- Layers, back-to-front -->
+    <div class="dark-stage" id="darkStage"></div>
+    <div class="white-bg"   id="whiteBg"></div>
+
+    <!-- Carry-over tagline from Scene 15 (briefly) -->
+    <div class="s15-tagline" id="s15Tag">
+      <div class="line">File with confidence.</div>
+      <div class="line italic">Every quarter, every day.</div>
+    </div>
+
+    <!-- Ink seed that bursts to wipe the white -->
+    <div class="ink-seed" id="inkSeed"></div>
+
+    <div class="grain"></div>
+
+    <!-- Brand lockup — mark and text positioned independently.
+         SVG matches Scene 2's BIG logo: viewBox 100, stroke-width 4.5 — same
+         line thickness as the rest of the video. -->
+    <div class="mark" id="mark">
+      <svg viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="brandGrad16" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="oklch(0.72 0.06 150)"/>
+            <stop offset="100%" stop-color="oklch(0.78 0.05 180)"/>
+          </linearGradient>
+        </defs>
+        <rect width="100" height="100" rx="22" fill="url(#brandGrad16)"/>
+        <path
+          d="M 22,55.6 L 32.08,55.6 L 37.68,44.4 L 45.52,64 L 53.36,33.2 L 61.2,55.6 L 78,55.6"
+          fill="none"
+          stroke="#FBF8F2"
+          stroke-width="4.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="brand-text" id="brandText">
+      <div class="word">CareData</div>
+      <div class="tag">Health Analytics Portal</div>
+      <div class="url">caredata.com</div>
+    </div>
+
+    <!-- Bottom-left footer -->
+    <div class="footer-cap" id="footerCap">
+      CSIT321 CAPSTONE <span class="sep">—</span> UNIVERSITY&nbsp;OF&nbsp;WOLLONGONG
+    </div>
+  </div>
+</div>
+
+<div class="hud">
+  <button id="replay">REPLAY</button>
+  <span class="timer" id="timer">0.00s</span>
+  <span style="opacity:.6">Scene 16 / Final Card</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+function fit(){
+  const wrap = document.getElementById('frame');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  /* zoom not transform: scale — natively rasterise at projected resolution; prevents 4K pixel break on 3D-rotated descendants. See ~/.claude/skills/hyperframes-video/rendering.md */
+  wrap.style.zoom = s;
+}
+fit();
+window.addEventListener('resize', fit);
+
+let tl;
+
+function build(){
+  /* Initial state — final frame of Scene 15 */
+  gsap.set('#whiteBg',  { opacity: 1 });
+  gsap.set('#darkStage',{ opacity: 1 });            /* always there underneath */
+  gsap.set('#s15Tag',   { xPercent: -50, yPercent: -50, opacity: 1 });
+  gsap.set('#inkSeed',  { opacity: 0, scale: 0.05 });
+
+  /* Mark — centred horizontally + vertically via xPercent/yPercent.
+     Starts off-stage above (M16 drop). */
+  gsap.set('#mark', {
+    xPercent: -50, yPercent: -50,
+    opacity: 0,
+    y: -360,
+    scale: 0.94
+  });
+
+  /* Brand-text — left edge anchored at frame centre. After M12 it sits
+     to the right (left edge at frame_centre - 200px since x: -200 with
+     no xPercent moves left edge by -200). */
+  gsap.set('#brandText', {
+    yPercent: -50,
+    opacity: 0,
+    x: -180,                /* offset left edge from centre line */
+    y: 0
+  });
+  gsap.set('#footerCap', { opacity: 0 });
+
+  tl = gsap.timeline({
+    paused: true,
+    onUpdate: () => {
+      document.getElementById('timer').textContent = tl.time().toFixed(2) + 's';
+    }
+  });
+
+  /* ============================================================
+     TOTAL ~3.50s — beat-locked at 120 BPM
+     TRANSITION FROM SCENE 15:
+        b0   0.00     White stage + tagline 2 still visible
+        b0+  0.05     Ink seed appears at centre, pulses
+        b1   0.20     Ink seed BURSTS outward (scale 0.1 → 32) covering white
+        b1+  0.20     Tagline fades up + out as the dark wipe takes over
+        b1+  0.55     White layer fades to 0; sage-glow dark stage now visible
+        b2   0.75     Ink seed itself fades (its job is done)
+     SCENE BODY:
+        b2   0.75     M16 logo drop-and-lock — falls from y −360 to centre
+                      with a back.out bounce ("lock" feel)
+        b3   1.30     Hold logo centred (~0.40s, per CLAUDE.md)
+        b4   1.70     M12 horizontal track — logo slides LEFT
+        b4+  1.85     "CareData" + "Health Analytics Portal" + "caredata.io"
+                      fade up on the right
+        b5   2.30     Footer fades in (CSIT321 / Wollongong)
+        b6   2.70–3.50 Hold + gentle fade for audio resolve
+     ============================================================ */
+
+  /* === Phase A (b0+): Ink seed appears + pulses === */
+  tl.to('#inkSeed', {
+    opacity: 1, scale: 1.0,
+    duration: 0.18, ease: 'power2.out'
+  }, 0.05);
+
+  /* === Phase B (b1): Ink seed BURSTS — wipes white to reveal dark stage ===
+     scale 1 → 32 covers the whole frame in ink-900. White layer fades to
+     reveal the sage-glow dark stage that's been beneath it the whole time. */
+  tl.to('#inkSeed', {
+    scale: 32,
+    duration: 0.55, ease: 'power2.in'
+  }, 0.20);
+  tl.to('#whiteBg', {
+    opacity: 0,
+    duration: 0.45, ease: 'power2.in'
+  }, 0.30);
+
+  /* Tagline fades up and out as the wipe takes over */
+  tl.to('#s15Tag', {
+    opacity: 0, y: -30,
+    duration: 0.40, ease: 'power3.in'
+  }, 0.20);
+
+  /* Ink seed itself fades once the wipe has done its job */
+  tl.to('#inkSeed', {
+    opacity: 0,
+    duration: 0.20, ease: 'power2.in'
+  }, 0.65);
+
+  /* === Phase C (b2): M16 mark drop-and-lock ===
+     Mark falls from y -360 to centre (y:0) with back.out for the "lock"
+     bounce. The mark is alone on stage — text appears later. */
+  tl.to('#mark', {
+    opacity: 1,
+    y: 0,
+    scale: 1.0,
+    duration: 0.55, ease: 'back.out(1.6)'
+  }, 0.75);
+
+  /* Tiny shockwave on landing — mark pulses 1.0 → 1.06 → 1.0 */
+  tl.to('#mark', {
+    scale: 1.06,
+    duration: 0.08, ease: 'power1.in'
+  }, 1.18);
+  tl.to('#mark', {
+    scale: 1.0,
+    duration: 0.20, ease: 'power2.out'
+  }, 1.26);
+
+  /* === Phase D (b3+): Hold centred (~0.40s) === */
+
+  /* === Phase E (b4): M12 horizontal track ===
+     Mark slides LEFT to its final lockup position. Brand-text fades in to
+     its right. The combined visual (mark centre + text block) is balanced
+     around frame centre:
+       - Mark final centre: x = -380 from frame centre (mark width 160 → 80 half)
+       - Text final left edge: x = -180 from frame centre
+       - Text block roughly 660px wide, so right edge ≈ +480 from centre
+       - Combined visual span: −460 to +480 → midpoint ≈ +10 (effectively centred)
+  */
+  tl.to('#mark', {
+    x: -380,
+    duration: 0.55, ease: 'cubic-bezier(.16,.85,.30,1)'
+  }, 1.70);
+
+  /* === Phase F (b4+): Brand text fades up on the right === */
+  tl.to('#brandText', {
+    opacity: 1,
+    duration: 0.50, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 1.85);
+
+  /* === Phase G (b5): Bottom-left footer fades in === */
+  tl.to('#footerCap', {
+    opacity: 1,
+    duration: 0.45, ease: 'power2.out'
+  }, 2.30);
+
+  /* === Phase H (b6+): Gentle fade tail for audio resolve === */
+  /* (Implementation note: the master mix handles the audio fade; this
+     scene just holds. We could optionally slow-bloom the sage glow.) */
+  tl.fromTo('.dark-stage',
+    { filter: 'brightness(1.0)' },
+    { filter: 'brightness(1.06)', duration: 0.80, ease: 'sine.inOut' },
+    2.70
+  );
+}
+
+function play(){
+  if (!tl) build();
+  tl.restart();
+  tl.play();
+}
+
+document.getElementById('replay').addEventListener('click', play);
+
+// IFRAME-AWARE BOOTSTRAP — patched by shared/patch-scenes.mjs
+window.addEventListener('load', () => {
+  const start = () => { build(); if (window.parent === window) play(); };
+  const waitForGsap = (cb) => {
+    if (typeof gsap !== 'undefined') return cb();
+    setTimeout(() => waitForGsap(cb), 30);
+  };
+  const ready = () => waitForGsap(start);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(ready);
+  } else {
+    ready();
+  }
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === 'play'  && typeof play === 'function')                          play();
+  if (t === 'pause' && typeof tl   !== 'undefined' && tl)                    tl.pause();
+  if (t === 'reset' && typeof tl   !== 'undefined' && tl) { tl.seek(0); tl.pause(); }
+});
+</script>
+</body>
+</html>

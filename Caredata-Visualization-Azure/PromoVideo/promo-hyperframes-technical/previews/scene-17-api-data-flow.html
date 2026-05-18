@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 09 - CSV Pipeline (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+
+  --win-bg:       #FFFFFF;
+  --win-chrome:   #F2EEE4;
+  --win-border:   #E2DCCC;
+  --code-comment: #8E948D;
+  --code-keyword: #4B6A55;
+  --code-fn:      #3D4743;
+  --code-string:  #836B47;
+  --code-punct:   #6B7570;
+  --code-good:    #6F8E76;
+}
+
+body {
+  background: var(--paper);
+  display:flex; align-items:center; justify-content:center;
+}
+
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+  background:
+    radial-gradient(circle at 20% 25%, rgba(159,180,160,0.10), transparent 55%),
+    radial-gradient(circle at 78% 72%, rgba(159,180,160,0.08), transparent 60%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* paper grain */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.35;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+/* ===== Watermarks ===== */
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.20em;
+  color:var(--ink-500); opacity:0.55; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+
+/* ===== Pipeline stage cards ===== */
+.pipeline-card {
+  position:absolute;
+  top:0;
+  width:260px; height:190px;
+  background:var(--win-bg);
+  border:1px solid rgba(159,180,160,0.35);
+  border-radius:10px;
+  padding:22px 20px 16px;
+  opacity:0;
+  box-shadow:
+    0 1px 0 #FFFFFF inset,
+    0 8px 20px rgba(60,55,40,0.09),
+    0 2px 5px rgba(60,55,40,0.05);
+  overflow:visible;
+}
+.pipeline-card.stage-active-border {
+  border-color: var(--sage);
+  border-width: 1.5px;
+}
+.card-title {
+  font-family:"Geist Mono",monospace;
+  font-size:20px; font-weight:600;
+  letter-spacing:0.06em;
+  color:var(--ink-900);
+}
+.card-sub {
+  margin-top:6px;
+  font-family:"Geist",sans-serif;
+  font-size:13px; font-weight:400;
+  color:var(--ink-500);
+  letter-spacing:0.02em;
+}
+
+/* M22 progress arc inside each card */
+.arc-wrap {
+  position:absolute;
+  right:16px; bottom:14px;
+  width:72px; height:72px;
+}
+.arc-track {
+  stroke:rgba(159,180,160,0.20);
+  stroke-width:3;
+  fill:none;
+}
+.arc-fill {
+  stroke:#9FB4A0;
+  stroke-width:3;
+  fill:none;
+  stroke-dasharray:188.5;
+  stroke-dashoffset:188.5;
+  transform:rotate(-90deg);
+  transform-origin:30px 30px;
+}
+
+/* Validation log inside validate card */
+#vlog {
+  position:absolute;
+  left:14px; right:14px; bottom:14px;
+  display:flex; flex-direction:column-reverse;
+  gap:2px;
+  overflow:hidden;
+  max-height:90px;
+}
+.vlog-row {
+  font-family:"Geist Mono",monospace;
+  font-size:10px; font-weight:500;
+  letter-spacing:0.04em;
+  line-height:1.35;
+  padding:2px 4px;
+  border-radius:3px;
+  opacity:0;
+  transform:translateY(16px);
+}
+.vlog-row.ok  { color:var(--sage-ink); background:var(--sage-tint); }
+.vlog-row.err { color:var(--clay-ink); background:#FDF4EC; }
+
+/* ===== Connectors SVG ===== */
+#connectors-svg {
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  pointer-events:none;
+  overflow:visible;
+}
+
+/* ===== Trace dot ===== */
+#trace-dot {
+  position:absolute;
+  width:14px; height:14px;
+  border-radius:50%;
+  background:#9FB4A0;
+  box-shadow:0 0 12px #9FB4A0;
+  opacity:0;
+  z-index:10;
+}
+
+/* ===== CSV icon ===== */
+#csv-icon {
+  position:absolute;
+  width:110px;
+  background:var(--paper-warm);
+  border:1px solid var(--clay);
+  border-radius:8px;
+  padding:12px 14px;
+  opacity:0;
+  z-index:20;
+  box-shadow:0 4px 12px rgba(60,55,40,0.10);
+}
+.csv-label {
+  font-family:"Geist Mono",monospace;
+  font-size:14px; font-weight:600;
+  color:var(--ink-900);
+}
+.csv-filename {
+  margin-top:20px;
+  font-family:"Geist",sans-serif;
+  font-size:11px; color:var(--ink-700);
+}
+.csv-size {
+  margin-top:2px;
+  font-family:"Geist Mono",monospace;
+  font-size:10px; color:var(--ink-500);
+}
+
+/* Badge above parse card */
+#parse-badge {
+  position:absolute;
+  top:-34px; left:0; right:0;
+  text-align:center;
+  font-family:"Geist Mono",monospace;
+  font-size:11px; font-weight:500;
+  color:var(--sage-ink);
+  background:var(--sage-tint);
+  border:1px solid rgba(75,106,85,0.18);
+  border-radius:4px;
+  padding:3px 8px;
+  opacity:0;
+  white-space:nowrap;
+}
+
+/* ===== Code pane (light theme) ===== */
+#code-pane {
+  position:absolute;
+  top:62px; right:60px;
+  width:760px; height:220px;
+  background:var(--win-bg);
+  border:1px solid var(--win-border);
+  border-radius:8px;
+  overflow:hidden;
+  opacity:0;
+  box-shadow:
+    0 1px 0 #FFFFFF inset,
+    0 10px 24px rgba(60,55,40,0.10),
+    0 2px 6px rgba(60,55,40,0.06);
+}
+#code-pane-chrome {
+  display:flex; align-items:center;
+  height:32px;
+  background:var(--win-chrome);
+  border-bottom:1px solid var(--win-border);
+  padding:0 14px;
+  font-family:"Geist Mono",monospace;
+  font-size:11px; font-weight:500;
+  letter-spacing:0.04em;
+  color:var(--ink-500);
+}
+#code-pane-chrome .lights {
+  display:inline-flex; gap:6px;
+  margin-right:14px;
+}
+#code-pane-chrome .lights span {
+  width:10px; height:10px; border-radius:50%;
+  background:#D9D3C4;
+  border:1px solid rgba(0,0,0,0.04);
+}
+#code-pane-chrome .lights span:first-child  { background:#D8B0A4; }
+#code-pane-chrome .lights span:nth-child(2) { background:#D9CDA4; }
+#code-pane-chrome .lights span:nth-child(3) { background:#B0C5B2; }
+#code-pane-body {
+  padding:14px 18px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:13px; line-height:1.55;
+  color:var(--ink-900);
+  white-space:pre;
+  overflow:hidden;
+  height:calc(100% - 32px);
+}
+#code-pane-body .cm  { color:var(--code-comment); font-style:italic; }
+#code-pane-body .kw  { color:var(--code-keyword); font-weight:600; }
+#code-pane-body .fn  { color:var(--code-fn); font-weight:600; }
+#code-pane-body .st  { color:var(--code-string); }
+#code-pane-body .pn  { color:var(--code-punct); }
+#code-pane-body .ok  { color:var(--code-good); }
+
+/* ===== Side caption (persist mini-note) ===== */
+#persist-mini {
+  position:absolute;
+  font-family:"Geist Mono",monospace;
+  font-size:11px; font-weight:500;
+  letter-spacing:0.04em;
+  color:var(--sage-ink);
+  background:var(--sage-tint);
+  border:1px solid rgba(75,106,85,0.18);
+  border-radius:4px;
+  padding:3px 8px;
+  opacity:0;
+  white-space:nowrap;
+}
+
+/* ===== Response card ===== */
+#response-card {
+  position:absolute;
+  font-family:"Geist Mono",monospace;
+  font-size:12px; font-weight:500;
+  color:var(--ink-900);
+  background:var(--win-bg);
+  border:1px solid var(--sage);
+  border-radius:6px;
+  padding:8px 14px;
+  opacity:0;
+  z-index:20;
+  white-space:nowrap;
+}
+
+/* ===== Code pane zoom overlay (annotation) ===== */
+#zoom-annotation {
+  position:absolute;
+  font-family:"Instrument Serif",serif;
+  font-style:italic;
+  font-size:22px;
+  color:var(--sage-ink);
+  opacity:0;
+  max-width:600px;
+  line-height:1.4;
+}
+
+/* ===== Pipeline caption ===== */
+#pipeline-caption {
+  position:absolute;
+  bottom:72px; left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  opacity:0;
+  font-family:"Geist",sans-serif;
+  font-weight:400;
+  font-size:26px;
+  color:var(--ink-900);
+  white-space:nowrap;
+}
+#pipeline-caption .flip {
+  color:var(--ink-900);
+}
+#pipeline-caption .flip.active {
+  color:var(--sage-ink);
+}
+
+/* ===== Curtain ===== */
+#curtain {
+  position:absolute; inset:0;
+  background:#0E1211; opacity:0;
+  pointer-events:none; z-index:100;
+}
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO · CARE-DATA · 09 / 12</div>
+
+  <!-- ===== Pipeline diagram container ===== -->
+  <div id="pipeline" style="position:absolute; top:310px; left:60px; right:60px; height:240px;">
+
+    <!-- Connector arrows SVG (draws below cards) -->
+    <svg id="connectors-svg" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible;">
+      <!-- drop -> parse -->
+      <path class="connector" id="conn-1"
+            d="M 328 95 L 390 95"
+            stroke="#A6B6C4" stroke-width="2" fill="none"
+            stroke-dasharray="6 5" stroke-dashoffset="44" opacity="0"/>
+      <!-- parse -> validate -->
+      <path class="connector" id="conn-2"
+            d="M 718 95 L 780 95"
+            stroke="#A6B6C4" stroke-width="2" fill="none"
+            stroke-dasharray="6 5" stroke-dashoffset="44" opacity="0"/>
+      <!-- validate -> persist -->
+      <path class="connector" id="conn-3"
+            d="M 1118 95 L 1180 95"
+            stroke="#A6B6C4" stroke-width="2" fill="none"
+            stroke-dasharray="6 5" stroke-dashoffset="44" opacity="0"/>
+      <!-- persist -> respond -->
+      <path class="connector" id="conn-4"
+            d="M 1508 95 L 1570 95"
+            stroke="#A6B6C4" stroke-width="2" fill="none"
+            stroke-dasharray="6 5" stroke-dashoffset="44" opacity="0"/>
+    </svg>
+
+    <!-- Card 1: drop -->
+    <div class="pipeline-card" id="card-drop" style="left:68px;">
+      <div class="card-title">drop</div>
+      <div class="card-sub">CSV upload</div>
+      <svg class="arc-wrap" viewBox="0 0 60 60" style="position:absolute;right:14px;bottom:12px;width:64px;height:64px;">
+        <circle class="arc-track" cx="30" cy="30" r="24"/>
+        <circle class="arc-fill" id="arc-drop" cx="30" cy="30" r="24"
+                stroke-dasharray="150.8" stroke-dashoffset="150.8"
+                transform="rotate(-90 30 30)"/>
+      </svg>
+    </div>
+
+    <!-- Card 2: parse -->
+    <div class="pipeline-card" id="card-parse" style="left:458px;">
+      <div id="parse-badge">60 residents / 47 indicators / 3 sections</div>
+      <div class="card-title">parse</div>
+      <div class="card-sub">_extract_quarter_labels_from_csv</div>
+      <svg class="arc-wrap" viewBox="0 0 60 60" style="position:absolute;right:14px;bottom:12px;width:64px;height:64px;">
+        <circle class="arc-track" cx="30" cy="30" r="24"/>
+        <circle class="arc-fill" id="arc-parse" cx="30" cy="30" r="24"
+                stroke-dasharray="150.8" stroke-dashoffset="150.8"
+                transform="rotate(-90 30 30)"/>
+      </svg>
+    </div>
+
+    <!-- Card 3: validate (wider to hold log) -->
+    <div class="pipeline-card" id="card-validate" style="left:848px; width:310px;">
+      <div class="card-title">validate</div>
+      <div class="card-sub">_compute_dashboard_from_csv</div>
+      <svg class="arc-wrap" viewBox="0 0 60 60" style="position:absolute;right:14px;bottom:12px;width:64px;height:64px;">
+        <circle class="arc-track" cx="30" cy="30" r="24"/>
+        <circle class="arc-fill" id="arc-validate" cx="30" cy="30" r="24"
+                stroke-dasharray="150.8" stroke-dashoffset="150.8"
+                transform="rotate(-90 30 30)"/>
+      </svg>
+      <!-- Validation log rows stream up from bottom of card -->
+      <div id="vlog">
+        <!-- failing row is illustrative; the validator surfaces errors in this shape -->
+        <div class="vlog-row ok"  id="vlog-r1">PI_S2 = 18 within [0..60] ✓</div>
+        <div class="vlog-row ok"  id="vlog-r2">MED_AP_NO_DX = 8.2% in valid range ✓</div>
+        <div class="vlog-row ok"  id="vlog-r3">HOSP_ED = 4.1 within [0..100] ✓</div>
+        <div class="vlog-row err" id="vlog-r4">UWL_SIG = -1.0 - invalid: must be >= 0</div>
+      </div>
+    </div>
+
+    <!-- Card 4: persist -->
+    <div class="pipeline-card" id="card-persist" style="left:1240px;">
+      <div class="card-title">persist</div>
+      <div class="card-sub">Azure / fallback</div>
+      <svg class="arc-wrap" viewBox="0 0 60 60" style="position:absolute;right:14px;bottom:12px;width:64px;height:64px;">
+        <circle class="arc-track" cx="30" cy="30" r="24"/>
+        <circle class="arc-fill" id="arc-persist" cx="30" cy="30" r="24"
+                stroke-dasharray="150.8" stroke-dashoffset="150.8"
+                transform="rotate(-90 30 30)"/>
+      </svg>
+    </div>
+
+    <!-- Card 5: respond -->
+    <div class="pipeline-card" id="card-respond" style="left:1630px;">
+      <div class="card-title">respond</div>
+      <div class="card-sub">analysis JSON</div>
+      <svg class="arc-wrap" viewBox="0 0 60 60" style="position:absolute;right:14px;bottom:12px;width:64px;height:64px;">
+        <circle class="arc-track" cx="30" cy="30" r="24"/>
+        <circle class="arc-fill" id="arc-respond" cx="30" cy="30" r="24"
+                stroke-dasharray="150.8" stroke-dashoffset="150.8"
+                transform="rotate(-90 30 30)"/>
+      </svg>
+    </div>
+
+    <!-- Trace dot (rides the pipeline left to right) -->
+    <div id="trace-dot" style="position:absolute; top:88px; left:68px;"></div>
+
+  </div><!-- /pipeline -->
+
+  <!-- CSV file icon (falls from above into drop card) -->
+  <div id="csv-icon" style="top:80px; left:128px;">
+    <div class="csv-label">CSV</div>
+    <div class="csv-filename">Q1-2026-Bayside.csv</div>
+    <div class="csv-size">3.2 MB</div>
+  </div>
+
+  <!-- Persist destination mini-label -->
+  <div id="persist-mini" style="top:530px; left:1240px;">to Azure Tables</div>
+
+  <!-- Code pane: FastAPI route handler -->
+  <div id="code-pane">
+    <div id="code-pane-chrome">
+      <span class="lights"><span></span><span></span><span></span></span>
+      Backend / app / api / upload_csv.py
+    </div>
+    <div id="code-pane-body"><span class="cm"># POST /upload-csv/analyze</span>
+<span class="kw">@router.post</span>(<span class="st">"/analyze"</span>)
+<span class="kw">async def</span> <span class="fn">upload_and_analyze_csv</span>(file, current_user):
+    content = <span class="kw">await</span> file.<span class="fn">read</span>()
+    quarter_labels = <span class="fn">_extract_quarter_labels_from_csv</span>(content)
+    analysis_obj  = <span class="fn">_compute_dashboard_from_csv</span>(
+                       content, quarter_labels, <span class="st">""</span>)
+    rows_by_date  = <span class="fn">_extract_rows_by_date</span>(content)
+    upload_id     = upload_history_db.<span class="fn">put_upload</span>(
+                       sub, file.filename, rows_by_date)
+    <span class="kw">return</span> {<span class="st">"upload_id"</span>: upload_id, <span class="st">"analysis"</span>: analysis_obj}</div>
+  </div>
+
+  <!-- M6 step-zoom annotation (shown during zoom phase 33-38 s) -->
+  <div id="zoom-annotation" style="top:290px; right:60px; width:740px; text-align:right;">
+    47 indicators, 18 in PI alone, range and type checks per definition row.
+  </div>
+
+  <!-- Response card (flies out right at 25.5 s) -->
+  <div id="response-card" style="top:298px; left:1630px;">
+    200 OK { upload_id: 'u-9f...', analysis: {...} }
+  </div>
+
+  <!-- Pipeline caption -->
+  <div id="pipeline-caption">
+    One quarter, one POST, 60 residents, 47 indicators,
+    <span class="flip" id="flip-span">three rejections caught at validate</span>.
+  </div>
+
+  <!-- Curtain -->
+  <div id="curtain"></div>
+
+  <!-- SFX -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3" preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function () {
+  await document.fonts.ready;
+
+  /* Iron Rule: zoom not transform:scale */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((vw - fw) / 2) + 'px';
+    frame.style.top  = ((vh - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* Element refs */
+  const cards      = [...document.querySelectorAll('.pipeline-card')];
+  const connectors = [...document.querySelectorAll('.connector')];
+  const traceDot   = document.getElementById('trace-dot');
+  const csvIcon    = document.getElementById('csv-icon');
+  const parseBadge = document.getElementById('parse-badge');
+  const vlogRows   = [
+    document.getElementById('vlog-r1'),
+    document.getElementById('vlog-r2'),
+    document.getElementById('vlog-r3'),
+    document.getElementById('vlog-r4'),
+  ];
+  const codePane       = document.getElementById('code-pane');
+  const persistMini    = document.getElementById('persist-mini');
+  const responseCard   = document.getElementById('response-card');
+  const zoomAnnotation = document.getElementById('zoom-annotation');
+  const captionEl      = document.getElementById('pipeline-caption');
+  const flipSpan       = document.getElementById('flip-span');
+  const curtain        = document.getElementById('curtain');
+
+  const sfxType   = document.getElementById('sfx-type');
+  const sfxWhoosh = document.getElementById('sfx-whoosh');
+  const sfxClick  = document.getElementById('sfx-click');
+
+  /* Arc fill elements */
+  const arcDrop     = document.getElementById('arc-drop');
+  const arcParse    = document.getElementById('arc-parse');
+  const arcValidate = document.getElementById('arc-validate');
+  const arcPersist  = document.getElementById('arc-persist');
+  const arcRespond  = document.getElementById('arc-respond');
+
+  /* SFX helpers */
+  function playClick(vol) {
+    try { sfxClick.currentTime = 0; sfxClick.volume = vol || 0.35; sfxClick.play(); } catch (_) {}
+  }
+  function playWhoosh() {
+    try { sfxWhoosh.currentTime = 0; sfxWhoosh.volume = 0.55; sfxWhoosh.play(); } catch (_) {}
+  }
+  function playType() {
+    try { sfxType.currentTime = 0; sfxType.volume = 0.45; sfxType.play(); } catch (_) {}
+  }
+
+  /* Easing presets */
+  const ease1 = 'cubic-bezier(0.16,0.85,0.30,1)';
+  const ease2 = 'cubic-bezier(0.22,0.85,0.30,1)';
+
+  /* Arc fill helper (M22) */
+  function fillArc(arcEl, dur, delay) {
+    return gsap.to(arcEl, {
+      strokeDashoffset: 0,
+      duration: dur,
+      delay: delay || 0,
+      ease: ease2,
+    });
+  }
+
+  /* ===== Initial state ===== */
+  gsap.set(cards,        { opacity: 0, y: 18 });
+  gsap.set(connectors,   { opacity: 0 });
+  gsap.set(traceDot,     { opacity: 0 });
+  gsap.set(csvIcon,      { opacity: 0, y: 0 });
+  gsap.set(parseBadge,   { opacity: 0 });
+  gsap.set(vlogRows,     { opacity: 0, y: 16 });
+  gsap.set(codePane,     { opacity: 0, y: -60 });
+  gsap.set(persistMini,  { opacity: 0 });
+  gsap.set(responseCard, { opacity: 0, x: 0 });
+  gsap.set(zoomAnnotation, { opacity: 0 });
+  gsap.set(captionEl,    { opacity: 0 });
+  gsap.set(curtain,      { opacity: 0 });
+
+  const tl = gsap.timeline();
+
+  /* ==========================================================
+     0.0 - 2.0  (b0-b4)  Stage cards + connectors M19-stagger
+     ========================================================== */
+  cards.forEach((card, i) => {
+    tl.to(card, { opacity: 1, y: 0, duration: 0.28, ease: ease2 }, i * 0.28);
+    tl.call(() => playClick(0.25), null, i * 0.28 + 0.04);
+  });
+  connectors.forEach((conn, i) => {
+    tl.to(conn, {
+      opacity: 1,
+      strokeDashoffset: 0,
+      duration: 0.45,
+      ease: ease2,
+      attr: { 'stroke-dashoffset': 0 }
+    }, 0.5 + i * 0.22);
+  });
+
+  /* ==========================================================
+     2.0 - 6.0  (b4-b12)  CSV icon falls into drop card
+     ========================================================== */
+  tl.call(() => playWhoosh(), null, 2.0);
+  tl.to(csvIcon, { opacity: 1, duration: 0.30, ease: 'sine.out' }, 2.0);
+  tl.to(csvIcon, { y: 270, duration: 1.50, ease: 'bounce.out' }, 2.0);
+
+  /* Drop card border activates at impact */
+  tl.call(() => {
+    const dropCard = document.getElementById('card-drop');
+    gsap.to(dropCard, { borderColor: '#9FB4A0', borderWidth: '1.5px', duration: 0.20 });
+  }, null, 3.55);
+
+  /* ==========================================================
+     6.0 - 10.0  (b12-b20)  Parse stage
+     ========================================================== */
+  /* Drop arc fills */
+  tl.add(fillArc(arcDrop, 1.50), 6.0);
+  tl.call(() => playClick(0.30), null, 6.0);
+
+  /* Trace dot: drop -> parse */
+  tl.to(traceDot, { opacity: 1, duration: 0.20, ease: 'sine.out' }, 7.60);
+  /* Approximate positions: drop card center-right ~388px, parse card left ~458px */
+  tl.to(traceDot, { x: 390, duration: 0.55, ease: ease2 }, 7.65);
+
+  /* Parse arc fills */
+  tl.add(fillArc(arcParse, 1.50), 8.0);
+  tl.call(() => playClick(0.25), null, 9.55);
+
+  /* Parse badge fades in */
+  tl.to(parseBadge, { opacity: 1, duration: 0.30, ease: 'sine.out' }, 8.80);
+
+  /* ==========================================================
+     10.0 - 17.0  (b20-b34)  Validate stage + validation log
+     ========================================================== */
+  /* Trace dot: parse -> validate */
+  tl.to(traceDot, { x: 780, duration: 0.55, ease: ease2 }, 10.0);
+
+  /* Validate arc fills slowly (4.5 s) while log streams */
+  tl.add(fillArc(arcValidate, 4.50), 10.0);
+
+  /* Validation log rows stream up -- M1 slide-up + fade */
+  const vlogTimings = [10.5, 11.5, 12.5, 13.5];
+  vlogTimings.forEach((t, i) => {
+    tl.to(vlogRows[i], { opacity: 1, y: 0, duration: 0.30, ease: ease2 }, t);
+    tl.call(() => playType(), null, t);
+  });
+
+  /* Ghost cursor correction at 14-15.5 s: brief code-pane flash pre-reveal */
+  tl.call(() => {
+    /* brief click sound pair representing the form-correction gesture */
+    playClick(0.40);
+  }, null, 14.0);
+  tl.call(() => playClick(0.40), null, 15.0);
+
+  /* Failing row morphs clay -> sage at 15.5 s */
+  tl.call(() => {
+    vlogRows[3].classList.remove('err');
+    vlogRows[3].classList.add('ok');
+    vlogRows[3].textContent = 'UWL_SIG = 0.0 within valid range ✓';
+    gsap.fromTo(vlogRows[3], { backgroundColor: '#FDF4EC' }, {
+      backgroundColor: 'var(--sage-tint)',
+      duration: 0.35
+    });
+  }, null, 15.5);
+
+  /* Validate card border activates on arc complete */
+  tl.call(() => {
+    const vc = document.getElementById('card-validate');
+    gsap.to(vc, { borderColor: '#9FB4A0', borderWidth: '1.5px', duration: 0.20 });
+  }, null, 14.6);
+
+  /* ==========================================================
+     17.0 - 24.0  (b34-b48)  Persist stage + code pane reveal
+     ========================================================== */
+  tl.call(() => playWhoosh(), null, 17.0);
+
+  /* Code pane slides in from above (M20) */
+  tl.to(codePane, { opacity: 0.90, y: 0, duration: 0.60, ease: ease2 }, 17.0);
+
+  /* Trace dot: validate -> persist */
+  tl.to(traceDot, { x: 1170, duration: 0.55, ease: ease2 }, 17.0);
+
+  /* Persist arc fills */
+  tl.add(fillArc(arcPersist, 1.50), 17.0);
+  tl.call(() => playClick(0.25), null, 17.5);
+
+  /* Typing bursts for code pane (three bursts simulate lines appearing) */
+  tl.call(() => playType(), null, 18.5);
+  tl.call(() => playType(), null, 20.5);
+  tl.call(() => playType(), null, 22.5);
+
+  /* Persist destination mini label */
+  tl.to(persistMini, { opacity: 1, duration: 0.30, ease: 'sine.out' }, 19.0);
+
+  tl.call(() => playClick(0.25), null, 22.0);
+
+  /* ==========================================================
+     24.0 - 29.0  (b48-b58)  Respond stage
+     ========================================================== */
+  /* Trace dot: persist -> respond */
+  tl.to(traceDot, { x: 1560, duration: 0.55, ease: ease2 }, 24.0);
+
+  /* Respond arc fills */
+  tl.add(fillArc(arcRespond, 1.50), 24.0);
+
+  /* Response card flies out right at arc completion */
+  tl.to(responseCard, { opacity: 1, duration: 0.20, ease: 'sine.out' }, 25.5);
+  tl.call(() => playClick(0.25), null, 25.5);
+  tl.to(responseCard, { x: 240, opacity: 0, duration: 0.80, ease: 'power2.in' }, 26.2);
+
+  /* ==========================================================
+     29.0 - 33.0  (b58-b66)  Hold -- all arcs at 100%
+     ========================================================== */
+  /* Trace dot parked at right edge (no movement needed, just stays) */
+
+  /* ==========================================================
+     33.0 - 38.0  (b66-b76)  M6 step-zoom on validate card / code line
+     ========================================================== */
+  tl.call(() => playWhoosh(), null, 33.0);
+
+  /* Scale code pane up to highlight the validate function names */
+  tl.to(codePane, {
+    scale: 1.32,
+    transformOrigin: '100% 0%',
+    duration: 0.40,
+    ease: ease2,
+    opacity: 1.0,
+  }, 33.0);
+
+  /* Annotation slides in */
+  tl.to(zoomAnnotation, { opacity: 1, duration: 0.35, ease: 'sine.out' }, 33.5);
+
+  /* ==========================================================
+     38.0 - 42.0  (b76-b84)  Zoom out, stages settle
+     ========================================================== */
+  tl.call(() => playWhoosh(), null, 38.0);
+
+  tl.to(codePane, {
+    scale: 1.0,
+    transformOrigin: '100% 0%',
+    opacity: 0.90,
+    duration: 0.40,
+    ease: ease2,
+  }, 38.0);
+  tl.to(zoomAnnotation, { opacity: 0, duration: 0.25, ease: 'sine.in' }, 38.0);
+
+  /* Stages settle to 0.75 opacity */
+  tl.to(cards, { opacity: 0.75, duration: 0.55, ease: 'sine.inOut' }, 38.4);
+
+  /* Trace dot gentle y oscillation */
+  gsap.to(traceDot, {
+    y: '+=6', yoyo: true, repeat: -1,
+    duration: 0.50, ease: 'sine.inOut', delay: 38.8
+  });
+
+  /* ==========================================================
+     42.0 - 46.0  (b84-b92)  Caption fades in + M15 colour flip
+     ========================================================== */
+  tl.call(() => playType(), null, 42.0);
+  tl.to(captionEl, { opacity: 1, duration: 0.50, ease: 'sine.out' }, 42.0);
+
+  /* M15 italic colour flip on the phrase after caption settles */
+  tl.call(() => {
+    gsap.to(flipSpan, { color: '#4B6A55', duration: 0.40, ease: 'sine.inOut' });
+  }, null, 43.2);
+
+  /* ==========================================================
+     46.0 - 50.0  (b92-b100)  M25 whip-pan out to Scene 10
+     ========================================================== */
+  tl.call(() => playWhoosh(), null, 46.0);
+
+  /* Everything whip-pans left */
+  tl.to([...cards, codePane, captionEl, csvIcon, traceDot, persistMini, parseBadge], {
+    x: '-=1600',
+    opacity: 0,
+    duration: 0.60,
+    ease: 'power3.in',
+    stagger: { amount: 0.08, from: 'start' }
+  }, 46.0);
+
+  /* Curtain closes */
+  tl.to(curtain, { opacity: 1, duration: 0.25, ease: 'power2.in' }, 49.75);
+
+  /* Scene ends at 50.0 s */
+
+})();
+</script>
+<script src="_nav.js" defer></script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 14, Audit-Ready Payoff (preview) | CareData promo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --cream:#F6F2EB;
+  --paper:#FBF8F2;
+  --line:#E1DBCC;
+  --ink-900:#1F2622;
+  --ink-700:#3D4743;
+  --ink-500:#6B7570;
+  --ink-300:#A4ABA4;
+  --sage:#9FB4A0;
+  --sage-bright:#B8D1B5;
+  --sage-ink:#4B6A55;
+  --sage-tint:#EEF1EC;
+  --clay:#C8B89B;
+  --clay-bright:#D4C4A8;
+  --clay-ink:#836B47;
+  --clay-deep:#9C7B4F;
+  --dusty-blue:#A6B6C4;
+  --dusty-deep:#5E7484;
+  --status-good:#8AA791;
+  --status-bad:#B86F62;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background:#0E1211;
+  color:var(--cream);
+  font-family:"Geist",ui-sans-serif,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.frame-wrap{
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;     /* 4K canvas-fill */
+  transform-style:preserve-3d;
+}
+.stage{
+  position:absolute; inset:0;
+  perspective:1800px;
+  perspective-origin:50% 50%;
+  transform-style:preserve-3d;
+  /* Dark from frame 0 — Scene 13 has already washed cream→dark before handing off */
+  background:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.10), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%, rgba(200,184,155,0.05), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  overflow:hidden;
+}
+
+/* Opening sage ripple — expands from centre at scene start as the visual
+   "ripple glow" handoff from Scene 13's wash-to-dark. */
+.open-ripple{
+  position:absolute;
+  top:50%; left:50%;
+  width:300px; height:300px;
+  margin-left:-150px; margin-top:-150px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(184,209,181,0.55) 0%, rgba(159,180,160,0.30) 35%, transparent 65%);
+  z-index:9;
+  pointer-events:none;
+  opacity:0;
+  filter:blur(2px);
+  will-change:transform, opacity;
+}
+
+/* End-of-scene white wash — orb bursts outward and washes everything to white,
+   handing off cleanly to Scene 15 which now starts on white. */
+.end-wash{
+  position:absolute; inset:0;
+  background:#FFFFFF;
+  opacity:0;
+  z-index:50;
+  pointer-events:none;
+  will-change:opacity;
+}
+
+/* Cream layer that lives BEHIND everything — fades to reveal the dark stage */
+.cream-bg{
+  position:absolute; inset:0;
+  z-index:1;
+  background:
+    radial-gradient(60vw 50vw at 50% 30%, rgba(255,255,255,0.55), transparent 70%),
+    radial-gradient(40vw 50vw at 8% 100%, rgba(200,184,155,0.18), transparent 65%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.18), transparent 65%),
+    linear-gradient(160deg, #FBF8F2 0%, #F2EBDA 60%, #E9E1CC 100%);
+  will-change:opacity;
+}
+.dark-bg{
+  position:absolute; inset:0;
+  z-index:2;
+  opacity:0;
+  background:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.10), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%, rgba(200,184,155,0.05), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  will-change:opacity;
+}
+
+.grain{
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.05;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+  z-index:5;
+}
+
+.footer{
+  position:absolute; bottom:38px; left:60px;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--cream); opacity:0.45;
+  z-index:60;
+}
+
+/* === Stamps (carry-over from Scene 13, simplified) === */
+.stamps{
+  position:absolute;
+  top:54%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  display:flex; align-items:center; justify-content:center;
+  gap:48px;
+  z-index:14;
+  transform-style:preserve-3d;
+  perspective:2200px;
+}
+.stamp{
+  width:300px;
+  height:240px;
+  background:#fff;
+  border:2px solid var(--ink-900);
+  border-radius:8px;
+  padding:18px 22px;
+  position:relative;
+  display:flex; flex-direction:column;
+  box-shadow:
+    0 22px 48px rgba(31,38,34,0.18),
+    0 8px 16px rgba(31,38,34,0.10),
+    inset 0 0 0 5px #fff,
+    inset 0 0 0 6px rgba(31,38,34,0.10);
+  transform-origin:50% 100%;       /* peel from the bottom */
+  transform-style:preserve-3d;
+  will-change:transform, opacity;
+  backface-visibility:hidden;
+}
+.stamp .corner{
+  position:absolute;
+  width:14px; height:14px;
+  border:2px solid var(--ink-900);
+}
+.stamp .corner.tl{ top:7px; left:7px;  border-right:none; border-bottom:none; }
+.stamp .corner.tr{ top:7px; right:7px; border-left:none;  border-bottom:none; }
+.stamp .corner.bl{ bottom:7px; left:7px;  border-right:none; border-top:none; }
+.stamp .corner.br{ bottom:7px; right:7px; border-left:none;  border-top:none; }
+.stamp-eye{
+  font-size:9.5px;
+  letter-spacing:0.20em;
+  text-transform:uppercase;
+  color:var(--ink-500);
+  font-weight:700;
+  font-family:"Geist Mono", monospace;
+  margin-bottom:10px;
+}
+.stamp-mark{
+  width:48px; height:48px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:10px;
+}
+.stamp-mark svg{ width:26px; height:26px; }
+.stamp-h{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:34px;
+  line-height:1;
+  letter-spacing:-0.022em;
+  color:var(--ink-900);
+}
+.stamp.s1{ border-color:var(--sage-ink); transform:rotate(-7deg); }
+.stamp.s1 .corner{ border-color:var(--sage-ink); }
+.stamp.s1 .stamp-mark{ background:var(--sage-tint); color:var(--sage-ink); }
+.stamp.s2{ border-color:var(--dusty-deep); transform:rotate(4deg); }
+.stamp.s2 .corner{ border-color:var(--dusty-deep); }
+.stamp.s2 .stamp-mark{ background:rgba(166,182,196,0.18); color:var(--dusty-deep); }
+.stamp.s3{ border-color:var(--clay-deep); transform:rotate(-3deg); }
+.stamp.s3 .corner{ border-color:var(--clay-deep); }
+.stamp.s3 .stamp-mark{ background:rgba(200,184,155,0.16); color:var(--clay-deep); }
+
+/* === Carry-over header + subhead from Scene 13 (peel away in Phase A) === */
+.s13-header{
+  position:absolute;
+  top:11%;
+  left:50%; transform:translateX(-50%);
+  text-align:center;
+  z-index:13;
+  white-space:nowrap;
+  will-change:opacity, transform;
+}
+.s13-eyebrow{
+  display:inline-flex; align-items:center; gap:9px;
+  font-size:11px;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:var(--ink-500);
+  font-weight:600;
+  font-family:"Geist", sans-serif;
+  margin-bottom:14px;
+}
+.s13-eyebrow::before, .s13-eyebrow::after{
+  content:''; width:38px; height:1px; background:var(--ink-300);
+}
+.s13-headline{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:96px;
+  line-height:0.98;
+  letter-spacing:-0.025em;
+  color:var(--ink-900);
+}
+.s13-headline em{ font-style:italic; color:var(--sage-ink); }
+.s13-subhead{
+  position:absolute;
+  bottom:11%;
+  left:50%; transform:translateX(-50%);
+  text-align:center;
+  z-index:13;
+  will-change:opacity, transform;
+}
+.s13-subhead .h{
+  font-family:"Geist", sans-serif;
+  font-weight:500;
+  font-size:24px;
+  letter-spacing:-0.005em;
+  color:var(--ink-700);
+  margin-bottom:7px;
+}
+.s13-subhead .meta{
+  font-family:"Geist Mono", monospace;
+  font-size:11px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--ink-500);
+}
+
+/* === Payoff panel (revealed when stamps peel) === */
+.panel{
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%, -50%);
+  width:1320px;
+  display:flex; flex-direction:column;
+  align-items:center;
+  gap:42px;
+  z-index:20;
+  opacity:0;
+}
+.caption-wrap{
+  position:relative;
+  height:124px;                /* enough for both captions; vertical centre */
+  width:100%;
+  display:flex; align-items:center; justify-content:center;
+}
+.caption{
+  position:absolute;
+  inset:0;
+  display:flex; align-items:center; justify-content:center;
+  text-align:center;
+}
+.caption.intro{
+  font-family:"Geist", sans-serif;
+  font-weight:500;
+  font-size:40px;
+  letter-spacing:-0.01em;
+  color:var(--cream);
+  opacity:0;
+  will-change:opacity, transform;
+}
+.caption.intro em{
+  font-style:italic;
+  color:var(--sage-bright);
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:48px;
+  letter-spacing:-0.02em;
+  margin-left:10px;
+}
+.caption.payoff{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:96px;
+  letter-spacing:-0.025em;
+  color:var(--cream);
+  opacity:0;
+  line-height:1;
+  will-change:opacity, transform;
+}
+
+/* CTA row — wider buttons, larger type, centre-relative pill positioning */
+.cta-row{
+  display:flex; gap:24px;
+  position:relative;
+  padding:10px;
+  align-items:center;
+  justify-content:center;
+}
+.cta{
+  font-family:"Geist", sans-serif;
+  font-weight:600;
+  font-size:20px;
+  letter-spacing:-0.005em;
+  padding:24px 40px;
+  border-radius:13px;
+  display:inline-flex; align-items:center; gap:14px;
+  cursor:default;
+  white-space:nowrap;
+  position:relative;
+  z-index:1;
+  opacity:0;
+  will-change:opacity, transform;
+}
+.cta svg{ width:20px; height:20px; }
+.cta.primary{
+  background:var(--sage-ink);
+  color:var(--cream);
+  border:1px solid var(--sage-ink);
+  box-shadow:0 8px 28px rgba(75,106,85,0.40);
+}
+.cta.primary .meta{
+  font-family:"Geist Mono", monospace;
+  font-size:13px; font-weight:500;
+  color:rgba(246,242,235,0.7);
+  margin-left:8px;
+}
+.cta.ghost{
+  background:transparent;
+  color:var(--clay-bright);
+  border:1px solid rgba(200,184,155,0.55);
+}
+.cta.ghost .meta{
+  font-family:"Geist Mono", monospace;
+  font-size:13px; font-weight:500;
+  color:rgba(200,184,155,0.7);
+  margin-left:8px;
+}
+
+/* M13 iridescent pill — centred via margins, animated via translateX
+   so x:0 lands its centre exactly over the orb (which is also at left:50%). */
+.iri-pill{
+  position:absolute;
+  top:50%; left:50%;
+  width:420px; height:140px;
+  margin-left:-100px; margin-top:-70px;
+  border-radius:999px;
+  pointer-events:none;
+  opacity:0;
+  z-index:5;
+  background:linear-gradient(110deg,
+    rgba(184,209,181,0.0) 0%,
+    rgba(184,209,181,0.45) 18%,
+    rgba(166,182,196,0.65) 38%,
+    rgba(255,255,255,0.92) 50%,
+    rgba(200,184,155,0.65) 62%,
+    rgba(184,209,181,0.45) 82%,
+    rgba(184,209,181,0.0) 100%);
+  filter:blur(16px);
+  mix-blend-mode:plus-lighter;
+  will-change:transform, opacity, width, height;
+}
+
+/* Final morph orb — sage ring → checkmark, also at left:50% / top:50% */
+.orb{
+  position:absolute;
+  top:50%; left:50%;
+  width:168px; height:168px;
+  margin-left:-84px; margin-top:-84px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  z-index:6;
+  opacity:0;
+  background:transparent;
+  border:4px solid var(--sage-bright);
+  box-shadow:
+    0 0 80px rgba(184,209,181,0.55),
+    inset 0 0 32px rgba(184,209,181,0.22);
+  transform:scale(0.4);
+  will-change:transform, opacity, background;
+}
+.orb svg{
+  width:78px; height:78px;
+  opacity:0;
+  transform:scale(0.6);
+  will-change:opacity, transform;
+}
+.orb svg .tick{
+  fill:none;
+  stroke:var(--cream);
+  stroke-width:5.5;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-dasharray:60;
+  stroke-dashoffset:60;
+}
+
+/* Hud */
+.hud{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  background:rgba(15,15,17,0.85);
+  color:#EAE3D2; font-family:"Geist Mono", monospace; font-size:11px;
+  padding:8px 14px; border-radius:999px;
+  display:flex; gap:14px; align-items:center; z-index:100;
+  letter-spacing:0.06em;
+}
+.hud button{
+  appearance:none; border:1px solid #555; background:transparent; color:#EAE3D2;
+  font-family:inherit; font-size:11px; padding:3px 10px; border-radius:999px; cursor:pointer;
+}
+.hud button:hover{ background:#222; }
+.hud .timer{ font-variant-numeric:tabular-nums; min-width:46px; }
+</style>
+</head>
+<body>
+
+<div class="frame-wrap" id="frame">
+  <div class="stage">
+    <!-- Cream/stamp/header carry-over removed: Scene 13 now ends with the peel
+         and a wash to dark, so Scene 14 starts on a blank dark stage. -->
+    <div class="dark-bg"   id="darkBg"></div>
+    <div class="grain"></div>
+    <div class="footer">CSIT321&nbsp;CAPSTONE</div>
+
+    <!-- White wash overlay — fades in at end of scene as the orb bursts outward,
+         producing a blank canvas for Scene 15 (was Scene 15 Phase B). -->
+    <div class="end-wash" id="endWash"></div>
+
+    <!-- Payoff panel revealed beneath -->
+    <div class="panel" id="panel">
+      <div class="caption-wrap">
+        <div class="caption intro" id="capIntro">
+          Generate the report. <em>File with confidence.</em>
+        </div>
+        <div class="caption payoff" id="capPayoff">
+          Audit-ready.
+        </div>
+      </div>
+
+      <div class="cta-row" id="ctaRow">
+        <button class="cta primary" id="ctaPrimary">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v9M4 7l4 4 4-4M3 14h10"/>
+          </svg>
+          Download Q1 2026 report
+          <span class="meta">PDF · 4.2 MB</span>
+        </button>
+        <button class="cta ghost" id="ctaGhost">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 4 H11 L13 6 V13 C13 13.6 12.6 14 12 14 H4 C3.4 14 3 13.6 3 13 Z"/>
+            <path d="M5 4 V7 H11 V4"/>
+            <path d="M5 11 H11"/>
+          </svg>
+          Save submission draft
+          <span class="meta">GPMS · Q1 2026</span>
+        </button>
+
+        <!-- M13 iridescent sweep pill -->
+        <div class="iri-pill" id="iriPill"></div>
+        <!-- M14 morph orb (ring + tick) -->
+        <div class="orb" id="orb">
+          <svg viewBox="0 0 32 32">
+            <path class="tick" d="M9 17 L14 22 L23 11"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hud">
+  <button id="replay">REPLAY</button>
+  <span class="timer" id="timer">0.00s</span>
+  <span style="opacity:.6">Scene 14 / Audit-Ready Payoff</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+function fit(){
+  const wrap = document.getElementById('frame');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  /* zoom not transform: scale — natively rasterise at projected resolution; prevents 4K pixel break on 3D-rotated descendants. See ~/.claude/skills/hyperframes-video/rendering.md */
+  wrap.style.zoom = s;
+}
+fit();
+window.addEventListener('resize', fit);
+
+let tl;
+
+function build(){
+  /* Initial state — Scene 13 has already peeled the stamps + washed to dark.
+     Scene 14 starts on a blank dark stage and proceeds straight to the caption. */
+  gsap.set('#endWash',    { opacity: 0 });
+
+  gsap.set('#panel',     { opacity: 0 });
+  gsap.set('#capIntro',  { opacity: 0, y: 14 });
+  gsap.set('#capPayoff', { opacity: 0, y: 14, scale: 0.96 });
+  gsap.set('#ctaPrimary',{ opacity: 0, y: 16 });
+  gsap.set('#ctaGhost',  { opacity: 0, y: 16 });
+  /* Pill is centred via margins; x: -800 starts it well left of centre,
+     x: 0 lands it dead-centre over the orb. */
+  gsap.set('#iriPill',   { opacity: 0, x: -800, width: 420, height: 140 });
+  gsap.set('#orb',       { opacity: 0, scale: 0.4 });
+  gsap.set('#orb svg',   { opacity: 0, scale: 0.6 });
+  gsap.set('.orb svg .tick', { strokeDashoffset: 60 });
+
+  tl = gsap.timeline({
+    paused: true,
+    onUpdate: () => {
+      document.getElementById('timer').textContent = tl.time().toFixed(2) + 's';
+    }
+  });
+
+  /* ============================================================
+     TOTAL ~5.63s — beat-locked at 120 BPM (peel moved to Scene 13)
+        b0  0.00      Caption "Generate the report. File with confidence."
+        b1  0.50      Two CTAs fade up (sage primary + clay ghost)
+        b2  1.20      M13 iridescent pill sweeps L→R across the CTA row
+        b4  2.10      M14 morph: pill compresses to sage ring at centre
+        b4+ 2.35      Ring fills, status-good tick draws
+        b5  2.65      M12 caption swap: "Audit-ready." Instrument Serif 64px
+        b6  3.20      Hold on tick + caption (audience reads)
+        b7  3.70      Orb bursts outward + white wash (carried over from Scene 15)
+        b8  4.40–5.63 White canvas (handoff to Scene 15)
+     ============================================================ */
+
+  /* === Phase A (b0): Caption "Generate the report. File with confidence." ===
+     No ripple opener — scene starts straight on dark, caption appears immediately. */
+  tl.to('#panel',    { opacity: 1, duration: 0.20 }, 0.00);
+  tl.to('#capIntro', { opacity: 1, y: 0, duration: 0.45, ease: 'cubic-bezier(.22,.85,.30,1)' }, 0.00);
+
+  /* === Phase B (b1): CTAs fade up === */
+  tl.to('#ctaPrimary', { opacity: 1, y: 0, duration: 0.40, ease: 'power3.out' }, 0.50);
+  tl.to('#ctaGhost',   { opacity: 1, y: 0, duration: 0.40, ease: 'power3.out' }, 0.62);
+
+  /* === Phase C (b2): M13 iridescent pill sweeps across CTA row ===
+     Pill is centred via margins, animated via x. */
+  tl.to('#iriPill', {
+    opacity: 1,
+    duration: 0.20, ease: 'power2.out'
+  }, 1.20);
+  tl.to('#iriPill', {
+    x: 800,                  /* sweep right past the CTA row */
+    duration: 1.00, ease: 'power2.inOut'
+  }, 1.20);
+
+  /* === Phase D (b4): M14 morph — pill compresses into sage ring === */
+  tl.to('#iriPill', {
+    x: 0,                    /* dead-centre, matches orb's left:50% anchor */
+    width: 168,
+    height: 168,
+    duration: 0.30, ease: 'power3.out'
+  }, 2.00);
+  tl.to('#iriPill', {
+    opacity: 0,
+    duration: 0.20, ease: 'power2.in'
+  }, 2.25);
+
+  /* Orb appears as the pill collapses — sage ring at centre */
+  tl.to('#orb', {
+    opacity: 1, scale: 1.0,
+    duration: 0.35, ease: 'back.out(1.8)'
+  }, 2.10);
+
+  /* Ring fills with sage; tick draws */
+  tl.to('#orb', {
+    background: 'rgba(138,167,145,0.95)',
+    borderColor: 'rgba(138,167,145,1)',
+    duration: 0.30, ease: 'power2.out'
+  }, 2.45);
+  tl.to('#orb svg', {
+    opacity: 1, scale: 1.0,
+    duration: 0.20, ease: 'power2.out'
+  }, 2.50);
+  tl.to('.orb svg .tick', {
+    strokeDashoffset: 0,
+    duration: 0.30, ease: 'power3.out'
+  }, 2.55);
+
+  /* === Phase E (b5): M12 caption swap to "Audit-ready." ===
+     Tick is KEPT visible — no orb fade-out, the tick stays through the hold. */
+  tl.to('#capIntro', {
+    opacity: 0, y: -10,
+    duration: 0.30, ease: 'power2.in'
+  }, 2.65);
+  tl.to('#capPayoff', {
+    opacity: 1, y: 0, scale: 1.0,
+    duration: 0.45, ease: 'cubic-bezier(.16,.85,.30,1)'
+  }, 2.80);
+
+  /* === Phase F (b6): Hold on tick + caption (audience reads the affirmation) === */
+
+  /* === Phase G (b7): Orb burst + white wash — moved here from Scene 15 ===
+     Tick orb pulses up briefly, then bursts outward with background flipping
+     to white. End-wash overlay fades in to fill the frame. Caption + CTAs
+     fade out under the wash. */
+  tl.to('#orb', {
+    scale: 1.35,
+    duration: 0.20, ease: 'power2.out'
+  }, 3.70);
+  tl.to('#orb', {
+    scale: 32,
+    background: '#FFFFFF',
+    borderColor: '#FFFFFF',
+    boxShadow: '0 0 0 0 rgba(255,255,255,0)',
+    duration: 0.55, ease: 'power2.in'
+  }, 3.90);
+  tl.to('#orb svg', {
+    opacity: 0,
+    duration: 0.20, ease: 'power2.in'
+  }, 3.90);
+  tl.to('#endWash', {
+    opacity: 1,
+    duration: 0.40, ease: 'power2.in'
+  }, 4.05);
+  /* Caption + CTAs fade under the white wash */
+  tl.to(['#capPayoff', '#ctaPrimary', '#ctaGhost'], {
+    opacity: 0,
+    duration: 0.30, ease: 'power2.in'
+  }, 3.90);
+}
+
+function play(){
+  if (!tl) build();
+  tl.restart();
+  tl.play();
+}
+
+document.getElementById('replay').addEventListener('click', play);
+
+// IFRAME-AWARE BOOTSTRAP — patched by shared/patch-scenes.mjs
+window.addEventListener('load', () => {
+  const start = () => { build(); if (window.parent === window) play(); };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+  } else {
+    start();
+  }
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === 'play'  && typeof play === 'function')                          play();
+  if (t === 'pause' && typeof tl   !== 'undefined' && tl)                    tl.pause();
+  if (t === 'reset' && typeof tl   !== 'undefined' && tl) { tl.seek(0); tl.pause(); }
+});
+</script>
+</body>
+</html>

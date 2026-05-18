@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 10 - Data Entry / Upload (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --cream:#F6F2EB;
+  --paper:#FBF8F2;
+  --line-soft:#EAE3D2;
+  --line:#E1DBCC;
+  --ink-900:#1F2622;
+  --ink-700:#3D4743;
+  --ink-500:#6B7570;
+  --ink-300:#A4ABA4;
+  --sage:#9FB4A0;
+  --sage-bright:#B8D1B5;
+  --sage-ink:#4B6A55;
+  --sage-tint:#EEF1EC;
+  --clay:#C8B89B;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background:#0E1211;
+  color:var(--cream);
+  font-family:"Geist",ui-sans-serif,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.frame-wrap{
+  position:relative;
+  width:1920px; height:1080px;
+  perspective:2400px;
+  perspective-origin:50% 50%;
+  /* No transform on .frame-wrap — fit() uses CSS `zoom` (not `transform: scale`)
+     so inner content rasterises NATIVELY at the zoomed resolution. With transform:
+     scale, the inner DOM rasterises at 1920×1080 and the bitmap is upscaled to 4K,
+     which pixelates 3D-rotated descendants like .app-card. zoom avoids that. */
+}
+.stage{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.10), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%, rgba(200,184,155,0.05), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  overflow:hidden;
+}
+
+.grain{
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.05;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+.watermark-tr {
+  position:absolute; top:38px; right:60px;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--cream); opacity:0.45; z-index:60;
+  pointer-events:none; text-transform:uppercase;
+}
+
+.footer{
+  position:absolute; bottom:38px; left:60px;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--cream); opacity:0.45;
+  z-index:60;
+}
+
+/* Floating caption above the rotated screen, sits in the dark margin so it doesn't overlap the app */
+.float-caption{
+  position:absolute;
+  top:5%; left:50%;
+  transform:translateX(-50%);
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:52px;
+  letter-spacing:-0.02em;
+  color:var(--cream);
+  white-space:nowrap;
+  z-index:35;
+  opacity:0;
+  text-align:center;
+  line-height:1;
+}
+.float-caption .accent{ color:var(--sage-bright); font-style:italic; }
+
+/* "Data Entry" standalone pill, positioned EXACTLY where Data Entry sits in the app's nav.
+   When the app card fades in at zoom-4 with origin on this same point, the pill aligns perfectly. */
+.entry-pill{
+  position:absolute;
+  top:16.85%;
+  left:43.75%;
+  padding:14px 30px;
+  background:var(--ink-900);
+  color:var(--cream);
+  font-weight:600; font-size:24px; letter-spacing:-0.005em;
+  border-radius:999px;
+  z-index:30;
+  box-shadow:
+    0 0 0 1px rgba(184,209,181,0.20),
+    0 0 32px rgba(184,209,181,0.30),
+    0 0 80px rgba(184,209,181,0.16),
+    0 14px 40px rgba(0,0,0,0.40);
+  display:inline-flex; align-items:center; gap:12px;
+  opacity:0;
+}
+.entry-pill .dot{
+  width:8px; height:8px;
+  border-radius:50%;
+  background:var(--sage-bright);
+  box-shadow:0 0 10px rgba(184,209,181,0.85);
+  flex-shrink:0;
+  will-change:opacity, width, margin;
+}
+
+/* Sage ripple ring that expands from the Data Entry button position */
+.ripple{
+  position:absolute;
+  top:16.85%;
+  left:43.75%;
+  width:200px; height:200px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(184,209,181,0.30) 0%, rgba(159,180,160,0.20) 35%, transparent 65%);
+  transform:translate(-50%,-50%) scale(0);
+  z-index:20;
+  pointer-events:none;
+  opacity:0;
+  filter:blur(2px);
+}
+
+/* Success tick that appears in the dropzone after upload completes */
+.success-tick{
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%) scale(0);
+  width:88px; height:88px;
+  border-radius:50%;
+  background:linear-gradient(180deg, var(--sage-bright), var(--sage));
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:
+    0 0 0 6px rgba(184,209,181,0.30),
+    0 0 32px rgba(184,209,181,0.55),
+    0 14px 28px rgba(0,0,0,0.20);
+  z-index:5;
+  opacity:0;
+  pointer-events:none;
+}
+.success-tick svg{
+  width:50px; height:50px;
+  stroke:#fff;
+  stroke-width:5;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  fill:none;
+}
+.success-tick svg path{
+  stroke-dasharray:60;
+  stroke-dashoffset:60;
+}
+
+/* Confetti dots that burst on successful drop */
+.confetti{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:31;
+}
+.confetti-dot{
+  position:absolute;
+  width:8px; height:8px;
+  border-radius:50%;
+  background:var(--sage-bright);
+  box-shadow:0 0 8px rgba(184,209,181,0.65);
+  opacity:0;
+  will-change:transform, opacity;
+}
+.confetti-dot.large{ width:11px; height:11px; }
+.confetti-dot.cream{ background:var(--cream); }
+.confetti-dot.dusty{ background:var(--dusty-blue); }
+
+/* App card, 16:9, 69% of viewport (10% smaller than before), pushed down for more top margin */
+.app-card{
+  position:absolute;
+  top:18%; left:15.5%;
+  width:69%; height:69%;  /* 16:9 ratio, viewport is 16:9 so equal % keeps ratio */
+  border-radius:18px;
+  overflow:hidden;
+  background:var(--cream);
+  box-shadow:
+    0 60px 120px rgba(0,0,0,0.55),
+    0 30px 60px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.04);
+  z-index:10;
+  opacity:0;
+  transform-style:preserve-3d;
+  will-change:transform, opacity;
+  display:flex; flex-direction:column;
+  font-family:"Geist", sans-serif;
+  color:var(--ink-900);
+}
+
+/* Specular sheen overlay — sweeps across the card during the BOOM tilt to suggest
+   a fixed studio light + camera orbit (not card-rotates-in-place). The gradient is
+   wider than the card; we translate it from -30% → 40% during the rotation so the
+   highlight band passes across the surface. mix-blend-mode lifts highlights without
+   washing the underlying UI. Sits on z:50 so it's above all app content. */
+.card-sheen{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:50;
+  border-radius:18px;
+  opacity:0;
+  background:linear-gradient(115deg,
+    rgba(255,255,255,0)   30%,
+    rgba(255,255,255,0.10) 47%,
+    rgba(255,255,255,0.22) 50%,
+    rgba(255,255,255,0.10) 53%,
+    rgba(255,255,255,0)   70%
+  );
+  mix-blend-mode:screen;
+  will-change:transform, opacity;
+}
+
+/* App content, production-faithful */
+.topnav{
+  height:62px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px;
+  background:var(--cream);
+  border-bottom:1px solid rgba(31,38,34,0.06);
+}
+.brand-mini{ display:flex; align-items:center; gap:10px; }
+.brand-mini-mark{
+  width:30px; height:30px;
+  background:linear-gradient(145deg, oklch(0.72 0.06 150) 0%, oklch(0.78 0.05 180) 100%);
+  border-radius:7px; position:relative; flex-shrink:0;
+}
+.brand-mini-mark svg{ position:absolute; inset:6px; }
+.brand-mini-text{ display:flex; flex-direction:column; line-height:1.05; }
+.brand-mini-text .nm{ font-weight:600; font-size:13px; color:var(--ink-900); letter-spacing:-0.01em;}
+.brand-mini-text .tg{ font-weight:400; font-size:9px; color:var(--ink-500); margin-top:2px; letter-spacing:0.02em;}
+
+.nav-items{
+  display:flex; align-items:center; gap:4px;
+  font-weight:500; font-size:12.5px;
+  color:var(--ink-700);
+}
+.nav-item{ padding:7px 14px; border-radius:999px; }
+.nav-item.active{ background:var(--ink-900); color:var(--cream); }
+
+.nav-user{
+  display:flex; align-items:center; gap:8px;
+  padding:5px 12px 5px 5px;
+  border:1px solid var(--line); border-radius:999px;
+  background:var(--paper);
+  font-size:12px;
+}
+.nav-user-avatar{
+  width:24px; height:24px; border-radius:50%;
+  background:var(--sage-tint); color:var(--sage-ink);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:600; font-size:10.5px;
+}
+
+/* Body */
+.body{
+  flex:1;
+  display:flex;
+  padding:36px 48px;
+  gap:36px;
+  background:var(--cream);
+}
+.sidebar{
+  width:200px; flex-shrink:0;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px 12px;
+  height:fit-content;
+}
+.sb-eyebrow{
+  font-size:9.5px; letter-spacing:0.16em; text-transform:uppercase;
+  color:var(--ink-500); font-weight:600;
+  padding:5px 10px 12px;
+}
+.sb-item{
+  display:flex; align-items:center; gap:9px;
+  padding:8px 11px;
+  border-radius:8px;
+  font-size:12.5px; font-weight:500;
+  color:var(--ink-700);
+}
+.sb-item.active{
+  background:var(--sage-tint); color:var(--sage-ink);
+  border:1px solid rgba(159,180,160,0.45);
+}
+
+.main{ flex:1; min-width:0; }
+.eyebrow{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:4.5px 12px;
+  border:1px solid rgba(159,180,160,0.45);
+  border-radius:999px;
+  background:var(--sage-tint);
+  font-size:11px; font-weight:500;
+  color:var(--sage-ink);
+  margin-bottom:10px;
+}
+.eyebrow::before{
+  content:""; width:5px; height:5px; border-radius:50%; background:var(--sage-ink);
+}
+.h1-app{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:36px;
+  line-height:1.04;
+  letter-spacing:-0.02em;
+  color:var(--ink-900);
+  margin-bottom:8px;
+}
+.sub-app{
+  font-size:13.5px; line-height:1.55; color:var(--ink-500);
+  max-width:540px; margin-bottom:24px;
+}
+
+.upload-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:22px 26px 26px;
+  max-width:520px;
+}
+.uc-h{ font-weight:600; font-size:15.5px; color:var(--ink-900); margin-bottom:4px;}
+.uc-sub{ font-size:11px; color:var(--ink-500); margin-bottom:16px;}
+
+.dropzone{
+  position:relative;
+  border:2px dashed rgba(31,38,34,0.18);
+  border-radius:12px;
+  padding:32px 0 24px;
+  display:flex; flex-direction:column; align-items:center;
+  background:var(--paper);
+  transition:background-color 0.30s, border-color 0.30s, box-shadow 0.30s, transform 0.25s;
+  transform-origin:50% 50%;
+}
+/* Hover state, sage glow and subtle scale, fires when cursor approaches */
+.dropzone.hover{
+  border-color:var(--sage-bright);
+  background:rgba(184,209,181,0.12);
+  box-shadow:
+    0 0 0 3px rgba(184,209,181,0.18),
+    0 0 32px rgba(184,209,181,0.20);
+  transform:scale(1.02);
+}
+.dropzone.active{
+  border-color:var(--sage);
+  background:rgba(159,180,160,0.16);
+  box-shadow:
+    0 0 0 4px rgba(159,180,160,0.30),
+    0 0 50px rgba(159,180,160,0.30);
+}
+.dz-icon{
+  width:42px; height:42px; border-radius:10px;
+  background:var(--sage-tint);
+  border:1px solid rgba(159,180,160,0.5);
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:14px;
+}
+.dz-icon svg{ width:18px; height:18px; color:var(--sage-ink); }
+.dz-h{ font-weight:600; font-size:15px; color:var(--ink-900); margin-bottom:4px;}
+.dz-sub{ font-size:11.5px; color:var(--ink-500); }
+.browse-btn{
+  margin:14px 0 8px;
+  padding:9px 24px;
+  background:var(--ink-900); color:var(--cream);
+  border:none; border-radius:7px;
+  font-family:inherit; font-weight:600; font-size:12px;
+  cursor:pointer;
+}
+.dz-foot{ font-size:10.5px; color:var(--ink-500); }
+
+/* CSV preview, dragged by cursor (mini spreadsheet) */
+.csv-preview{
+  position:absolute;
+  z-index:25;
+  width:340px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:10px;
+  box-shadow:
+    0 30px 60px rgba(0,0,0,0.45),
+    0 12px 24px rgba(0,0,0,0.25);
+  overflow:hidden;
+  font-family:"Geist", sans-serif;
+  color:var(--ink-900);
+  opacity:0;
+  will-change:transform, opacity;
+}
+.csv-pv-header{
+  display:flex; align-items:center; gap:9px;
+  padding:10px 14px;
+  background:linear-gradient(180deg, var(--paper), var(--cream));
+  border-bottom:1px solid var(--line-soft);
+  font-family:"Geist Mono", monospace;
+  font-size:11.5px;
+}
+.csv-pv-icon{
+  width:22px; height:22px; border-radius:5px;
+  background:var(--sage-tint); border:1px solid rgba(159,180,160,0.5);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+  color:var(--sage-ink);
+}
+.csv-pv-icon svg{ width:13px; height:13px; }
+.csv-pv-name{ flex:1; font-weight:600; font-size:11px; color:var(--ink-900); letter-spacing:-0.005em;}
+.csv-pv-size{ font-size:10px; color:var(--ink-500); }
+
+.csv-pv-table{
+  width:100%; border-collapse:collapse;
+  font-family:"Geist Mono", monospace;
+  font-size:10.5px;
+}
+.csv-pv-table th{
+  background:#F2EBD8;
+  font-weight:700; font-size:9.5px; letter-spacing:0.04em;
+  color:var(--ink-900);
+  text-align:left;
+  padding:6px 10px;
+  border-bottom:1px solid var(--line-soft);
+  text-transform:uppercase;
+}
+.csv-pv-table td{
+  padding:5.5px 10px;
+  color:var(--ink-700);
+  border-bottom:1px solid var(--line-soft);
+}
+.csv-pv-table tr:last-child td{ border-bottom:none; }
+.csv-pv-table .num{ text-align:right; font-weight:600; color:var(--ink-900); }
+.csv-pv-footer{
+  padding:7px 14px;
+  background:var(--paper);
+  border-top:1px solid var(--line-soft);
+  font-size:10px; color:var(--ink-500);
+  display:flex; justify-content:space-between;
+  font-family:"Geist", sans-serif;
+}
+
+/* Cursor */
+.cursor-svg{
+  position:absolute;
+  width:32px; height:32px;
+  z-index:30;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.45));
+  opacity:0;
+  will-change:transform, opacity;
+}
+
+/* Hud */
+.hud{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  background:rgba(15,15,17,0.85);
+  color:#EAE3D2; font-family:"Geist Mono", monospace; font-size:11px;
+  padding:8px 14px; border-radius:999px;
+  display:flex; gap:14px; align-items:center; z-index:100;
+  letter-spacing:0.06em;
+}
+.hud button{
+  appearance:none; border:1px solid #555; background:transparent; color:#EAE3D2;
+  font-family:inherit; font-size:11px; padding:3px 10px; border-radius:999px; cursor:pointer;
+}
+.hud button:hover{ background:#222; }
+.hud .timer{ font-variant-numeric:tabular-nums; min-width:46px; }
+</style>
+</head>
+<body>
+
+<audio id="sfx-click-drop" class="sfx-click" src="../audio/mouse_click.mp3" data-start="2.86" data-duration="0.20" data-track-index="audio-0"></audio>
+
+<div class="frame-wrap" id="frame">
+  <div class="stage">
+    <div class="grain"></div>
+    <div class="watermark-tr">Scene 10 / 18</div>
+    <div class="footer">CSIT321&nbsp;CAPSTONE / TECHNICAL OVERVIEW</div>
+
+    <!-- Floating caption -->
+    <div class="float-caption" id="floatCaption"><span class="accent">Data Entry</span> &mdash; quarterly CSV upload</div>
+
+    <!-- Sage ripple expanding from the Data Entry button -->
+    <div class="ripple" id="ripple"></div>
+
+    <!-- Data Entry button (the focal element that ripples open) -->
+    <div class="entry-pill" id="entryPill"><span class="dot" id="pillDot"></span>Data Entry</div>
+
+    <!-- Rotated app card, 16:9, smaller than viewport -->
+    <div class="app-card" id="appCard">
+      <!-- Specular sheen overlay (camera-orbit lighting) -->
+      <div class="card-sheen" id="cardSheen"></div>
+      <div class="topnav">
+        <div class="brand-mini">
+          <span class="brand-mini-mark">
+            <svg viewBox="0 0 18 18"><path d="M0,11 L3,11 L5,7 L7.5,14 L10,3 L12.5,11 L18,11" fill="none" stroke="#FBF8F2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div class="brand-mini-text">
+            <span class="nm">CareData</span>
+            <span class="tg">Health Analytics Portal</span>
+          </div>
+        </div>
+        <div class="nav-items">
+          <span class="nav-item">Dashboard</span>
+          <span class="nav-item active">Data Entry</span>
+          <span class="nav-item">Voice Screening</span>
+          <span class="nav-item">Reports</span>
+          <span class="nav-item">Benchmarking</span>
+        </div>
+        <div class="nav-user">
+          <span class="nav-user-avatar">N</span>
+          <span>Nelly</span>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="sidebar">
+          <div class="sb-eyebrow">Data Entry</div>
+          <div class="sb-item active">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11h10M8 4v7M5 7l3-3 3 3"/></svg>
+            Upload Data
+          </div>
+          <div class="sb-item">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 12.5l1-1 7-7 1.5 1.5-7 7-1.5.5z"/></svg>
+            Manual Entry
+          </div>
+          <div class="sb-item">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 12h10M8 3v7M5 7l3 3 3-3"/></svg>
+            Download
+          </div>
+        </div>
+
+        <div class="main">
+          <span class="eyebrow">Quarterly intake</span>
+          <h1 class="h1-app">Upload QI data</h1>
+          <p class="sub-app">Upload your quarterly CSV from the QI Platform template. Data will be validated and GPMS fields auto-computed.</p>
+
+          <div class="upload-card">
+            <div class="uc-h">Quarterly CSV upload</div>
+            <div class="uc-sub">Accepted: .csv files, GPMS export or QI Platform template</div>
+
+            <div class="dropzone" id="dropzone">
+              <div class="success-tick" id="successTick">
+                <svg viewBox="0 0 50 50">
+                  <path d="M11 26 L22 36 L40 16"/>
+                </svg>
+              </div>
+              <div class="dz-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
+              <div class="dz-h">Drag and drop your CSV here</div>
+              <div class="dz-sub">or click to browse.</div>
+              <button class="browse-btn">Browse files</button>
+              <div class="dz-foot">Supported: .csv · Max: 5 MB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CSV preview, mini spreadsheet, dragged by cursor -->
+    <div class="csv-preview" id="csvPreview">
+      <div class="csv-pv-header">
+        <span class="csv-pv-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <path d="M14 2v6h6"/>
+          </svg>
+        </span>
+        <span class="csv-pv-name">Synthetic_QI_Data_2024_350r_4q.csv</span>
+        <span class="csv-pv-size">213&nbsp;KB</span>
+      </div>
+      <table class="csv-pv-table">
+        <thead>
+          <tr><th>FACILITY</th><th>QUARTER</th><th>INDICATOR</th><th class="num">VALUE</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>BAYSIDE</td><td>Q1 2024</td><td>PI_01</td><td class="num">16.6%</td></tr>
+          <tr><td>BAYSIDE</td><td>Q2 2024</td><td>PI_01</td><td class="num">12.6%</td></tr>
+          <tr><td>BAYSIDE</td><td>Q3 2024</td><td>PI_01</td><td class="num">12.3%</td></tr>
+          <tr><td>BAYSIDE</td><td>Q4 2024</td><td>PI_01</td><td class="num">7.1%</td></tr>
+          <tr><td>BAYSIDE</td><td>Q1 2024</td><td>FALLS_MAJ</td><td class="num">4.3%</td></tr>
+        </tbody>
+      </table>
+      <div class="csv-pv-footer">
+        <span>350 rows · 4 quarters · 14 indicators</span>
+        <span style="color:var(--sage-ink); font-weight:600;">Q1-Q4 2024</span>
+      </div>
+    </div>
+
+    <!-- Confetti burst on drop, 12 dots -->
+    <div class="confetti" id="confetti">
+      <span class="confetti-dot large" data-i="0"></span>
+      <span class="confetti-dot" data-i="1"></span>
+      <span class="confetti-dot dusty" data-i="2"></span>
+      <span class="confetti-dot" data-i="3"></span>
+      <span class="confetti-dot large cream" data-i="4"></span>
+      <span class="confetti-dot" data-i="5"></span>
+      <span class="confetti-dot dusty large" data-i="6"></span>
+      <span class="confetti-dot" data-i="7"></span>
+      <span class="confetti-dot cream" data-i="8"></span>
+      <span class="confetti-dot" data-i="9"></span>
+      <span class="confetti-dot large" data-i="10"></span>
+      <span class="confetti-dot dusty" data-i="11"></span>
+    </div>
+
+    <!-- Cursor: Bootstrap Icons `hand-index-thumb-fill` (bootstrap-icons,
+         MIT). Single filled path — no internal strokes show through the
+         white fill, so no "gray line across the hand" artifact. -->
+    <svg class="cursor-svg" id="cursor" viewBox="0 0 16 16" fill="#fff" stroke="#1F2622" stroke-width="0.5" stroke-linejoin="round" data-icon="bi-hand-index-thumb-fill">
+      <path d="M8.5 1.75v2.716l.047-.002c.312-.012.742-.016 1.051.046.28.056.543.18.738.288.273.152.456.385.56.642l.132-.012c.312-.024.794-.038 1.158.108.37.148.689.487.88.716q.113.137.195.248h.582a2 2 0 0 1 1.99 2.199l-.272 2.715a3.5 3.5 0 0 1-.444 1.389l-1.395 2.441A1.5 1.5 0 0 1 12.42 16H6.118a1.5 1.5 0 0 1-1.342-.83l-1.215-2.43L1.07 8.589a1.517 1.517 0 0 1 2.373-1.852L5 8.293V1.75a1.75 1.75 0 0 1 3.5 0"/>
+    </svg>
+  </div>
+</div>
+
+<div class="hud">
+  <button id="replay">REPLAY</button>
+  <span class="timer" id="timer">0.00s</span>
+  <span style="opacity:.6">Scene 10 / Data Entry</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+/* Deterministic PRNG (mulberry32) — Hyperframes lint rejects Math.random() */
+let __seed = 1;
+function rand(){
+  __seed = (__seed + 0x6D2B79F5) | 0;
+  let t = __seed;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return (((t ^ (t >>> 14)) >>> 0) / 4294967296);
+}
+
+function fit(){
+  const wrap = document.getElementById('frame');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  /* CSS zoom, not transform: scale. zoom changes the layout coordinate system so
+     the browser rasterises text/borders/shadows at the zoomed resolution natively
+     (no bitmap upscale). At 4K render this is the only reliable way to keep 3D-
+     rotated descendants crisp; transform: scale rasterises children at 1920-coord
+     and 2×-upscales the bitmap, producing pixel break on rotation. */
+  wrap.style.zoom = s;
+}
+fit();
+window.addEventListener('resize', fit);
+
+let tl;
+let NAV_POS = null;       /* nav Data Entry button centre in 1920x1080 frame coords */
+let CARD_ORIGIN = null;   /* nav button position as % of card, used as transform-origin */
+let DROPZONE_POS = null;  /* dropzone centre in 1920x1080 frame coords */
+let PILL_NAV_SCALE = 2.0; /* pill scale that visually matches the nav button when card is at scale 4 */
+let NAV_VISUAL = null;    /* nav button width/height when card sits at scale 4 (frame coords) */
+
+/* Measure actual DOM positions of nav button + dropzone, then snap the standalone entry-pill,
+   ripple, and the app's transform-origin to those measured positions so they align 1:1. */
+function syncFromDom(){
+  const wrap = document.getElementById('frame');
+  const card = document.getElementById('appCard');
+  const navBtn = document.querySelector('.app-card .nav-item.active');
+  const dz = document.getElementById('dropzone');
+
+  /* Save state */
+  const savedOpacity = card.style.opacity;
+  const savedVisibility = card.style.visibility;
+  card.style.opacity = '0';
+  card.style.visibility = 'visible';
+  /* Clear gsap-applied transform for natural measurement */
+  gsap.set('#appCard', { clearProps: 'transform,scale,rotation,rotationX,rotationY' });
+  card.offsetHeight; /* force layout */
+
+  const wrapRect = wrap.getBoundingClientRect();
+  const wrapScale = wrapRect.width / 1920;
+
+  const navRect = navBtn.getBoundingClientRect();
+  const cardRect = card.getBoundingClientRect();
+  const dzRect = dz.getBoundingClientRect();
+
+  const toFrameX = (px) => (px - wrapRect.left) / wrapScale;
+  const toFrameY = (py) => (py - wrapRect.top) / wrapScale;
+
+  NAV_POS = {
+    x: toFrameX(navRect.left + navRect.width / 2),
+    y: toFrameY(navRect.top + navRect.height / 2)
+  };
+
+  const cardLeft = toFrameX(cardRect.left);
+  const cardTop = toFrameY(cardRect.top);
+  const cardW = cardRect.width / wrapScale;
+  const cardH = cardRect.height / wrapScale;
+
+  CARD_ORIGIN = {
+    x: ((NAV_POS.x - cardLeft) / cardW) * 100,
+    y: ((NAV_POS.y - cardTop) / cardH) * 100
+  };
+
+  DROPZONE_POS = {
+    x: toFrameX(dzRect.left + dzRect.width / 2),
+    y: toFrameY(dzRect.top + dzRect.height / 2)
+  };
+
+  /* Nav button visual size when the card sits at scale 4.0 */
+  NAV_VISUAL = {
+    w: (navRect.width / wrapScale) * 4.0,
+    h: (navRect.height / wrapScale) * 4.0
+  };
+
+  /* Snap pill + ripple to the exact nav button position */
+  const pill = document.getElementById('entryPill');
+  pill.style.top = `${NAV_POS.y / 1080 * 100}%`;
+  pill.style.left = `${NAV_POS.x / 1920 * 100}%`;
+
+  /* Measure pill natural size at scale 1 (with bullet hidden, since at the merge moment
+     the bullet is faded out — match the post-bullet width so the merge is exact). */
+  gsap.set('#entryPill', { clearProps: 'transform,scale' });
+  pill.style.opacity = '0';
+  pill.style.visibility = 'visible';
+  const dot = document.getElementById('pillDot');
+  const savedDotDisplay = dot.style.display;
+  dot.style.display = 'none';
+  pill.offsetHeight; /* force layout */
+  const pillRect = pill.getBoundingClientRect();
+  const pillH = pillRect.height / wrapScale;
+  /* Match HEIGHT exactly, accept slight width variation (text + padding differences) */
+  PILL_NAV_SCALE = NAV_VISUAL.h / pillH;
+  dot.style.display = savedDotDisplay;
+
+  const ripple = document.getElementById('ripple');
+  ripple.style.top = `${NAV_POS.y / 1080 * 100}%`;
+  ripple.style.left = `${NAV_POS.x / 1920 * 100}%`;
+
+  /* Restore */
+  card.style.opacity = savedOpacity;
+  card.style.visibility = savedVisibility;
+}
+
+/* approximate dropzone center in viewport pixels, used to drive the magnetic snap */
+const DROPZONE_TARGET = { x: 870, y: 800 };
+
+function getDropzoneCenter(){
+  const dz = document.getElementById('dropzone');
+  const r = dz.getBoundingClientRect();
+  const wrap = document.getElementById('frame').getBoundingClientRect();
+  /* convert page rect to native 1920x1080 frame coords */
+  const sx = 1920 / wrap.width;
+  const sy = 1080 / wrap.height;
+  return {
+    x: (r.left + r.width/2 - wrap.left) * sx,
+    y: (r.top + r.height/2 - wrap.top) * sy
+  };
+}
+
+function build(){
+  /* Sync standalone pill, ripple, and transform-origin to the actual measured DOM positions */
+  syncFromDom();
+  const offsetToCentre = { x: 960 - NAV_POS.x, y: 540 - NAV_POS.y };
+
+  /* Initial state */
+  /* Standalone Data Entry pill starts SUPER BIG (zooming in from camera), then zooms out to its
+     centre resting scale, then in Phase 2 flies to nav position + shrinks to fit the screen. */
+  gsap.set('#entryPill', {
+    opacity: 0,
+    xPercent: -50, yPercent: -50,
+    x: offsetToCentre.x,  /* translate from nav position TO viewport centre */
+    y: offsetToCentre.y,
+    scale: 5.6  /* over-scaled, will zoom-out to 2.6 during Phase 1 */
+  });
+  gsap.set('#ripple', { scale: 0, opacity: 0 });
+
+  /* App card at scale 4.0 with transform-origin on the MEASURED Data Entry button position */
+  gsap.set('#appCard', {
+    opacity: 0,
+    transformPerspective: 2400,
+    transformOrigin: `${CARD_ORIGIN.x}% ${CARD_ORIGIN.y}%`,
+    rotationY: 0, rotationX: 0,
+    scale: 4.0,
+    filter: 'blur(0px)'
+  });
+  gsap.set('#floatCaption', { opacity: 0, y: 14, scale: 1 });
+  gsap.set('#csvPreview', { opacity: 0, x: 2200, y: 480, rotation: 4, scale: 1 });
+  /* Cursor initial position is off-screen right, slides in during Phase 4. */
+  gsap.set('#cursor', { opacity: 0, x: 2200, y: 440 });
+
+  /* hide all confetti + success tick */
+  gsap.set('.confetti-dot', { opacity: 0, x: 0, y: 0, scale: 0 });
+  gsap.set('#successTick', { opacity: 0, scale: 0 });
+  gsap.set('#successTick svg path', { strokeDashoffset: 60 });
+
+  /* Camera-move scaffolding — neutral start states for the layered cues that fire
+     during the BOOM tilt: specular sheen hidden + parked left, .stage at world-zero,
+     .frame-wrap at the default centred perspective. */
+  gsap.set('#cardSheen', { opacity: 0, xPercent: -30 });
+  gsap.set('.stage', { x: 0, y: 0 });
+  gsap.set('#frame', { perspectiveOrigin: '50% 50%' });
+
+  /* Reset pill bullet to its visible default for replay */
+  gsap.set('#pillDot', { opacity: 1, width: 8, marginRight: 0 });
+
+  tl = gsap.timeline({
+    paused: true,
+    onUpdate: () => {
+      document.getElementById('timer').textContent = tl.time().toFixed(2) + 's';
+    }
+  });
+
+  /* Reset DOM state for replay */
+  tl.call(()=>{
+    document.getElementById('dropzone').classList.remove('active');
+    document.getElementById('dropzone').classList.remove('hover');
+    document.getElementById('entryPill').classList.remove('flat');
+  }, null, 0);
+
+  /* === Phase 1: 0.000 to 0.500  Pill flies in by ZOOM, holds at centre longer === */
+  tl.to('#entryPill', {
+    opacity: 1,
+    duration: 0.14,
+    ease: 'power2.out'
+  }, 0);
+  tl.to('#entryPill', {
+    scale: 2.6,
+    duration: 0.28,             /* faster zoom-out (was 0.42), so pill rests longer at centre */
+    ease: 'power3.out'
+  }, 0);
+  /* Hold at scale 2.6 from 0.28 → 0.500 (about 220ms of dwell), pill registers fully */
+
+  /* === Phase 2: 0.500 to 0.740  Pill MOVES from centre to nav position + SHRINKS ===
+     End y tuned against the 4K render: -5 inner (= ~-10 viewport-px at zoom=2)
+     drops the pill onto the nav button's optical centre. Was -55 (calibrated
+     against preview only); render needed +100 viewport-px down. */
+  tl.to('#entryPill', {
+    x: 0, y: -5,
+    scale: PILL_NAV_SCALE,
+    duration: 0.24,
+    ease: 'power3.out'
+  }, 0.500);
+
+  /* Bullet dot fades + collapses as pill flies in, so on landing the pill is just text "Data Entry"
+     visually identical to the nav button. */
+  tl.to('#pillDot', {
+    opacity: 0, width: 0, marginRight: -12,
+    duration: 0.14,
+    ease: 'power2.in'
+  }, 0.530);
+
+  /* === Phase 3: 0.800 to ~1.30  Screen materialises + BOOM tilt out (tightened, less dwell) === */
+  /* Sage ripple pulse confirms the merge moment, lands earlier (200ms tighter) */
+  tl.to('#ripple', {
+    opacity: 1, scale: 6,
+    duration: 0.26,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 0.800);
+  tl.to('#ripple', { opacity: 0, duration: 0.18, ease: 'power2.in' }, 0.980);
+
+  /* App card materialises at scale 4.0 — appears under the standalone pill, which already matches
+     the nav button visually thanks to PILL_NAV_SCALE. */
+  tl.to('#appCard', {
+    opacity: 1,
+    duration: 0.16,
+    ease: 'power2.out'
+  }, 0.800);
+
+  /* Standalone pill quickly fades into the app's own nav button (clean handoff). */
+  tl.to('#entryPill', {
+    opacity: 0,
+    duration: 0.12,
+    ease: 'power2.in'
+  }, 0.860);
+
+  /* BOOM, app scales 4.0 to 1.0 + rotates 0 to full tilt (10°/4°, calmer than original). Tilt HOLDS
+     through the cursor approach + drop, then untilts at Phase 7 (after the file is dropped + tick shows). */
+  tl.to('#appCard', {
+    scale: 1.0,
+    rotationY: 10, rotationX: 4,
+    duration: 0.75,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 0.920);
+
+  /* === CAMERA-MOVE LAYERS (run alongside the BOOM rotation) ===
+     The card rotation alone reads as "object flipping in place." These three layers
+     reframe it as "camera orbiting around stationary card":
+       (1) Specular sheen sweeps across the card surface — fixed light, moving camera.
+       (2) Stage gradient counter-parallaxes opposite to the card tilt — depth cue.
+       (3) Perspective-origin glides — the actual CSS3D camera point shifts.
+     All three return to neutral on the UNTILT (3.000) so the rest of the scene is
+     untouched. */
+
+  /* (1) Specular sheen: sweep band -30% → 40% across the card while ramping opacity
+         up then down. Peak coincides with mid-rotation (~1.2s) when surface angle
+         is most reflective. */
+  tl.to('#cardSheen', { opacity: 1, duration: 0.20, ease: 'power1.out' }, 0.940);
+  tl.to('#cardSheen', { xPercent: 40, duration: 0.75, ease: 'cubic-bezier(.22,.85,.30,1)' }, 0.940);
+  tl.to('#cardSheen', { opacity: 0, duration: 0.22, ease: 'power1.in' }, 1.270);
+
+  /* (2) Stage counter-parallax: nudge the background gradient opposite to the card's
+         apparent rotation. Small (-14, -6 inner px) — should read as depth, not motion. */
+  tl.to('.stage', {
+    x: -14, y: -6,
+    duration: 0.75,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 0.920);
+
+  /* (3) Perspective-origin glide on .frame-wrap: shifts the CSS3D vanishing point
+         during the rotation, making the projection itself "move" alongside the card.
+         50%/50% (centred) → 54%/47% (slightly right + up) is enough to register
+         without distorting the card's silhouette. */
+  tl.to('#frame', {
+    perspectiveOrigin: '54% 47%',
+    duration: 0.75,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 0.920);
+
+  tl.to('#floatCaption', {
+    opacity: 1, y: 0,
+    duration: 0.40,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 1.150);
+
+  /* Live dropzone centre — captured at runtime so cursor/csv hit the visible dropzone even
+     while the screen is TILTED. dzX/dzY (build-time, untilted) is the seed; liveDz is updated
+     just before cursor entry by reading the current bounding-rect of the rotated dropzone. */
+  const dzX = (DROPZONE_POS && DROPZONE_POS.x) || 843;
+  const dzY = (DROPZONE_POS && DROPZONE_POS.y) || 530;
+  const liveDz = { x: dzX, y: dzY };
+
+  /* Capture live dropzone centre WITH the current 3D transform applied (tilted screen) */
+  tl.call(()=>{
+    const r = document.getElementById('dropzone').getBoundingClientRect();
+    const wrap = document.getElementById('frame').getBoundingClientRect();
+    const ws = wrap.width / 1920;
+    liveDz.x = (r.left + r.width/2 - wrap.left) / ws;
+    liveDz.y = (r.top + r.height/2 - wrap.top) / ws;
+  }, null, 1.680);
+
+  /* === Phase 4: 1.700 to 2.300  Cursor + CSV enter and GLIDE to the (tilted) dropzone === */
+  tl.to('#cursor', { opacity: 1, duration: 0.10 }, 1.700);
+  tl.to('#csvPreview', { opacity: 1, duration: 0.10 }, 1.700);
+
+  /* CSV grab pulse */
+  tl.to('#csvPreview', { scale: 1.06, duration: 0.10, ease: 'power2.out' }, 1.700);
+  tl.to('#csvPreview', { scale: 1.0, duration: 0.16, ease: 'power2.inOut' }, 1.800);
+
+  /* TILT_OFFSET — empirical correction for the AABB-vs-visual-centre gap of the
+     3D-rotated dropzone. getBoundingClientRect returns the axis-aligned bounding
+     box, not the rotated rectangle's visual centre, so liveDz lands a bit off.
+     Both values calibrated against the 4K render (zoom=2, so 1 inner = 2 viewport-px).
+     X: 0 inner — was -100, render needed +200 viewport-px right.
+     Y: 0 inner — was -100, render needed +200 viewport-px down. */
+  const TILT_DX = 0;
+  const TILT_DY = 0;
+
+  /* Outer glide — slower, readable trajectory toward the visually-corrected dropzone */
+  tl.to('#cursor', {
+    x: () => liveDz.x + 95 + TILT_DX,
+    y: () => liveDz.y - 60 + TILT_DY,
+    duration: 0.36,
+    ease: 'cubic-bezier(.45,.10,.50,.90)'
+  }, 1.720);
+  tl.to('#csvPreview', {
+    x: () => liveDz.x + 115 + TILT_DX,
+    y: () => liveDz.y - 20 + TILT_DY,
+    rotation: -3,
+    duration: 0.36,
+    ease: 'cubic-bezier(.45,.10,.50,.90)'
+  }, 1.720);
+
+  /* drag wiggle */
+  tl.to('#csvPreview', {
+    rotation: 2,
+    duration: 0.14, yoyo: true, repeat: 1, ease: 'sine.inOut'
+  }, 1.880);
+
+  /* === 2.080  Cursor enters the dropzone area, hover state activates === */
+  tl.call(()=>{
+    document.getElementById('dropzone').classList.add('hover');
+  }, null, 2.080);
+
+  /* Final approach — cursor + csv land ON the (live, tilt-corrected) dropzone */
+  tl.to('#cursor', {
+    x: () => liveDz.x + TILT_DX,
+    y: () => liveDz.y - 5 + TILT_DY,
+    duration: 0.22,
+    ease: 'power3.out'
+  }, 2.080);
+  tl.to('#csvPreview', {
+    x: () => liveDz.x + 20 + TILT_DX,
+    y: () => liveDz.y + 35 + TILT_DY,
+    rotation: 0,
+    duration: 0.22,
+    ease: 'power3.out'
+  }, 2.080);
+
+  /* === Phase 5: 2.300 to 2.800  HOLD ON DROPZONE (500 ms clear pause) === */
+  /* Nothing animates here — cursor + csv steady on the box, dropzone stays in hover. The
+     eye locks in. Then the drop happens. */
+
+  /* === Phase 6: 2.800 to 3.000  DROP, csv snaps INTO the dropzone === */
+  /* Tiny anticipation lift just before release */
+  tl.to('#csvPreview', {
+    y: () => liveDz.y + 22 + TILT_DY,
+    duration: 0.06, ease: 'back.out(1.6)'
+  }, 2.800);
+
+  /* Snap down */
+  tl.to('#csvPreview', {
+    x: () => liveDz.x + TILT_DX,
+    y: () => liveDz.y + TILT_DY,
+    scale: 0.55,
+    rotation: 0,
+    duration: 0.14,
+    ease: 'power4.in'
+  }, 2.860);
+
+  tl.to('#csvPreview', { scale: 0.35, duration: 0.08, ease: 'back.in(2)' }, 3.000);
+  tl.to('#csvPreview', { opacity: 0, duration: 0.12, ease: 'power2.in' }, 3.060);
+
+  /* Cursor releases, moves up slightly */
+  tl.to('#cursor', {
+    y: () => liveDz.y - 45 + TILT_DY,
+    duration: 0.14, ease: 'power2.out'
+  }, 2.940);
+
+  /* === Phase 7: 3.000 to 3.400  WEB STRAIGHTENS + TICK + CONFETTI (all simultaneous) === */
+  tl.call(()=>{
+    document.getElementById('dropzone').classList.remove('hover');
+    document.getElementById('dropzone').classList.add('active');
+  }, null, 3.000);
+
+  /* Camera-move layers return to neutral in lockstep with the UNTILT (matched
+     duration/easing so the whole frame settles back to a flat, centred shot). */
+  tl.to('.stage', {
+    x: 0, y: 0,
+    duration: 0.36,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 3.000);
+  tl.to('#frame', {
+    perspectiveOrigin: '50% 50%',
+    duration: 0.36,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 3.000);
+
+  /* Web untilts back to flat */
+  tl.to('#appCard', {
+    rotationY: 0, rotationX: 0,
+    duration: 0.36,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 3.000);
+
+  /* Dropzone scale reaction */
+  tl.fromTo('#dropzone',
+    { scale: 1.02 },
+    { scale: 1.06, duration: 0.12, ease: 'power2.out' },
+    3.000);
+  tl.to('#dropzone',
+    { scale: 1.0, duration: 0.30, ease: 'elastic.out(1, 0.55)' },
+    3.120);
+
+  /* Success TICK appears */
+  tl.to('#successTick', {
+    opacity: 1, scale: 1.0,
+    duration: 0.24, ease: 'back.out(1.6)'
+  }, 3.040);
+  tl.to('#successTick svg path', {
+    strokeDashoffset: 0,
+    duration: 0.26, ease: 'power2.out'
+  }, 3.120);
+
+  /* Confetti burst at the (now flat) dropzone centre — re-read live position */
+  tl.call(()=>{
+    const r = document.getElementById('dropzone').getBoundingClientRect();
+    const wrap = document.getElementById('frame').getBoundingClientRect();
+    const ws = wrap.width / 1920;
+    liveDz.x = (r.left + r.width/2 - wrap.left) / ws;
+    liveDz.y = (r.top + r.height/2 - wrap.top) / ws;
+  }, null, 3.020);
+
+  const dots = document.querySelectorAll('.confetti-dot');
+  tl.set('.confetti-dot', { x: () => liveDz.x, y: () => liveDz.y }, 3.040);
+  dots.forEach((dot, i) => {
+    const angle = (Math.PI * 2) * (i / dots.length) + (rand() * 0.4 - 0.2);
+    const dist = 90 + rand() * 100;
+    tl.fromTo(dot,
+      { opacity: 0, scale: 0, x: () => liveDz.x, y: () => liveDz.y },
+      {
+        opacity: 1, scale: 1,
+        x: () => liveDz.x + Math.cos(angle) * dist,
+        y: () => liveDz.y + Math.sin(angle) * dist,
+        duration: 0.36, ease: 'power3.out'
+      },
+      3.040 + i * 0.012);
+    tl.to(dot, {
+      opacity: 0, scale: 0.6,
+      y: `+=80`,
+      duration: 0.30, ease: 'power2.in'
+    }, 3.300 + i * 0.012);
+  });
+
+  /* === Phase 8: 3.400 to 3.900  HOLD flat web with visible tick (500 ms breathe) === */
+  /* Nothing animates — audience reads the success state. */
+
+  /* Phase 9: gentle fade out instead of fly-past */
+  tl.to('#appCard', { opacity: 0, duration: 0.60, ease: 'power1.in' }, 3.900);
+  tl.to('#floatCaption', { opacity: 0, duration: 0.45, ease: 'power1.in' }, 3.900);
+  tl.to('#cursor', { opacity: 0, duration: 0.30 }, 3.900);
+}
+
+function play(){
+  if (!tl) build();
+  tl.restart();
+  tl.play();
+}
+
+document.getElementById('replay').addEventListener('click', play);
+
+// IFRAME-AWARE BOOTSTRAP — patched by shared/patch-scenes.mjs
+window.addEventListener('load', () => {
+  const start = () => { build(); if (window.parent === window) play(); };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+  } else {
+    start();
+  }
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === 'play'  && typeof play === 'function')                          play();
+  if (t === 'pause' && typeof tl   !== 'undefined' && tl)                    tl.pause();
+  if (t === 'reset' && typeof tl   !== 'undefined' && tl) { tl.seek(0); tl.pause(); }
+});
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

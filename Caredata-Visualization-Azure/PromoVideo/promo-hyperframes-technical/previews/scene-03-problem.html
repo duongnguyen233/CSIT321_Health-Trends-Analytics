@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 03 - The Problem — Scattered QI Records (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+  --win-bg:       #FFFFFF;
+  --win-chrome:   #F2EEE4;
+  --win-border:   #E2DCCC;
+}
+
+body {
+  background: #0E1211;
+  display:flex; align-items:center; justify-content:center;
+}
+
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+  background: linear-gradient(180deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+}
+
+/* ===== Stage: dark dramatic ===== */
+.stage {
+  position:absolute; inset:0;
+  background: linear-gradient(180deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+}
+
+/* subtle ambient radial to add depth */
+.stage::after {
+  content:"";
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 50%, rgba(159,180,160,0.04), transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(200,184,155,0.03), transparent 60%);
+}
+
+/* paper grain — on dark it subtracts slightly, still keeps film texture */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.35;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+/* ===== Watermarks ===== */
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.20em;
+  color:var(--ink-300); opacity:0.45; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-300); opacity:0.45;
+  z-index:60; pointer-events:none;
+}
+
+/* ===== Paper card base ===== */
+.paper-card {
+  position:absolute;
+  background:var(--win-bg);
+  border:1px solid var(--win-border);
+  border-radius:8px;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.18),
+    0 8px 24px rgba(0,0,0,0.28),
+    0 1px 0 rgba(255,255,255,0.06) inset;
+  overflow:hidden;
+}
+
+/* ===== Window chrome header (traffic lights) ===== */
+.win-chrome {
+  height:32px;
+  background:var(--win-chrome);
+  border-bottom:1px solid var(--win-border);
+  display:flex; align-items:center;
+  padding:0 12px;
+  gap:6px;
+  flex-shrink:0;
+}
+.win-chrome .dot {
+  width:12px; height:12px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+.dot-red    { background:#FF5F57; }
+.dot-yellow { background:#FFBD2E; }
+.dot-green  { background:#28C840; }
+.win-chrome .win-title {
+  margin-left:8px;
+  font-family:"Geist Mono",monospace; font-weight:400;
+  font-size:11px; color:var(--ink-500);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* ===== Card body ===== */
+.card-body {
+  padding:14px 16px;
+  background:var(--win-bg);
+}
+
+/* ===== Mini table (fragment A) ===== */
+.mini-table {
+  width:100%;
+  border-collapse:collapse;
+  font-family:"Geist Mono",monospace;
+  font-size:11px;
+}
+.mini-table th {
+  background:#F6F2EB;
+  color:var(--ink-700);
+  font-weight:500;
+  padding:5px 8px;
+  border:1px solid var(--win-border);
+  text-align:left;
+}
+.mini-table td {
+  padding:5px 8px;
+  border:1px solid var(--win-border);
+  color:var(--ink-700);
+  background:var(--win-bg);
+}
+.mini-table td.error-cell {
+  background:#FFF3CD;
+  color:#856404;
+  font-weight:600;
+}
+.mini-table tr:nth-child(odd) td {
+  background:#FAFAF8;
+}
+.mini-table tr:nth-child(odd) td.error-cell {
+  background:#FFF3CD;
+}
+
+/* ===== GPMS PDF fields (fragment B) ===== */
+.gpms-header {
+  background:#F0EDE4;
+  border-bottom:2px solid #C8B89B;
+  padding:10px 14px;
+  font-family:"Geist",sans-serif;
+  font-weight:600;
+  font-size:12px;
+  color:var(--ink-900);
+  line-height:1.3;
+}
+.gpms-section-label {
+  font-family:"Geist Mono",monospace;
+  font-size:10px;
+  font-weight:500;
+  color:var(--clay-ink);
+  letter-spacing:0.08em;
+  margin-bottom:2px;
+}
+.gpms-field {
+  margin-bottom:12px;
+}
+.gpms-field label {
+  display:block;
+  font-family:"Geist",sans-serif;
+  font-size:11px;
+  font-weight:500;
+  color:var(--ink-700);
+  margin-bottom:4px;
+}
+.gpms-field .field-value {
+  font-family:"Geist Mono",monospace;
+  font-size:11px;
+  color:var(--ink-900);
+}
+.gpms-underline {
+  border:none;
+  border-bottom:1.5px solid var(--ink-300);
+  height:18px;
+  width:100%;
+  display:block;
+}
+
+/* ===== Audit checklist (fragment C) ===== */
+.checklist-row {
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:9px;
+  font-family:"Geist",sans-serif;
+  font-size:11px;
+  color:var(--ink-700);
+}
+.checklist-row .cb {
+  width:14px; height:14px;
+  border:1.5px solid var(--ink-300);
+  border-radius:3px;
+  flex-shrink:0;
+}
+.sticky-note {
+  position:absolute;
+  right:10px; bottom:14px;
+  width:80px; height:50px;
+  background:#FDF5C5;
+  border:1px solid #E8D97A;
+  border-radius:2px;
+  transform:rotate(45deg);
+  padding:6px 7px;
+  font-family:"Geist",sans-serif;
+  font-style:italic;
+  font-size:9px;
+  line-height:1.3;
+  color:#5A4A00;
+  box-shadow:1px 2px 6px rgba(0,0,0,0.12);
+}
+
+/* ===== Email card (fragment D) ===== */
+.email-from {
+  font-family:"Geist Mono",monospace;
+  font-size:10px;
+  color:var(--ink-500);
+  margin-bottom:3px;
+}
+.email-subject {
+  font-family:"Geist",sans-serif;
+  font-weight:600;
+  font-size:12px;
+  color:var(--ink-900);
+  margin-bottom:4px;
+  line-height:1.3;
+}
+.email-preview {
+  font-family:"Geist",sans-serif;
+  font-size:11px;
+  color:var(--ink-500);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* ===== Sticky note E ===== */
+#frag-e {
+  background:#FDF5C5;
+  border:1px solid #E8D97A;
+  border-radius:4px;
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.22),
+    0 8px 20px rgba(0,0,0,0.18);
+  padding:20px;
+  font-family:"Geist",sans-serif;
+  font-style:italic;
+  font-weight:400;
+  font-size:26px;
+  color:#5A4A00;
+  line-height:1.5;
+  white-space:pre-line;
+}
+
+/* ===== Headline ===== */
+#headline {
+  position:absolute;
+  left:50%; top:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  opacity:0;
+  z-index:50;
+  pointer-events:none;
+}
+
+#headline .hl-main {
+  font-family:"Instrument Serif",serif;
+  font-weight:400;
+  font-size:84px;
+  color:var(--paper);
+  line-height:1.1;
+  letter-spacing:-0.01em;
+}
+
+#headline .hl-sub {
+  margin-top:16px;
+  font-family:"Geist",sans-serif;
+  font-weight:400;
+  font-size:38px;
+  color:var(--ink-300);
+  line-height:1.3;
+}
+
+#headline .hl-third {
+  margin-top:20px;
+  font-family:"Geist",sans-serif;
+  font-weight:500;
+  font-size:30px;
+  color:var(--clay-ink);
+  opacity:0;
+  line-height:1.4;
+}
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE · GROUP W08 / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO · CARE-DATA · 03 / 18</div>
+
+  <!-- ===== Fragment A: Excel snippet ===== -->
+  <div id="frag-a" class="paper-card" style="position:absolute; left:80px; top:80px; width:460px; height:250px;">
+    <div class="win-chrome">
+      <span class="dot dot-red"></span>
+      <span class="dot dot-yellow"></span>
+      <span class="dot dot-green"></span>
+      <span class="win-title">PI-Tracking-Q1-2026.xlsx</span>
+    </div>
+    <div class="card-body" style="padding:10px 12px;">
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>Indicator</th>
+            <th>Q4 2025</th>
+            <th>Q1 2026</th>
+            <th>Change</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Any PI</td>
+            <td>12</td>
+            <td>8</td>
+            <td>-4</td>
+          </tr>
+          <tr>
+            <td>Stage S1</td>
+            <td>5</td>
+            <td class="error-cell">#VALUE!</td>
+            <td class="error-cell">#VALUE!</td>
+          </tr>
+          <tr>
+            <td>Stage S2</td>
+            <td>4</td>
+            <td>3</td>
+            <td>-1</td>
+          </tr>
+          <tr>
+            <td>Stage S3/S4</td>
+            <td>3</td>
+            <td>2</td>
+            <td>-1</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== Fragment B: GPMS PDF ===== -->
+  <div id="frag-b" class="paper-card" style="position:absolute; right:80px; top:40px; width:370px; height:430px; background:#FDFBF7;">
+    <div class="gpms-header">
+      GPMS Submission Form<br>
+      <span style="font-weight:400; font-size:11px; color:var(--clay-ink);">Section 1 of 13</span>
+    </div>
+    <div class="card-body" style="padding:14px 16px; background:#FDFBF7;">
+      <div class="gpms-section-label">COLLECTION PERIOD</div>
+      <div class="gpms-field">
+        <label>Period</label>
+        <div class="field-value">1 Jan 2026 – 31 Mar 2026</div>
+      </div>
+      <div class="gpms-field">
+        <label>Facility name:</label>
+        <span class="gpms-underline"></span>
+      </div>
+      <div class="gpms-field">
+        <label>Number of residents assessed:</label>
+        <span class="gpms-underline"></span>
+      </div>
+      <div class="gpms-field">
+        <label>ACFI classification:</label>
+        <span class="gpms-underline"></span>
+      </div>
+      <div class="gpms-field">
+        <label>Authorised by:</label>
+        <span class="gpms-underline"></span>
+      </div>
+      <div style="margin-top:16px; font-family:'Geist Mono',monospace; font-size:9px; color:var(--ink-300); line-height:1.5;">
+        AIHW / GPMS Form QI-2026-R4<br>
+        Complete all 13 sections before submission.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Fragment C: Audit clipboard ===== -->
+  <div id="frag-c" class="paper-card" style="position:absolute; right:100px; bottom:100px; width:340px; height:360px; background:#FDFAF5;">
+    <div class="win-chrome" style="background:#EDE9DD; border-bottom-color:#D8D2C4;">
+      <span class="dot dot-red"></span>
+      <span class="dot dot-yellow"></span>
+      <span class="dot dot-green"></span>
+      <span class="win-title" style="font-family:'Geist',sans-serif; font-weight:600;">QI Audit Checklist</span>
+    </div>
+    <div class="card-body" style="padding:14px 16px; background:#FDFAF5; position:relative;">
+      <div class="checklist-row"><span class="cb"></span>PI point-in-time collection</div>
+      <div class="checklist-row"><span class="cb"></span>Falls retrospective audit (3 months)</div>
+      <div class="checklist-row"><span class="cb"></span>Weight loss records verified</div>
+      <div class="checklist-row"><span class="cb"></span>Medication review sign-off</div>
+      <div class="checklist-row"><span class="cb"></span>Resident census cross-checked</div>
+      <div class="checklist-row"><span class="cb"></span>Section 1–13 GPMS complete</div>
+      <div class="sticky-note">Check with roster!</div>
+    </div>
+  </div>
+
+  <!-- ===== Fragment D: Email ===== -->
+  <div id="frag-d" class="paper-card" style="position:absolute; left:60px; bottom:120px; width:480px; height:155px;">
+    <div class="win-chrome">
+      <span class="dot dot-red"></span>
+      <span class="dot dot-yellow"></span>
+      <span class="dot dot-green"></span>
+      <span class="win-title">Inbox — noreply@health.gov.au</span>
+    </div>
+    <div class="card-body" style="padding:12px 16px;">
+      <div class="email-from">From: noreply@health.gov.au</div>
+      <div class="email-subject">REMINDER: Q1 2026 QI Submission Due in 3 Days</div>
+      <div class="email-preview">Please ensure all 13 sections of the GPMS form are completed and signed off by the Director of Nursing before...</div>
+    </div>
+  </div>
+
+  <!-- ===== Fragment E: Sticky note ===== -->
+  <div id="frag-e" style="position:absolute; left:900px; top:60px; width:275px; height:275px;">Falls Q3?
+ask roster
+sheet 🤷</div>
+
+  <!-- ===== Central Headline ===== -->
+  <div id="headline">
+    <div class="hl-main">Aged care QI reporting.</div>
+    <div id="hl-sub" class="hl-sub" style="opacity:0;">13 mandatory sections. Manual cross-referencing. Every quarter.</div>
+    <div id="hl-third" class="hl-third">Directors of Nursing spend hours on compliance paperwork, not on resident care.</div>
+    <div id="hl-fourth" class="hl-fourth" style="opacity:0; margin-top:18px; font-family:'Geist',sans-serif; font-weight:500; font-size:22px; color:var(--clay); line-height:1.4;">Every missed deadline is a compliance risk for the facility.</div>
+  </div>
+
+  <!-- SFX -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3" preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function() {
+  await document.fonts.ready;
+
+  /* ===== Iron Rule: zoom not transform:scale; transform-origin:0 0 ===== */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((vw - fw) / 2) + 'px';
+    frame.style.top  = ((vh - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* ===== Element refs ===== */
+  const fragA    = document.getElementById('frag-a');
+  const fragB    = document.getElementById('frag-b');
+  const fragC    = document.getElementById('frag-c');
+  const fragD    = document.getElementById('frag-d');
+  const fragE    = document.getElementById('frag-e');
+  const headline = document.getElementById('headline');
+  const hlSub    = document.getElementById('hl-sub');
+  const hlThird  = document.getElementById('hl-third');
+
+  const sfxType   = document.getElementById('sfx-type');
+  const sfxWhoosh = document.getElementById('sfx-whoosh');
+  const sfxClick  = document.getElementById('sfx-click');
+
+  /* ===== SFX helper ===== */
+  function playSfx(el, vol) {
+    try { el.volume = (vol !== undefined ? vol : 1.0); el.currentTime = 0; el.play(); } catch (_) {}
+  }
+
+  /* ===== Easing presets ===== */
+  const easeSettle = 'cubic-bezier(0.16,0.85,0.30,1)';
+
+  /* ===== Initial state: all hidden ===== */
+  gsap.set([fragA, fragB, fragC, fragD, fragE], { opacity: 0 });
+  gsap.set(fragA, { x: -200, rotation: -3 });
+  gsap.set(fragB, { x:  200, rotation:  1.5 });
+  gsap.set(fragC, { y:  200, rotation:  2 });
+  gsap.set(fragD, { x: -200, rotation: -1 });
+  gsap.set(fragE, { y: -150, rotation:  5 });
+  gsap.set(headline, { opacity: 0 });
+  gsap.set(hlSub,    { opacity: 0 });
+  gsap.set(hlThird,  { opacity: 0 });
+
+  const tl = gsap.timeline();
+
+  /* ===== Fragment entries (120 BPM: 1 beat = 0.5 s) ===== */
+
+  /* 0.5 s — Fragment A slides in from left */
+  tl.call(() => playSfx(sfxWhoosh, 0.55), null, 0.5);
+  tl.to(fragA, {
+    opacity: 1, x: 0,
+    duration: 0.45, ease: easeSettle
+  }, 0.5);
+
+  /* 1.0 s — Fragment B slides in from right */
+  tl.call(() => playSfx(sfxWhoosh, 0.55), null, 1.0);
+  tl.to(fragB, {
+    opacity: 1, x: 0,
+    duration: 0.45, ease: easeSettle
+  }, 1.0);
+
+  /* 1.5 s — Fragment C slides up from bottom */
+  tl.call(() => playSfx(sfxWhoosh, 0.50), null, 1.5);
+  tl.to(fragC, {
+    opacity: 1, y: 0,
+    duration: 0.45, ease: easeSettle
+  }, 1.5);
+
+  /* 2.0 s — Fragment D slides in from left */
+  tl.call(() => playSfx(sfxWhoosh, 0.50), null, 2.0);
+  tl.to(fragD, {
+    opacity: 1, x: 0,
+    duration: 0.45, ease: easeSettle
+  }, 2.0);
+
+  /* 2.5 s — Fragment E drops from top */
+  tl.call(() => playSfx(sfxWhoosh, 0.48), null, 2.5);
+  tl.to(fragE, {
+    opacity: 1, y: 0,
+    duration: 0.45, ease: easeSettle
+  }, 2.5);
+
+  /* ===== 3.0 s: all fragments settled — subtle float jitter ===== */
+  /* each fragment gets a gentle 2 s yoyo on y ±2 px */
+  tl.call(() => {
+    gsap.to(fragA, { y: 2,  duration: 2.0, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+    gsap.to(fragB, { y: -2, duration: 2.2, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+    gsap.to(fragC, { y: 2,  duration: 1.9, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+    gsap.to(fragD, { y: -2, duration: 2.1, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+    gsap.to(fragE, { y: 2,  duration: 2.3, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+  }, null, 3.0);
+
+  /* ===== 4.0 s: headline line 1 fades in ===== */
+  tl.call(() => playSfx(sfxType, 0.75), null, 4.0);
+  tl.to(headline, {
+    opacity: 1,
+    duration: 0.50, ease: 'sine.out'
+  }, 4.0);
+
+  /* ===== 5.0 s: sub-text fades in ===== */
+  tl.to(hlSub, {
+    opacity: 1,
+    duration: 0.50, ease: 'sine.out'
+  }, 5.0);
+
+  /* ===== 4.5 s: one click SFX ===== */
+  tl.call(() => playSfx(sfxClick, 0.40), null, 4.5);
+
+  /* ===== 6.5 s: third line (clay) fades in ===== */
+  tl.to(hlThird, {
+    opacity: 1,
+    duration: 0.50, ease: 'sine.out'
+  }, 6.5);
+
+  const hlFourth = document.getElementById('hl-fourth');
+  if (hlFourth) {
+    gsap.set(hlFourth, { opacity: 0 });
+    tl.to(hlFourth, { opacity: 1, duration: 0.50, ease: 'sine.out' }, 7.5);
+  }
+
+  /* ===== 8.0 – 30.0 s: hold ===== */
+  /* Scene holds. No curtain, no fade. */
+
+})();
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

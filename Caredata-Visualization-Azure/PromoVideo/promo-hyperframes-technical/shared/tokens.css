@@ -1,0 +1,160 @@
+/* =========================================================================
+   CareData Technical Promo — Design Tokens
+   Ported from promo-hyperframes/shared/tokens.css (v2 sibling).
+   Extended with JetBrains Mono for code-pane scenes (Act I-III).
+   ========================================================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;600&display=swap");
+
+:root{
+  /* === Palette: dark stage / light cards / sage accents (locked in script) === */
+  --ink-deep:   #0E1211;
+  --ink-mid:    #1A1F1B;
+  --ink-900:    #1F2622;
+  --ink-700:    #3D4743;
+  --ink-500:    #6B7570;
+  --ink-300:    #A4ABA4;
+
+  --cream:      #F6F2EB;
+  --paper:      #FBF8F2;
+  --paper-dark: #EFE8D6;
+  --line:       #E1DBCC;
+  --line-soft:  #EAE3D2;
+
+  --sage:        #9FB4A0;
+  --sage-bright: #B8D1B5;
+  --sage-ink:    #4B6A55;
+  --sage-tint:   #EEF1EC;
+
+  --clay:        #C8B89B;
+  --clay-bright: #D4C4A8;
+  --clay-ink:    #836B47;
+  --clay-deep:   #9C7B4F;
+  --clay-tint:   rgba(200,184,155,0.16);
+
+  --dusty-blue:  #A6B6C4;
+  --dusty-deep:  #5E7484;
+  --dusty-tint:  rgba(166,182,196,0.18);
+
+  --status-good: #8AA791;
+  --status-bad:  #B86F62;
+
+  /* === Type === */
+  --font-display: "Instrument Serif", Georgia, serif;
+  --font-ui:      "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    "Geist Mono", ui-monospace, monospace;
+  --font-code:    "JetBrains Mono", "Geist Mono", ui-monospace, monospace;
+  --font-hand:    "Caveat", cursive;
+
+  /* === Standard easings (locked in script) === */
+  --ease-out-cinematic: cubic-bezier(.16,.85,.30,1);
+  --ease-soft:          cubic-bezier(.22,.85,.30,1);
+
+  /* === Stage gradients (reused across nearly every scene) === */
+  --bg-dark-stage:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.10), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%,  rgba(200,184,155,0.05), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+
+  --bg-paper-stage:
+    radial-gradient(60vw 50vw at 50% 30%, rgba(255,255,255,0.55), transparent 70%),
+    radial-gradient(40vw 50vw at 8% 100%, rgba(200,184,155,0.18), transparent 65%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.18), transparent 65%),
+    linear-gradient(160deg, #FBF8F2 0%, #F2EBDA 60%, #E9E1CC 100%);
+
+  /* === Code-pane theme (dark variant, used Act I-III) === */
+  --code-bg:        #151B17;
+  --code-border:    rgba(159,180,160,0.12);
+  --code-comment:   #6B7570;
+  --code-keyword:   #B8D1B5;
+  --code-fn:        #A6B6C4;
+  --code-string:    #C8B89B;
+  --code-type:      #9FB4A0;
+  --code-operator:  #F6F2EB;
+  --code-number:    #D4C4A8;
+
+  /* === SVG noise data-URI (paper grain, 0.05 opacity, mix-blend screen) === */
+  --grain-svg:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+}
+
+/* === Base resets === */
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; }
+
+/* === Stage skeleton === */
+.tk-stage {
+  position:absolute; inset:0;
+  background:var(--bg-dark-stage);
+  color:var(--cream);
+  font-family:var(--font-ui);
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+.tk-stage--paper { background:var(--bg-paper-stage); color:var(--ink-900); }
+
+/* === Grain overlay === */
+.tk-grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.05;
+  mix-blend-mode:screen;
+  background-image:var(--grain-svg);
+  background-size:420px 420px;
+  z-index:5;
+}
+
+/* === Watermarks === */
+.watermark-bl {
+  position:absolute; bottom:38px; left:60px;
+  font-family:var(--font-ui); font-weight:400;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--cream); opacity:0.45; z-index:60;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:60px;
+  font-family:var(--font-ui); font-weight:600;
+  font-size:14px; letter-spacing:0.16em;
+  color:var(--cream); opacity:0.20;
+  transform:rotate(-4deg);
+  border:1.5px solid currentColor;
+  padding:8px 16px; border-radius:4px;
+  z-index:60;
+}
+
+/* === Code pane (dark) === */
+.code-pane {
+  background:var(--code-bg);
+  border:1px solid var(--code-border);
+  border-radius:12px;
+  padding:28px 32px;
+  font-family:var(--font-code);
+  font-size:22px; line-height:1.55;
+  color:var(--cream);
+  overflow:hidden;
+}
+.code-pane .pane-header {
+  font-family:var(--font-ui); font-weight:500; font-size:22px;
+  color:var(--ink-300); margin-bottom:16px;
+}
+
+/* === Syntax colour helpers === */
+.tok-comment  { color:var(--code-comment); font-style:italic; }
+.tok-keyword  { color:var(--code-keyword); }
+.tok-fn       { color:var(--code-fn); }
+.tok-string   { color:var(--code-string); }
+.tok-type     { color:var(--code-type); }
+.tok-op       { color:var(--code-operator); }
+.tok-num      { color:var(--code-number); }
+
+/* === Frame-wrap: 1920x1080 native, fits viewport via zoom === */
+body {
+  background:var(--bg-dark-stage);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+}

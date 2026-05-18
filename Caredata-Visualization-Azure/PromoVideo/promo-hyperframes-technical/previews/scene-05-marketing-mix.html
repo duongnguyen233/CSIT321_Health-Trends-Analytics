@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 05 - Marketing Mix — The 7Ps (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+  --win-bg:       #FFFFFF;
+  --win-chrome:   #F2EEE4;
+  --win-border:   #E2DCCC;
+}
+
+body {
+  background: #0E1211;
+  display:flex; align-items:center; justify-content:center;
+}
+
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+  background: linear-gradient(160deg, #1A1F1B 0%, #0E1211 50%, #141918 100%);
+}
+
+/* ===== Stage: dark gradient ===== */
+.stage {
+  position:absolute; inset:0;
+  background: linear-gradient(160deg, #1A1F1B 0%, #0E1211 50%, #141918 100%);
+}
+
+/* paper grain — multiply on dark keeps the texture subtle */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.35;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+/* ===== Watermarks ===== */
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.20em;
+  color:var(--ink-300); opacity:0.55; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-300); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+
+/* ===== Section header ===== */
+#mix-head {
+  position:absolute;
+  top:60px;
+  left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  opacity:0;
+  z-index:10;
+  white-space:nowrap;
+}
+#mix-head .eyebrow {
+  font-family:"Geist Mono",monospace;
+  font-size:12px;
+  letter-spacing:0.22em;
+  color:var(--sage);
+  margin-bottom:10px;
+}
+#mix-head h2 {
+  font-family:"Instrument Serif",serif;
+  font-weight:400;
+  font-style:normal;
+  font-size:64px;
+  color:var(--paper);
+  line-height:1;
+}
+
+/* ===== Card rows ===== */
+.card-row {
+  position:absolute;
+  display:flex;
+  gap:24px;
+}
+#row-1 {
+  top:280px;
+  left:164px; /* (1920 - 4*380 - 3*24) / 2 = 164 */
+}
+#row-2 {
+  top:514px;
+  left:366px; /* (1920 - 3*380 - 2*24) / 2 = 366 */
+}
+
+/* ===== Individual 7P card ===== */
+.p-card {
+  position:relative;
+  width:380px;
+  height:210px;
+  background:rgba(255,255,255,0.96);
+  border:1px solid var(--win-border);
+  border-radius:14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.10);
+  padding:28px 28px 24px;
+  overflow:hidden;
+  opacity:0;
+}
+
+/* Large decorative "P" — background letter, top-right of card */
+.p-card .p-deco {
+  position:absolute;
+  top:8px; right:14px;
+  font-family:"Instrument Serif",serif;
+  font-style:italic;
+  font-weight:400;
+  font-size:72px;
+  color:var(--sage);
+  opacity:0.25;
+  line-height:1;
+  pointer-events:none;
+  user-select:none;
+}
+
+.p-card .p-label {
+  font-family:"Geist Mono",monospace;
+  font-weight:500;
+  font-size:11px;
+  letter-spacing:0.18em;
+  color:var(--sage-ink);
+  margin-bottom:8px;
+  position:relative;
+  z-index:1;
+}
+
+.p-card .p-title {
+  font-family:"Geist",sans-serif;
+  font-weight:600;
+  font-size:22px;
+  color:var(--ink-900);
+  line-height:1.25;
+  margin-bottom:10px;
+  position:relative;
+  z-index:1;
+}
+
+.p-card .p-desc {
+  font-family:"Geist",sans-serif;
+  font-weight:400;
+  font-size:14px;
+  line-height:1.5;
+  color:var(--ink-700);
+  position:relative;
+  z-index:1;
+}
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE · GROUP W08 / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO · CARE-DATA · 05 / 18</div>
+
+  <!-- ===== Section header ===== -->
+  <div id="mix-head">
+    <div class="eyebrow">MARKETING MIX</div>
+    <h2>The 7 Ps.</h2>
+  </div>
+
+  <!-- ===== Row 1: Product, Price, Place, Promotion ===== -->
+  <div class="card-row" id="row-1">
+
+    <div class="p-card" id="card-product">
+      <span class="p-deco">P</span>
+      <div class="p-label">PRODUCT</div>
+      <div class="p-title">Clinical Governance SaaS</div>
+      <div class="p-desc">Web-based QI tracking platform for aged care facilities.</div>
+    </div>
+
+    <div class="p-card" id="card-price">
+      <span class="p-deco">P</span>
+      <div class="p-label">PRICE</div>
+      <div class="p-title">Volume Subscription</div>
+      <div class="p-desc">Facility-based SaaS pricing, tiered by resident count.</div>
+    </div>
+
+    <div class="p-card" id="card-place">
+      <span class="p-deco">P</span>
+      <div class="p-label">PLACE</div>
+      <div class="p-title">Cloud-Hosted</div>
+      <div class="p-desc">Browser-native. No installation. Works on any device.</div>
+    </div>
+
+    <div class="p-card" id="card-promotion">
+      <span class="p-deco">P</span>
+      <div class="p-label">PROMOTION</div>
+      <div class="p-title">AIHW-Aligned</div>
+      <div class="p-desc">Peer benchmarking and national median comparisons.</div>
+    </div>
+
+  </div>
+
+  <!-- ===== Row 2: People, Process, Physical Evidence ===== -->
+  <div class="card-row" id="row-2">
+
+    <div class="p-card" id="card-people">
+      <span class="p-deco">P</span>
+      <div class="p-label">PEOPLE</div>
+      <div class="p-title">Clinical Specialists</div>
+      <div class="p-desc">Built with Directors of Nursing and quality managers.</div>
+    </div>
+
+    <div class="p-card" id="card-process">
+      <span class="p-deco">P</span>
+      <div class="p-label">PROCESS</div>
+      <div class="p-title">One Upload</div>
+      <div class="p-desc">CSV upload triggers automated indicator computation.</div>
+    </div>
+
+    <div class="p-card" id="card-physical">
+      <span class="p-deco">P</span>
+      <div class="p-label">PHYSICAL EVIDENCE</div>
+      <div class="p-title">GPMS-Format PDF</div>
+      <div class="p-desc">Audit-ready reports in the regulator's own format.</div>
+    </div>
+
+  </div>
+
+  <!-- ===== Audio ===== -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3" preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function() {
+  await document.fonts.ready;
+
+  /* ===== Iron Rule: zoom not transform:scale; frame fixed-positioned and centered ===== */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((vw - fw) / 2) + 'px';
+    frame.style.top  = ((vh - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* ===== Element refs ===== */
+  const mixHead       = document.getElementById('mix-head');
+  const cardProduct   = document.getElementById('card-product');
+  const cardPrice     = document.getElementById('card-price');
+  const cardPlace     = document.getElementById('card-place');
+  const cardPromotion = document.getElementById('card-promotion');
+  const cardPeople    = document.getElementById('card-people');
+  const cardProcess   = document.getElementById('card-process');
+  const cardPhysical  = document.getElementById('card-physical');
+
+  const sfxType   = document.getElementById('sfx-type');
+  const sfxWhoosh = document.getElementById('sfx-whoosh');
+  const sfxClick  = document.getElementById('sfx-click');
+
+  /* ===== SFX helper ===== */
+  function playSfx(el, vol) {
+    try { el.volume = (vol !== undefined ? vol : 1.0); el.currentTime = 0; el.play(); } catch (_) {}
+  }
+
+  /* ===== Initial state — everything hidden ===== */
+  gsap.set(mixHead, { opacity: 0 });
+  gsap.set(
+    [cardProduct, cardPrice, cardPlace, cardPromotion, cardPeople, cardProcess, cardPhysical],
+    { opacity: 0, y: 30, scale: 0.92 }
+  );
+
+  /* ===== Timeline — 30 s total ===== */
+  const tl = gsap.timeline();
+
+  /* 0.5 s: section header fades in (0.4 s) */
+  tl.to(mixHead, { opacity: 1, duration: 0.40, ease: 'sine.out' }, 0.5);
+
+  /* Helper: card reveal (scale 0.92->1, opacity 0->1, y 30->0, 0.35 s back.out(1.5)) */
+  function revealCard(card, t) {
+    tl.call(() => playSfx(sfxWhoosh, 0.40), null, t);
+    tl.to(card, {
+      opacity: 1, y: 0, scale: 1,
+      duration: 0.35, ease: 'back.out(1.5)'
+    }, t);
+  }
+
+  /* Row 1 — 1.5, 2.0, 2.5, 3.0 s */
+  revealCard(cardProduct,   1.5);
+  revealCard(cardPrice,     2.0);
+  revealCard(cardPlace,     2.5);
+  revealCard(cardPromotion, 3.0);
+
+  /* Row 2 — 3.5, 4.0, 4.5 s */
+  revealCard(cardPeople,   3.5);
+  revealCard(cardProcess,  4.0);
+  revealCard(cardPhysical, 4.5);
+
+  /* 5.0 – 30.0 s: hold — all 7 cards visible, timeline keeps running to 30 s */
+  tl.to({}, { duration: 25.0 }, 5.0);
+
+})();
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

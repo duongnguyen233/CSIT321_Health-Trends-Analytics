@@ -1,0 +1,54 @@
+export default function BrandMark({ size = 28, className = "", style = {} }) {
+  const px = typeof size === "number" ? `${size}px` : size;
+  return (
+    <span
+      aria-hidden="true"
+      className={`relative inline-block shrink-0 ${className}`}
+      style={{
+        width: px,
+        height: px,
+        borderRadius: Math.max(6, Math.round((typeof size === "number" ? size : 28) * 0.22)),
+        background:
+          "linear-gradient(145deg, oklch(0.72 0.06 150) 0%, oklch(0.78 0.05 180) 100%)",
+        ...style,
+      }}
+    >
+      <span
+        className="absolute"
+        style={{
+          inset: Math.max(4, Math.round((typeof size === "number" ? size : 28) * 0.22)),
+          borderRadius: 3,
+          background: "var(--bg-paper)",
+          clipPath:
+            "polygon(0 60%, 18% 60%, 28% 40%, 42% 75%, 56% 20%, 70% 60%, 100% 60%, 100% 65%, 68% 65%, 56% 30%, 42% 82%, 28% 50%, 18% 65%, 0 65%)",
+        }}
+      />
+    </span>
+  );
+}
+
+export function BrandLockup({ tagline = "Health Analytics Portal", size = 28, className = "" }) {
+  return (
+    <span className={`flex items-center gap-2.5 ${className}`}>
+      <BrandMark size={size} />
+      <span className="flex flex-col leading-none">
+        <span
+          className="font-semibold tracking-tight"
+          style={{ color: "var(--ink-900)", fontSize: 15 }}
+        >
+          CareData
+        </span>
+        {tagline && (
+          <span
+            className="font-normal"
+            style={{ color: "var(--ink-500)", fontSize: 11, marginTop: 2 }}
+          >
+            {tagline}
+          </span>
+        )}
+      </span>
+    </span>
+  );
+}
+
+# end excerpt

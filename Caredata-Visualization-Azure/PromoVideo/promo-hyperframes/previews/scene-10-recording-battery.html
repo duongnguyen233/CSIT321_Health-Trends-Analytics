@@ -1,0 +1,1403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 10, Recording Battery (preview) | CareData promo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --cream:#F6F2EB;
+  --paper:#FBF8F2;
+  --line:#E1DBCC;
+  --line-soft:#EAE3D2;
+  --ink-900:#1F2622;
+  --ink-700:#3D4743;
+  --ink-500:#6B7570;
+  --ink-300:#A4ABA4;
+  --sage:#9FB4A0;
+  --sage-bright:#B8D1B5;
+  --sage-ink:#4B6A55;
+  --sage-tint:#EEF1EC;
+  --clay:#C8B89B;
+  --clay-ink:#836B47;
+  --dusty-blue:#A6B6C4;
+  --primary:#FF7B00;
+  --status-bad:#B86F62;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background:#0E1211;
+  color:var(--cream);
+  font-family:"Geist",ui-sans-serif,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.frame-wrap{
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;     /* 4K canvas-fill */
+  transform-style:preserve-3d;
+}
+.stage{
+  position:absolute; inset:0;
+  perspective:1800px;
+  perspective-origin:50% 45%;
+  transform-style:preserve-3d;
+  background:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.10), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%, rgba(200,184,155,0.05), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  overflow:hidden;
+}
+
+.grain{
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.05;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+.footer{
+  position:absolute; bottom:38px; left:60px;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--cream); opacity:0.45;
+  z-index:60;
+}
+
+/* === Browser mockup window === */
+.browser{
+  position:absolute;
+  top:6%; left:14%;
+  width:72%; height:88%;
+  background:var(--cream);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:
+    0 60px 120px rgba(0,0,0,0.55),
+    0 30px 60px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.04);
+  display:flex; flex-direction:column;
+  z-index:10;
+  opacity:0;
+  transform-style:preserve-3d;
+  will-change:transform, opacity, filter;
+}
+.rec-card{ transform-style:preserve-3d; }
+
+/* Browser chrome — tab bar + address bar */
+.chrome{
+  background:#E5E0D2;
+  flex-shrink:0;
+  border-bottom:1px solid rgba(31,38,34,0.08);
+}
+.chrome-tabs{
+  display:flex; align-items:flex-end;
+  height:38px;
+  padding:8px 14px 0;
+  gap:6px;
+}
+.traffic{
+  display:flex; gap:8px;
+  margin-right:14px;
+  margin-bottom:8px;
+}
+.traffic span{
+  width:12px; height:12px; border-radius:50%;
+  display:inline-block;
+}
+.traffic .red{ background:#FF6058; }
+.traffic .yel{ background:#FFBE2E; }
+.traffic .grn{ background:#28C941; }
+.tab{
+  height:30px;
+  padding:0 14px;
+  background:var(--cream);
+  border:1px solid rgba(31,38,34,0.10);
+  border-bottom:none;
+  border-radius:8px 8px 0 0;
+  display:flex; align-items:center; gap:8px;
+  font-size:12px;
+  color:var(--ink-700);
+  font-weight:500;
+}
+.tab .favicon{
+  width:14px; height:14px;
+  background:linear-gradient(145deg, oklch(0.72 0.06 150) 0%, oklch(0.78 0.05 180) 100%);
+  border-radius:3px;
+  flex-shrink:0;
+}
+.tab.inactive{
+  background:rgba(255,255,255,0.4);
+  color:var(--ink-500);
+  border:none;
+  height:26px;
+}
+.chrome-bar{
+  display:flex; align-items:center; gap:12px;
+  padding:7px 14px 11px;
+  background:#E5E0D2;
+}
+.chrome-controls{
+  display:flex; gap:6px;
+  color:var(--ink-500);
+}
+.chrome-controls button{
+  width:28px; height:28px;
+  border:none; background:transparent;
+  border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--ink-700);
+  cursor:pointer;
+}
+.chrome-controls button:hover{ background:rgba(31,38,34,0.07); }
+.chrome-controls svg{ width:14px; height:14px; }
+.address-bar{
+  flex:1;
+  height:32px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:999px;
+  display:flex; align-items:center;
+  padding:0 14px;
+  font-family:"Geist Mono", monospace;
+  font-size:12.5px;
+  color:var(--ink-700);
+  gap:8px;
+}
+.address-bar .lock{
+  color:var(--sage-ink);
+  display:flex; align-items:center;
+  flex-shrink:0;
+}
+.address-bar .lock svg{ width:13px; height:13px; }
+.address-bar .url-text{
+  flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+}
+.address-bar .url-text .domain{ color:var(--ink-500); }
+.address-bar .url-text .token{
+  color:var(--sage-ink);
+  font-weight:600;
+}
+.address-bar .star{
+  color:var(--ink-500);
+  flex-shrink:0;
+}
+.address-bar .star svg{ width:14px; height:14px; }
+
+/* === Browser viewport — voice check-in page === */
+.viewport{
+  flex:1;
+  background:var(--paper);
+  overflow:hidden;
+  display:flex; flex-direction:column;
+  position:relative;
+}
+
+/* App header inside browser viewport */
+.app-header{
+  height:64px; flex-shrink:0;
+  background:#fff;
+  border-bottom:1px solid rgba(31,38,34,0.06);
+  display:flex; align-items:center;
+  padding:0 32px;
+}
+.app-header-row{
+  max-width:760px;
+  margin:0 auto;
+  width:100%;
+  display:flex; align-items:center; gap:11px;
+}
+.app-header .mark{
+  width:30px; height:30px;
+  background:linear-gradient(145deg, oklch(0.72 0.06 150) 0%, oklch(0.78 0.05 180) 100%);
+  border-radius:7px; position:relative; flex-shrink:0;
+}
+.app-header .mark svg{ position:absolute; inset:6px; }
+.app-header .name{
+  font-size:15px; font-weight:600; color:var(--ink-900);
+  letter-spacing:-0.01em;
+}
+.app-header .name .dot{ color:var(--ink-500); margin:0 4px; font-weight:400;}
+
+/* Main content — centred, max width */
+.main{
+  flex:1;
+  padding:48px 32px 28px;
+  display:flex; flex-direction:column;
+  align-items:center;
+  overflow:hidden;
+}
+.greeting{
+  text-align:center;
+  margin-bottom:30px;
+}
+.greeting .date-eye{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:0.14em;
+  color:var(--ink-500);
+  margin-bottom:5px;
+  font-weight:500;
+}
+.greeting h1{
+  font-size:32px;
+  font-weight:600;
+  color:var(--ink-900);
+  letter-spacing:-0.015em;
+  line-height:1.1;
+}
+.greeting .sub{
+  font-size:14px;
+  color:var(--ink-500);
+  margin-top:9px;
+}
+
+/* The recording card */
+.rec-card{
+  background:#fff;
+  border:1px solid rgba(31,38,34,0.08);
+  border-radius:14px;
+  box-shadow:0 6px 24px rgba(0,0,0,0.04);
+  width:680px;
+  max-width:100%;
+  padding:26px 32px 28px;
+  position:relative;
+}
+.rec-card-h{
+  font-size:18px;
+  font-weight:600;
+  color:var(--ink-900);
+  margin-bottom:5px;
+  letter-spacing:-0.01em;
+}
+.rec-card-sub{
+  font-size:13.5px;
+  color:var(--ink-500);
+  margin-bottom:20px;
+  line-height:1.5;
+}
+
+/* Stage list */
+.stage-list{
+  display:flex; flex-direction:column;
+  gap:11px;
+  margin-bottom:18px;
+}
+.stage-item{
+  display:flex; gap:12px;
+  align-items:flex-start;
+}
+.stage-num{
+  width:26px; height:26px;
+  border-radius:50%;
+  background:var(--cream);
+  color:var(--ink-900);
+  font-weight:600; font-size:12.5px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.stage-item.active .stage-num{
+  background:var(--sage-ink); color:var(--cream);
+  box-shadow:0 0 0 4px var(--sage-tint);
+}
+.stage-text{
+  flex:1; min-width:0;
+}
+.stage-text .h{
+  font-size:13.5px;
+  font-weight:600;
+  color:var(--ink-900);
+  line-height:1.45;
+}
+.stage-text .ins{
+  font-size:11.5px;
+  color:var(--ink-500);
+  margin-top:2px;
+  font-style:italic;
+}
+.stage-text .dur{
+  font-size:11px;
+  color:var(--ink-300);
+  margin-top:3px;
+  font-family:"Geist Mono", monospace;
+}
+
+/* Context flag checkboxes */
+.flags-section{
+  border-top:1px solid rgba(31,38,34,0.06);
+  padding-top:16px;
+  margin-bottom:18px;
+}
+.flags-eye{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:0.14em;
+  color:var(--ink-700);
+  font-weight:600;
+  margin-bottom:9px;
+}
+.flags-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:9px;
+}
+.flag{
+  display:flex; align-items:center; gap:10px;
+  font-size:13px;
+  color:var(--ink-700);
+}
+.flag .box{
+  width:16px; height:16px;
+  border:1px solid rgba(31,38,34,0.30);
+  border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+  background:#fff;
+  transition:background-color 0.18s ease, border-color 0.18s ease;
+}
+.flag .box svg{
+  width:10px; height:10px; color:#fff;
+  opacity:0;
+  transition:opacity 0.15s ease;
+}
+.flag.checked .box{
+  background:var(--primary); border-color:var(--primary);
+}
+.flag.checked .box svg{ opacity:1; }
+
+/* Big primary button */
+.start-btn{
+  width:100%;
+  background:var(--ink-900);
+  color:var(--cream);
+  border:none;
+  padding:14px 18px;
+  border-radius:9px;
+  font-family:inherit;
+  font-weight:600; font-size:15px;
+  letter-spacing:-0.005em;
+  cursor:pointer;
+  transition:transform 0.16s ease, box-shadow 0.16s ease;
+}
+.start-btn:hover{ box-shadow:0 0 0 3px var(--sage-tint); }
+
+.disclaimer{
+  text-align:center;
+  font-size:11px;
+  color:var(--ink-500);
+  margin-top:11px;
+}
+
+/* === Active recording overlay (replaces stages list) === */
+.rec-active{
+  position:absolute;
+  inset:0;
+  padding:26px 32px 28px;
+  background:#fff;
+  border-radius:14px;
+  display:flex; flex-direction:column;
+  opacity:0;
+  pointer-events:none;
+}
+.rec-status{
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:10px;
+}
+.rec-dot-wrap{
+  position:relative; width:14px; height:14px;
+  flex-shrink:0;
+}
+.rec-dot{
+  position:absolute; inset:0;
+  background:#E55D5D; border-radius:50%;
+}
+.rec-dot-ping{
+  position:absolute; inset:-2px;
+  border:2px solid #E55D5D;
+  border-radius:50%;
+  opacity:0;
+  animation:ping 1.2s ease-out infinite;
+}
+@keyframes ping{
+  0%{ transform:scale(0.6); opacity:0.7; }
+  100%{ transform:scale(2.2); opacity:0; }
+}
+.rec-status-text{
+  font-size:13.5px;
+  font-weight:600;
+  color:var(--ink-900);
+}
+
+.rec-progress-row{
+  margin-bottom:18px;
+}
+.rec-progress-track{
+  height:9px;
+  background:rgba(31,38,34,0.06);
+  border-radius:5px; overflow:hidden;
+}
+.rec-progress-fill{
+  height:100%; width:0%;
+  background:linear-gradient(90deg, var(--sage-ink), var(--sage-bright));
+  border-radius:5px;
+}
+.rec-progress-meta{
+  display:flex; justify-content:space-between;
+  font-size:11px; color:var(--ink-500);
+  margin-top:6px; font-family:"Geist Mono", monospace;
+}
+
+/* Active stage card */
+.active-stage{
+  background:var(--paper);
+  border:1px solid var(--line-soft);
+  border-radius:10px;
+  padding:18px 22px 20px;
+  margin-bottom:16px;
+}
+.active-stage .eye{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:0.14em;
+  color:var(--ink-500);
+  margin-bottom:6px;
+  font-weight:600;
+}
+.active-stage .prompt{
+  font-size:16px;
+  font-weight:600;
+  color:var(--ink-900);
+  line-height:1.4;
+  margin-bottom:6px;
+}
+.active-stage .ins{
+  font-size:13px;
+  color:var(--ink-500);
+  margin-bottom:14px;
+}
+
+/* Live waveform — 24 sage bars */
+.waveform{
+  display:flex; align-items:center;
+  gap:3px; height:48px;
+  margin-bottom:14px;
+  justify-content:center;
+}
+.wf-bar{
+  flex:1;
+  background:linear-gradient(180deg, var(--sage), var(--sage-bright));
+  border-radius:1.5px;
+  height:14px;
+  max-width:6px;
+  /* GPU-accelerated scaleY (not height) — prevents layout thrash at 4K
+     when 24 bars × 19 yoyo cycles all animate per-frame. */
+  transform-origin:50% 100%;
+  will-change:transform;
+}
+
+.stage-progress-track{
+  height:5px;
+  background:#fff;
+  border:1px solid var(--line-soft);
+  border-radius:4px;
+  overflow:hidden;
+}
+.stage-progress-fill{
+  height:100%; width:0%;
+  background:var(--sage-ink);
+  border-radius:4px;
+}
+
+.stop-link{
+  align-self:flex-end;
+  font-size:13px;
+  font-weight:500;
+  color:var(--ink-700);
+  text-decoration:underline;
+  margin-top:auto;
+}
+
+/* === Completion / "Thank you" overlay === */
+.rec-complete{
+  position:absolute;
+  inset:0;
+  padding:36px 40px 40px;
+  background:linear-gradient(155deg, #FFFFFF 0%, var(--sage-tint) 100%);
+  border-radius:14px;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  text-align:center;
+  transform-style:preserve-3d;
+  overflow:hidden;
+}
+.rec-complete::before{
+  content:'';
+  position:absolute; inset:-30%;
+  background:radial-gradient(closest-side, rgba(184,209,181,0.55) 0%, rgba(184,209,181,0) 70%);
+  opacity:0;
+  pointer-events:none;
+}
+.rec-complete.lit::before{ opacity:1; transition:opacity 0.45s ease; }
+.complete-check-wrap{
+  width:106px; height:106px;
+  margin-bottom:22px;
+  position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+.complete-check-wrap::after{
+  content:'';
+  position:absolute; inset:-18px;
+  border-radius:50%;
+  background:radial-gradient(closest-side, rgba(184,209,181,0.55), transparent 75%);
+  opacity:0;
+  transition:opacity 0.6s ease;
+  z-index:0;
+}
+.complete-check-wrap.lit::after{ opacity:1; }
+.complete-check{ width:100%; height:100%; position:relative; z-index:1; }
+.check-circle{
+  stroke-dasharray:220;
+  stroke-dashoffset:220;
+}
+.check-tick{
+  stroke-dasharray:60;
+  stroke-dashoffset:60;
+}
+.complete-h{
+  font-family:"Instrument Serif", serif;
+  font-size:44px;
+  color:var(--ink-900);
+  letter-spacing:-0.01em;
+  line-height:1;
+  margin-bottom:10px;
+  position:relative; z-index:1;
+}
+.complete-sub{
+  font-size:14px;
+  color:var(--ink-500);
+  margin-bottom:22px;
+  position:relative; z-index:1;
+}
+.complete-pill{
+  display:inline-flex; align-items:center; gap:10px;
+  background:#fff;
+  border:1px solid var(--sage);
+  color:var(--sage-ink);
+  padding:9px 18px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  font-family:"Geist Mono", monospace;
+  box-shadow:0 4px 14px rgba(75,106,85,0.12);
+  position:relative; z-index:1;
+}
+.pulse-dot{
+  width:8px; height:8px;
+  background:var(--sage-ink);
+  border-radius:50%;
+  animation:dotPulse 1.0s ease-in-out infinite;
+}
+@keyframes dotPulse{
+  0%, 100%{ opacity:0.4; transform:scale(0.85); }
+  50%{ opacity:1; transform:scale(1.18); }
+}
+
+/* === Big analysing ring (rotates in as thank-you spins away) === */
+.processing{
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%, -50%);
+  display:flex; flex-direction:column; align-items:center;
+  gap:34px;
+  z-index:30;
+  transform-style:preserve-3d;
+  pointer-events:none;
+}
+.proc-ring-wrap{
+  width:340px; height:340px;
+  position:relative;
+  transform-style:preserve-3d;
+  will-change:transform, opacity;
+  /* Was 60px blur — too heavy at 4K, crashed the render during the browser
+     exit + ring materialise overlap. 22px reads almost identical visually. */
+  filter:drop-shadow(0 0 22px rgba(184,209,181,0.45));
+  opacity:0;
+}
+.proc-ring{
+  width:100%; height:100%;
+  display:block;
+  will-change:transform;
+}
+.proc-tick{
+  position:absolute;
+  inset:0;
+  width:100%; height:100%;
+  opacity:0;
+  will-change:transform, opacity;
+  filter:drop-shadow(0 0 28px rgba(184,209,181,0.75));
+}
+.proc-ring .track{
+  fill:none;
+  stroke:rgba(184,209,181,0.18);
+  stroke-width:3;
+}
+.proc-ring .arc{
+  fill:none;
+  stroke:url(#procArcGrad);
+  stroke-width:4;
+  stroke-linecap:round;
+  stroke-dasharray:170 360;
+}
+.proc-ring .inner{
+  fill:none;
+  stroke:rgba(184,209,181,0.10);
+  stroke-width:1.5;
+  stroke-dasharray:4 6;
+}
+.proc-label{
+  font-family:"Instrument Serif", serif;
+  font-style:italic;
+  font-size:36px;
+  color:var(--cream);
+  letter-spacing:-0.005em;
+  opacity:0;
+  will-change:opacity, transform;
+}
+
+/* Cursor */
+.cursor-svg{
+  position:absolute;
+  width:36px; height:36px;
+  z-index:50;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.45));
+  opacity:0;
+  will-change:transform, opacity;
+}
+
+/* Hud */
+.hud{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  background:rgba(15,15,17,0.85);
+  color:#EAE3D2; font-family:"Geist Mono", monospace; font-size:11px;
+  padding:8px 14px; border-radius:999px;
+  display:flex; gap:14px; align-items:center; z-index:100;
+  letter-spacing:0.06em;
+}
+.hud button{
+  appearance:none; border:1px solid #555; background:transparent; color:#EAE3D2;
+  font-family:inherit; font-size:11px; padding:3px 10px; border-radius:999px; cursor:pointer;
+}
+.hud button:hover{ background:#222; }
+.hud .timer{ font-variant-numeric:tabular-nums; min-width:46px; }
+</style>
+</head>
+<body>
+
+<div class="frame-wrap" id="frame">
+  <div class="stage">
+    <div class="grain"></div>
+    <div class="footer">CSIT321&nbsp;CAPSTONE</div>
+
+    <!-- Browser mockup -->
+    <div class="browser" id="browser">
+      <!-- Browser chrome -->
+      <div class="chrome">
+        <div class="chrome-tabs">
+          <div class="traffic"><span class="red"></span><span class="yel"></span><span class="grn"></span></div>
+          <div class="tab">
+            <span class="favicon"></span>
+            CareData · Voice check-in
+          </div>
+          <div class="tab inactive">+ New</div>
+        </div>
+        <div class="chrome-bar">
+          <div class="chrome-controls">
+            <button><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 4l-4 4 4 4"/></svg></button>
+            <button><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4l4 4-4 4"/></svg></button>
+            <button><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v8M4 7l4-4 4 4M4 13h8"/></svg></button>
+          </div>
+          <div class="address-bar">
+            <span class="lock">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="7" width="8" height="6" rx="1"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>
+            </span>
+            <span class="url-text">
+              <span class="domain">caredata.com/voice/r/</span><span class="token">dr-0148-7n4kP3</span>
+            </span>
+            <span class="star">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2l1.8 4 4.2.4-3.2 2.8 1 4.2L8 11l-3.8 2.4 1-4.2L2 6.4 6.2 6z"/></svg>
+            </span>
+          </div>
+          <div class="chrome-controls">
+            <button><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="4" r="1"/><circle cx="8" cy="8" r="1"/><circle cx="8" cy="12" r="1"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Browser viewport — voice check-in page -->
+      <div class="viewport">
+        <!-- App header -->
+        <div class="app-header">
+          <div class="app-header-row">
+            <span class="mark">
+              <svg viewBox="0 0 18 18"><path d="M0,11 L3,11 L5,7 L7.5,14 L10,3 L12.5,11 L18,11" fill="none" stroke="#FBF8F2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="name">CareData<span class="dot">·</span>Voice check-in</span>
+          </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="main">
+          <div class="greeting" id="greeting">
+            <div class="date-eye">8 May 2026</div>
+            <h1>Hello, Dorothy</h1>
+            <div class="sub">Your nurse asked us to check in with you today. It only takes a minute.</div>
+          </div>
+
+          <div class="rec-card" id="recCard">
+            <!-- Intro state -->
+            <div class="rec-intro" id="recIntro">
+              <div class="rec-card-h">Today's voice check-in</div>
+              <div class="rec-card-sub">Four short prompts in about 73 seconds. Find a quiet spot. Speak naturally.</div>
+
+              <div class="stage-list" id="stageList">
+                <div class="stage-item">
+                  <div class="stage-num">1</div>
+                  <div class="stage-text">
+                    <div class="h">Take a breath in, then say the sound 'ahhh' for as long as you comfortably can in one breath.</div>
+                    <div class="ins">Hold the sound steady. We need about six seconds.</div>
+                    <div class="dur">~6s</div>
+                  </div>
+                </div>
+                <div class="stage-item">
+                  <div class="stage-num">2</div>
+                  <div class="stage-text">
+                    <div class="h">Repeat the syllables 'pa-ta-ka, pa-ta-ka, pa-ta-ka' as quickly and clearly as you can, for about five seconds.</div>
+                    <div class="ins">Try to keep a steady rhythm.</div>
+                    <div class="dur">~5s</div>
+                  </div>
+                </div>
+                <div class="stage-item">
+                  <div class="stage-num">3</div>
+                  <div class="stage-text">
+                    <div class="h">Please read this aloud at your normal pace: "The sun was warm on the old stone wall…"</div>
+                    <div class="ins">Read it once through, naturally.</div>
+                    <div class="dur">~7s</div>
+                  </div>
+                </div>
+                <div class="stage-item">
+                  <div class="stage-num">4</div>
+                  <div class="stage-text">
+                    <div class="h">In your own words, please tell me about your favourite meal.</div>
+                    <div class="ins">There is no right answer — just speak naturally.</div>
+                    <div class="dur">~55s</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flags-section">
+                <div class="flags-eye">Anything we should know about today?</div>
+                <div class="flags-grid">
+                  <label class="flag" data-flag="cold">
+                    <span class="box"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 8l3 3 7-7"/></svg></span>
+                    I have a cold today
+                  </label>
+                  <label class="flag" data-flag="dentures">
+                    <span class="box"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 8l3 3 7-7"/></svg></span>
+                    My dentures are out
+                  </label>
+                  <label class="flag" id="flagJustWoke" data-flag="just_woke">
+                    <span class="box"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 8l3 3 7-7"/></svg></span>
+                    I just woke up
+                  </label>
+                  <label class="flag" data-flag="pain">
+                    <span class="box"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 8l3 3 7-7"/></svg></span>
+                    I am in pain right now
+                  </label>
+                </div>
+              </div>
+
+              <button class="start-btn" id="startBtn">Start recording</button>
+              <div class="disclaimer">This is a trend monitoring tool, not a diagnostic device.</div>
+            </div>
+
+            <!-- Active recording state (overlays the intro) -->
+            <div class="rec-active" id="recActive">
+              <div class="rec-status">
+                <span class="rec-dot-wrap">
+                  <span class="rec-dot"></span>
+                  <span class="rec-dot-ping"></span>
+                </span>
+                <span class="rec-status-text">Recording · stage <span id="curStage">1</span> of 4</span>
+              </div>
+
+              <div class="rec-progress-row">
+                <div class="rec-progress-track">
+                  <div class="rec-progress-fill" id="overallFill"></div>
+                </div>
+                <div class="rec-progress-meta">
+                  <span id="elapsed">0.0s</span>
+                  <span>~73s total</span>
+                </div>
+              </div>
+
+              <div class="active-stage" id="activeStage">
+                <div class="eye">Stage <span id="curStageEye">1</span></div>
+                <div class="prompt" id="curPrompt">Take a breath in, then say the sound 'ahhh' for as long as you comfortably can in one breath.</div>
+                <div class="ins" id="curIns">Hold the sound steady. We need about six seconds.</div>
+
+                <div class="waveform" id="waveform">
+                  <!-- 24 bars dynamically -->
+                </div>
+
+                <div class="stage-progress-track">
+                  <div class="stage-progress-fill" id="stageFill"></div>
+                </div>
+              </div>
+
+              <a class="stop-link">Stop early</a>
+            </div>
+
+            <!-- Completion / Thank you state (overlays after stage 4) -->
+            <div class="rec-complete" id="recComplete">
+              <div class="complete-check-wrap" id="checkWrap">
+                <svg class="complete-check" viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="#4B6A55" stroke-width="3" class="check-circle"/>
+                  <path d="M24 41 L36 53 L57 30" fill="none" stroke="#4B6A55" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" class="check-tick"/>
+                </svg>
+              </div>
+              <div class="complete-h">Thank you, Dorothy.</div>
+              <div class="complete-sub">Your check-in is on its way to your nurse.</div>
+              <div class="complete-pill">
+                <span class="pulse-dot"></span>
+                Submitting voice score · 73s captured
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Big analysing ring — rotates in as thank-you spins away -->
+    <div class="processing" id="processing">
+      <div class="proc-ring-wrap" id="procRing">
+        <svg class="proc-ring" id="procRingSvg" viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="procArcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#B8D1B5"/>
+              <stop offset="100%" stop-color="#9FB4A0"/>
+            </linearGradient>
+          </defs>
+          <circle class="track"  cx="50" cy="50" r="45"/>
+          <circle class="inner"  cx="50" cy="50" r="36"/>
+          <circle class="arc"    cx="50" cy="50" r="45" transform="rotate(-90 50 50)"/>
+        </svg>
+        <!-- Success tick — swaps in for the spinning ring just before exit.
+             Ring is solid sage-bright border with TRANSPARENT inner fill so the
+             dark stage shows through cleanly (user note: prior translucent fill
+             read as opaque/muddy). Tick is sage-ink dark green. -->
+        <svg class="proc-tick" id="procTick" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="#B8D1B5" stroke-width="4"/>
+          <path d="M30 52 L45 67 L72 36" fill="none" stroke="#4B6A55" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="proc-label" id="procLabel">Analysing voice…</div>
+    </div>
+
+    <!-- Cursor: Bootstrap Icons `hand-index-thumb-fill` (MIT). -->
+    <svg class="cursor-svg" id="cursor" viewBox="0 0 16 16" fill="#fff" stroke="#1F2622" stroke-width="0.5" stroke-linejoin="round" data-icon="bi-hand-index-thumb-fill">
+      <path d="M8.5 1.75v2.716l.047-.002c.312-.012.742-.016 1.051.046.28.056.543.18.738.288.273.152.456.385.56.642l.132-.012c.312-.024.794-.038 1.158.108.37.148.689.487.88.716q.113.137.195.248h.582a2 2 0 0 1 1.99 2.199l-.272 2.715a3.5 3.5 0 0 1-.444 1.389l-1.395 2.441A1.5 1.5 0 0 1 12.42 16H6.118a1.5 1.5 0 0 1-1.342-.83l-1.215-2.43L1.07 8.589a1.517 1.517 0 0 1 2.373-1.852L5 8.293V1.75a1.75 1.75 0 0 1 3.5 0"/>
+    </svg>
+
+    <!-- SFX: Hyperframes data-start scheduling. One <audio> per click event.
+         Click 1: flag toggle "I just woke up" — cursor min-scale at 2.55s
+         Click 2: Start recording button — cursor min-scale at 3.30s -->
+    <audio src="../audio/mouse_click_clip.mp3" data-start="2.53" data-duration="0.13" data-volume="1.0" preload="auto"></audio>
+    <audio src="../audio/mouse_click_clip.mp3" data-start="3.28" data-duration="0.13" data-volume="1.0" preload="auto"></audio>
+  </div>
+</div>
+
+<div class="hud">
+  <button id="replay">REPLAY</button>
+  <span class="timer" id="timer">0.00s</span>
+  <span style="opacity:.6">Scene 10 / Recording Battery</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+/* Deterministic PRNG (mulberry32) — seeded so renders are stable across frames/runs */
+let __seed = 1;
+function rand(){
+  __seed = (__seed + 0x6D2B79F5) | 0;
+  let t = __seed;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return (((t ^ (t >>> 14)) >>> 0) / 4294967296);
+}
+function fit(){
+  const wrap = document.getElementById('frame');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  /* zoom not transform: scale — natively rasterise at projected resolution; prevents 4K pixel break on 3D-rotated descendants. See ~/.claude/skills/hyperframes-video/rendering.md */
+  wrap.style.zoom = s;
+}
+fit();
+window.addEventListener('resize', fit);
+
+/* Build 24 waveform bars */
+(function(){
+  const wf = document.getElementById('waveform');
+  for (let i = 0; i < 24; i++){
+    const b = document.createElement('span');
+    b.className = 'wf-bar';
+    wf.appendChild(b);
+  }
+})();
+
+let tl;
+
+function build(){
+  const wfBars = Array.from(document.querySelectorAll('.wf-bar'));
+
+  /* Initial state */
+  /* Browser is fully on-screen from frame 0 — no fly-in / zoom-out. Scene 9 hands
+     off by flying its URL link-box to the position of THIS browser's address bar,
+     so the URL bar is already visible at Scene 10 start; the link box from
+     Scene 9 visually merges with it. */
+  gsap.set('#browser', {
+    opacity: 1,
+    transformOrigin: '50% 8%',          /* origin near the address bar */
+    scale: 1.0,
+    rotationX: 0,
+    rotationY: 0,
+    z: 0,
+    filter: 'blur(0px)',
+    y: 0
+  });
+
+  gsap.set('#greeting', { opacity: 0, y: 20 });
+  gsap.set('#recCard', { opacity: 0, y: 20 });
+  gsap.set('#recIntro', { opacity: 1 });
+  gsap.set('#recActive', { opacity: 0, transformOrigin: '50% 50%' });
+  gsap.set('#recComplete', { opacity: 0, scale: 0.88, rotationX: 14, z: -80, transformOrigin: '50% 50%' });
+  gsap.set('.check-circle', { strokeDashoffset: 220 });
+  gsap.set('.check-tick', { strokeDashoffset: 60 });
+  gsap.set('#cursor', { x: 1900, y: 540, scale: 1, opacity: 0, xPercent: 0, yPercent: 0 });
+  gsap.set('#stageList .stage-item', { opacity: 0, x: -10 });
+  gsap.set('#flagJustWoke', { });
+
+  /* Big analysing ring — hidden behind camera (huge, far forward, tilted) */
+  gsap.set('#procRing', {
+    opacity: 0,
+    scale: 5.5,
+    z: 1400,
+    rotationY: -540,
+    rotationX: 55,
+    rotationZ: -25,
+    transformOrigin: '50% 50%'
+  });
+  gsap.set('#procLabel', { opacity: 0, y: 12 });
+
+  /* Reset flag classes + completion lit state */
+  document.querySelectorAll('.flag').forEach(f => f.classList.remove('checked'));
+  document.getElementById('recComplete').classList.remove('lit');
+  document.getElementById('checkWrap').classList.remove('lit');
+
+  /* Re-clear at scene start so REPLAY also begins with all flags unticked */
+  function resetFlagsAndLit(){
+    document.querySelectorAll('.flag').forEach(f => f.classList.remove('checked'));
+    document.getElementById('recComplete').classList.remove('lit');
+    document.getElementById('checkWrap').classList.remove('lit');
+  }
+
+  tl = gsap.timeline({
+    paused: true,
+    onUpdate: () => {
+      document.getElementById('timer').textContent = tl.time().toFixed(2) + 's';
+    }
+  });
+
+  /* ============================================================
+     TOTAL ~10.65s — beat-locked at 120 BPM, 3D parallax throughout
+        b1  0.00      Browser materialises around the URL (continuing zoom-out from Scene 9)
+        b2  0.50      Browser settles at full scale, address bar visible
+        b3  1.00      Greeting fades in
+        b4  1.50      Recording card appears, stage list cascades
+        b5  2.00      Cursor enters
+        b6  2.50      Cursor toggles "I just woke up" flag (M9)
+        b7  3.00      Cursor moves to "Start recording" + clicks
+        b8  3.30      Active recording state takes over — stage 1 "ahhh"
+                      Browser begins slow rotationY drift for cinematic parallax
+        b10 4.50      Stage 2 ("pa-ta-ka")
+        b12 5.50      Stage 3 (passage reading)
+        b14 6.50      Stage 4 (open prompt — favourite meal)
+        b16 7.45      Active card flips back, completion screen scales in 3D
+                      with sage check-stroke draw + "Thank you, Dorothy"
+        b17 8.20-9.80 HOLD on completion (1.6s) — pulse-dot pill alive
+        b21 9.80      3D exit — browser tilts back, dollies hard forward
+                      with motion blur + opacity decay, hands off to Scene 11
+     ============================================================ */
+
+  /* Always start with flags unticked + completion glow off (matters on REPLAY) */
+  tl.call(resetFlagsAndLit, null, 0);
+
+  /* === Phase A (b1-b2): Browser is already in place from frame 0 (Scene 9 hands off
+     the link box onto the address bar). No materialise tween needed. === */
+
+  /* === Phase B (b3): Greeting === */
+  tl.to('#greeting', {
+    opacity: 1, y: 0,
+    duration: 0.40, ease: 'power3.out'
+  }, 0.65);
+
+  /* === Phase C (b4): Recording card + stage list === */
+  tl.to('#recCard', {
+    opacity: 1, y: 0,
+    duration: 0.40, ease: 'power3.out'
+  }, 1.00);
+
+  tl.to('#stageList .stage-item', {
+    opacity: 1, x: 0,
+    duration: 0.30, stagger: 0.07, ease: 'power2.out'
+  }, 1.20);
+
+  /* === Phase D (b5-b6): Cursor enters and toggles "I just woke up" === */
+  /* Live measure flag position (same -200 y bias as the Start-button target) */
+  const flagTarget = { x: 0, y: 0 };
+  tl.call(() => {
+    const f = document.getElementById('flagJustWoke');
+    const r = f.getBoundingClientRect();
+    const wrap = document.getElementById('frame').getBoundingClientRect();
+    const ws = wrap.width / 1920;
+    flagTarget.x = (r.left + 12 - wrap.left) / ws;   /* aim at the checkbox */
+    flagTarget.y = (r.top + r.height/2 - wrap.top) / ws;
+  }, null, 1.95);
+
+  tl.to('#cursor', { opacity: 1, duration: 0.10 }, 2.00);
+  tl.to('#cursor', {
+    x: () => flagTarget.x - 9,
+    y: () => flagTarget.y - 4,
+    duration: 0.45, ease: 'cubic-bezier(.45,.10,.50,.90)'
+  }, 2.00);
+
+  /* Click pulse + flag fills (M9 colour fill) */
+  tl.to('#cursor', { scale: 0.85, duration: 0.10, ease: 'power2.in' }, 2.45);
+  tl.to('#cursor', { scale: 1.0, duration: 0.16, ease: 'power2.out' }, 2.55);
+  tl.call(() => {
+    document.getElementById('flagJustWoke').classList.add('checked');
+  }, null, 2.50);
+
+  /* === Phase E (b7): Cursor moves to "Start recording" === */
+  const startTarget = { x: 0, y: 0 };
+  tl.call(() => {
+    const b = document.getElementById('startBtn');
+    const r = b.getBoundingClientRect();
+    const wrap = document.getElementById('frame').getBoundingClientRect();
+    const ws = wrap.width / 1920;
+    startTarget.x = (r.left + r.width/2 - wrap.left) / ws;
+    startTarget.y = (r.top + r.height/2 - wrap.top) / ws;
+  }, null, 2.75);
+
+  tl.to('#cursor', {
+    x: () => startTarget.x - 9,
+    y: () => startTarget.y - 4,
+    duration: 0.40, ease: 'cubic-bezier(.45,.10,.50,.90)'
+  }, 2.80);
+
+  tl.to('#cursor', { scale: 0.85, duration: 0.10 }, 3.20);
+  tl.to('#cursor', { scale: 1.0, duration: 0.16 }, 3.30);
+
+  /* === Phase F (b8): Active recording state takes over === */
+  tl.to('#cursor', { opacity: 0, duration: 0.20 }, 3.30);
+  tl.set('#recActive', { pointerEvents: 'auto' }, 3.30);
+  tl.to('#recActive', {
+    opacity: 1,
+    duration: 0.30, ease: 'power2.out'
+  }, 3.30);
+  /* Hide the intro content (stage list / flags / Start button) once recording begins
+     so it can never reappear during the rec-active → rec-complete crossfade later. */
+  tl.to('#recIntro', { opacity: 0, duration: 0.20, ease: 'power2.out' }, 3.30);
+
+  /* Cinematic 3D parallax — browser drifts visibly during the whole recording phase */
+  tl.fromTo('#browser',
+    { rotationY: -7, rotationX: 2, z: -20 },
+    { rotationY: 6, rotationX: -2, z: 60, duration: 4.10, ease: 'sine.inOut' },
+    3.35
+  );
+
+  /* Overall progress bar fills 0% → 17% (stage 1 ~13s of 73s ≈ 17%) */
+  tl.to('#overallFill', {
+    width: '17%',
+    duration: 1.00, ease: 'none'
+  }, 3.50);
+
+  /* Elapsed text counter */
+  const elapsed = { v: 0 };
+  tl.to(elapsed, {
+    v: 13.0, duration: 1.00, ease: 'none',
+    onUpdate: () => {
+      document.getElementById('elapsed').textContent = elapsed.v.toFixed(1) + 's';
+    }
+  }, 3.50);
+
+  /* Stage 1 progress bar fills 0 → 100% over the 6s stage (compressed) */
+  tl.to('#stageFill', {
+    width: '100%',
+    duration: 0.85, ease: 'none'
+  }, 3.55);
+
+  /* Live waveform — scaleY (GPU-accelerated, no layout thrash) instead of height.
+     Base height is 14px, scaleY 1.0 to ~3.1 = visual range 14-44px. Looping
+     during active state (3.40s → ~7.45s, ~4s, 24 bars × 19 cycles = 456 tweens). */
+  wfBars.forEach((bar, i) => {
+    const randomScale = () => 1.0 + rand() * 2.1;
+    tl.to(bar, {
+      scaleY: () => randomScale(),
+      duration: 0.10 + rand() * 0.10,
+      repeat: 18,
+      yoyo: true,
+      ease: 'sine.inOut'
+    }, 3.40 + i * 0.005);
+  });
+
+  /* === Phase G (b10): Stage 2 transition (pa-ta-ka) === */
+  tl.call(() => {
+    document.getElementById('curStage').textContent = '2';
+    document.getElementById('curStageEye').textContent = '2';
+    document.getElementById('curPrompt').textContent = "Repeat the syllables 'pa-ta-ka, pa-ta-ka, pa-ta-ka' as quickly and clearly as you can.";
+    document.getElementById('curIns').textContent = 'Try to keep a steady rhythm.';
+  }, null, 4.50);
+
+  /* Stage 2 progress restarts and fills */
+  tl.set('#stageFill', { width: '0%' }, 4.50);
+  tl.to('#stageFill', {
+    width: '100%',
+    duration: 0.85, ease: 'none'
+  }, 4.50);
+
+  /* Overall keeps filling — 17% → 24% (stage 2 adds ~5s ≈ 7%) */
+  tl.to('#overallFill', {
+    width: '24%',
+    duration: 0.85, ease: 'none'
+  }, 4.50);
+
+  tl.to(elapsed, {
+    v: 18.0, duration: 0.85, ease: 'none',
+    onUpdate: () => {
+      document.getElementById('elapsed').textContent = elapsed.v.toFixed(1) + 's';
+    }
+  }, 4.50);
+
+  /* === Phase H (b12): Stage 3 transition (passage reading) === */
+  tl.call(() => {
+    document.getElementById('curStage').textContent = '3';
+    document.getElementById('curStageEye').textContent = '3';
+    document.getElementById('curPrompt').textContent = 'Please read this aloud at your normal pace: "The sun was warm on the old stone wall…"';
+    document.getElementById('curIns').textContent = 'Read it once through, naturally.';
+  }, null, 5.50);
+
+  tl.set('#stageFill', { width: '0%' }, 5.50);
+  tl.to('#stageFill', {
+    width: '100%',
+    duration: 0.85, ease: 'none'
+  }, 5.50);
+
+  /* Overall: 24% → 34% (stage 3 ~7s ≈ 10%) */
+  tl.to('#overallFill', {
+    width: '34%',
+    duration: 0.85, ease: 'none'
+  }, 5.50);
+
+  tl.to(elapsed, {
+    v: 25.0, duration: 0.85, ease: 'none',
+    onUpdate: () => {
+      document.getElementById('elapsed').textContent = elapsed.v.toFixed(1) + 's';
+    }
+  }, 5.50);
+
+  /* === Phase I (b14): Stage 4 transition (open prompt — favourite meal) === */
+  tl.call(() => {
+    document.getElementById('curStage').textContent = '4';
+    document.getElementById('curStageEye').textContent = '4';
+    document.getElementById('curPrompt').textContent = 'In your own words, please tell me about your favourite meal.';
+    document.getElementById('curIns').textContent = 'There is no right answer — just speak naturally.';
+  }, null, 6.50);
+
+  tl.set('#stageFill', { width: '0%' }, 6.50);
+  tl.to('#stageFill', {
+    width: '100%',
+    duration: 0.95, ease: 'none'
+  }, 6.50);
+
+  /* Overall: 34% → 99% (stage 4 ~55s of 73s ≈ 75%) */
+  tl.to('#overallFill', {
+    width: '99%',
+    duration: 0.95, ease: 'none'
+  }, 6.50);
+
+  tl.to(elapsed, {
+    v: 72.5, duration: 0.95, ease: 'none',
+    onUpdate: () => {
+      document.getElementById('elapsed').textContent = elapsed.v.toFixed(1) + 's';
+    }
+  }, 6.50);
+
+  /* === Phase J (b16): Recording complete — active card flips back, completion screen scales in === */
+  tl.to('#recActive', {
+    opacity: 0,
+    rotationX: -22,
+    z: -120,
+    filter: 'blur(4px)',
+    duration: 0.40, ease: 'power2.in'
+  }, 7.45);
+
+  /* Settle browser drift to neutral, push slightly toward camera */
+  tl.to('#browser', {
+    rotationY: 0,
+    rotationX: 0,
+    z: 80,
+    scale: 1.05,
+    duration: 0.55, ease: 'power2.out'
+  }, 7.45);
+
+  tl.set('#recComplete', { pointerEvents: 'auto' }, 7.45);
+  tl.to('#recComplete', {
+    opacity: 1,
+    scale: 1,
+    rotationX: 0,
+    z: 0,
+    duration: 0.60, ease: 'back.out(1.7)'
+  }, 7.45);
+
+  /* Glow halo + check stroke draw */
+  tl.call(() => {
+    document.getElementById('recComplete').classList.add('lit');
+    document.getElementById('checkWrap').classList.add('lit');
+  }, null, 7.75);
+  tl.to('.check-circle', { strokeDashoffset: 0, duration: 0.55, ease: 'power3.out' }, 7.80);
+  tl.to('.check-tick',   { strokeDashoffset: 0, duration: 0.30, ease: 'power3.out' }, 8.20);
+
+  /* HOLD on completion screen so the moment lands (~1.4s of "Thank you" visible) */
+
+  /* === Phase K (b17): Screen spins away early; the ring snaps in HUGE and
+     opaque (covering the whole screen) then shrinks slowly to land centre.
+     The two are offset so the ring is visible BIG before the screen has
+     fully left — that's what makes the ring "cover the screen". === */
+  const screenExit = 8.45;   /* screen starts leaving early */
+  const ringStart  = 8.95;   /* ring spin-in delayed 0.5s — screen mostly gone before ring covers */
+
+  /* Screen spins far away — quicker than the ring shrink */
+  tl.to('#browser', {
+    rotationY: -190,
+    rotationX: 32,
+    scale: 0.04,
+    z: -2000,
+    y: -40,
+    opacity: 0,
+    duration: 0.80, ease: 'power3.in'
+  }, screenExit);
+
+  /* Ring opacity ramps FAST so it's visible while still huge — covers
+     the whole frame for the duration of the swap. */
+  tl.to('#procRing', {
+    opacity: 1,
+    duration: 0.18, ease: 'power2.out'
+  }, ringStart);
+
+  /* Ring scale + Z + rotation eases for longer — it lingers HUGE (covering
+     the screen) and only shrinks to its landing size after the screen has
+     already vanished. */
+  tl.to('#procRing', {
+    scale: 1.0,
+    z: 0,
+    rotationY: 0,
+    rotationX: 0,
+    rotationZ: 0,
+    duration: 1.30, ease: 'power3.out'
+  }, ringStart);
+
+  /* SVG ring keeps spinning so it reads as a loading icon */
+  tl.to('#procRingSvg', {
+    rotation: 720,
+    duration: 1.80, ease: 'none',
+    transformOrigin: '50% 50%'
+  }, ringStart);
+
+  /* Label fades in once the ring has landed */
+  tl.to('#procLabel', {
+    opacity: 1, y: 0,
+    duration: 0.30, ease: 'power2.out'
+  }, ringStart + 1.20);
+
+  /* === Pre-exit: SWAP loading ring → success tick, hold 0.3s, then exit ===
+     The spinning ring fades out and a sage success tick fades in (with a small
+     back-out scale bounce) at ringExitT - 0.30. Reads as "analysis complete"
+     before the panel exits. */
+  const ringExitT = ringStart + 1.95;   /* ~10.90 — was a 0.45s hold; now 0.30s on tick */
+  const tickShowT = ringExitT - 0.30;   /* ~10.60 */
+  tl.to('#procRingSvg', {
+    opacity: 0,
+    duration: 0.18, ease: 'power2.in'
+  }, tickShowT);
+  tl.fromTo('#procTick',
+    { opacity: 0, scale: 0.6, transformOrigin: '50% 50%' },
+    { opacity: 1, scale: 1.0, duration: 0.26, ease: 'back.out(1.6)' },
+    tickShowT);
+
+  /* === Phase L: Ring + label slide out to the RIGHT
+     (Scene 11 will enter its score card from the LEFT) === */
+  tl.to('#processing', {
+    x: 1900,
+    opacity: 0.0,
+    duration: 0.55, ease: 'power3.in'
+  }, ringExitT);
+}
+
+function play(){
+  if (!tl) build();
+  tl.restart();
+  tl.play();
+}
+
+document.getElementById('replay').addEventListener('click', play);
+
+// IFRAME-AWARE BOOTSTRAP — patched by shared/patch-scenes.mjs
+// Bug fix: previously the rendered t=0 frame was a blank dark stage because
+// Hyperframes captured frame 0 before gsap had loaded from CDN. Poll for gsap
+// before invoking build() so the browser mockup is visible from frame 0.
+window.addEventListener('load', () => {
+  const start = () => { build(); if (window.parent === window) play(); };
+  const waitForGsap = (cb) => {
+    if (typeof gsap !== 'undefined') return cb();
+    setTimeout(() => waitForGsap(cb), 30);
+  };
+  const ready = () => waitForGsap(start);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(ready);
+  } else {
+    ready();
+  }
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === 'play'  && typeof play === 'function')                          play();
+  if (t === 'pause' && typeof tl   !== 'undefined' && tl)                    tl.pause();
+  if (t === 'reset' && typeof tl   !== 'undefined' && tl) { tl.seek(0); tl.pause(); }
+});
+</script>
+</body>
+</html>

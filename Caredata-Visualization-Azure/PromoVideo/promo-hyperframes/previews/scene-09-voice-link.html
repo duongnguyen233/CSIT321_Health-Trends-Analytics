@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 9, Voice Setup Link (preview) | CareData promo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --cream:#F6F2EB;
+  --paper:#FBF8F2;
+  --line:#E1DBCC;
+  --line-soft:#EAE3D2;
+  --ink-900:#1F2622;
+  --ink-700:#3D4743;
+  --ink-500:#6B7570;
+  --ink-300:#A4ABA4;
+  --sage:#9FB4A0;
+  --sage-bright:#B8D1B5;
+  --sage-ink:#4B6A55;
+  --sage-tint:#EEF1EC;
+  --clay:#C8B89B;
+  --clay-ink:#836B47;
+  --dusty-blue:#A6B6C4;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background:#0E1211;
+  color:var(--cream);
+  font-family:"Geist",ui-sans-serif,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.frame-wrap{
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;     /* 4K canvas-fill */
+  perspective:2400px;
+  perspective-origin:50% 50%;
+}
+.stage{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.10), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%, rgba(200,184,155,0.05), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  overflow:hidden;
+}
+
+.grain{
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.05;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+.footer{
+  position:absolute; bottom:38px; left:60px;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--cream); opacity:0.45;
+  z-index:60;
+}
+
+/* Voice icon (carryover from Scene 8) — sits centred */
+.voice-icon{
+  position:absolute;
+  top:50%; left:50%;
+  width:240px; height:240px;
+  border-radius:50%;
+  background:linear-gradient(145deg, var(--sage) 0%, var(--sage-bright) 50%, var(--dusty-blue) 100%);
+  display:flex; align-items:center; justify-content:center;
+  z-index:20;
+  box-shadow:
+    0 0 0 1px rgba(184,209,181,0.50),
+    0 0 80px rgba(184,209,181,0.55),
+    0 0 200px rgba(184,209,181,0.35),
+    0 30px 80px rgba(0,0,0,0.40);
+  will-change:transform, opacity, filter;
+  transform-origin:50% 50%;
+  /* visibility: hidden until build() runs gsap.set with the centred translate.
+     Otherwise the very first frame paints the element with its top-left at
+     viewport centre (no translate yet), then snaps into place — visible glitch
+     and a position-mismatch with Scene 8's centred final frame. */
+  visibility:hidden;
+}
+.voice-icon svg{
+  width:120px; height:120px;
+  color:var(--cream);
+}
+
+/* Generate recording link button (carryover from Scene 8) */
+.generate-btn{
+  position:absolute;
+  top:50%; left:50%;
+  /* Same hidden-until-gsap pattern as .voice-icon — first frame would otherwise
+     paint with top-left at viewport centre (untranslated), causing a glitch. */
+  visibility:hidden;
+  appearance:none; border:none;
+  padding:18px 32px;
+  background:var(--ink-900);
+  color:var(--cream);
+  font-family:"Geist", sans-serif;
+  font-weight:600; font-size:18px; letter-spacing:-0.005em;
+  border-radius:999px;
+  cursor:pointer;
+  display:inline-flex; align-items:center; gap:12px;
+  z-index:25;
+  box-shadow:
+    0 0 0 1px rgba(184,209,181,0.30),
+    0 0 32px rgba(184,209,181,0.30),
+    0 14px 40px rgba(0,0,0,0.40);
+  white-space:nowrap;
+  will-change:transform, opacity, box-shadow;
+}
+.generate-btn .pulse{
+  width:9px; height:9px; border-radius:50%;
+  background:var(--sage-bright);
+  box-shadow:0 0 12px rgba(184,209,181,0.85);
+  flex-shrink:0;
+}
+
+/* Cursor */
+.cursor-svg{
+  position:absolute;
+  width:36px; height:36px;
+  z-index:30;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.45));
+  opacity:0;
+  will-change:transform, opacity;
+}
+
+/* Half-circle ripple — emanates from BOTTOM-CENTRE of viewport */
+.ripple-half{
+  position:absolute;
+  left:50%; bottom:0;                 /* anchored to bottom */
+  width:600px; height:600px;
+  border-radius:50%;
+  background:radial-gradient(circle,
+    rgba(232,248,222,0.85) 0%,
+    rgba(184,209,181,0.65) 25%,
+    rgba(159,180,160,0.30) 55%,
+    transparent 78%);
+  box-shadow:
+    0 0 80px rgba(184,209,181,0.70),
+    0 0 200px rgba(184,209,181,0.35);
+  z-index:18;
+  pointer-events:none;
+  opacity:0;
+  filter:blur(1px);
+  transform:translate(-50%, 50%) scale(0.2);
+  transform-origin:50% 50%;
+  will-change:transform, opacity;
+}
+
+/* Full-page Voice Setup screen — occupies almost the whole frame.
+   Sits ABOVE the ripple in z-stack so the ripple acts as a back-wash, not a cover. */
+.app-card{
+  position:absolute;
+  top:3.5%; left:3.5%;
+  width:93%; height:93%;
+  border-radius:18px;
+  overflow:hidden;
+  background:var(--cream);
+  box-shadow:
+    0 60px 120px rgba(0,0,0,0.55),
+    0 30px 60px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.04);
+  z-index:22;
+  opacity:0;
+  display:flex; flex-direction:column;
+  font-family:"Geist", sans-serif;
+  color:var(--ink-900);
+  transform-style:preserve-3d;
+  will-change:transform, opacity, filter;
+}
+
+/* Top nav */
+.topnav{
+  height:64px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px;
+  background:var(--cream);
+  border-bottom:1px solid rgba(31,38,34,0.06);
+}
+.brand-mini{ display:flex; align-items:center; gap:11px; }
+.brand-mini-mark{
+  width:32px; height:32px;
+  background:linear-gradient(145deg, oklch(0.72 0.06 150) 0%, oklch(0.78 0.05 180) 100%);
+  border-radius:7px; position:relative; flex-shrink:0;
+}
+.brand-mini-mark svg{ position:absolute; inset:6px; }
+.brand-mini-text .nm{ font-weight:600; font-size:13.5px; color:var(--ink-900); letter-spacing:-0.01em; display:block;}
+.brand-mini-text .tg{ font-weight:400; font-size:9.5px; color:var(--ink-500); margin-top:1px; letter-spacing:0.02em; display:block;}
+
+.nav-items{
+  display:flex; align-items:center; gap:5px;
+  font-weight:500; font-size:13px;
+  color:var(--ink-700);
+}
+.nav-item{ padding:8px 16px; border-radius:999px; }
+.nav-item.active{ background:var(--ink-900); color:var(--cream); }
+
+.nav-user{
+  display:flex; align-items:center; gap:8px;
+  padding:5px 13px 5px 5px;
+  border:1px solid var(--line); border-radius:999px;
+  background:var(--paper);
+  font-size:13px;
+}
+.nav-user-avatar{
+  width:26px; height:26px; border-radius:50%;
+  background:var(--sage-tint); color:var(--sage-ink);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:600; font-size:11.5px;
+}
+
+/* Body */
+.body{
+  flex:1;
+  display:flex;
+  background:var(--cream);
+}
+.sidebar{
+  width:240px; flex-shrink:0;
+  padding:24px 18px;
+  border-right:1px solid rgba(31,38,34,0.05);
+}
+.sb-eyebrow{
+  font-size:10px; letter-spacing:0.16em; text-transform:uppercase;
+  color:var(--ink-500); font-weight:600;
+  padding:6px 12px 16px;
+}
+.sb-item{
+  display:flex; align-items:center; gap:11px;
+  padding:10px 13px;
+  border-radius:9px;
+  font-size:13.5px; font-weight:500;
+  color:var(--ink-700);
+  margin-bottom:3px;
+}
+.sb-item.active{
+  background:var(--sage-tint);
+  color:var(--sage-ink);
+  font-weight:600;
+  border:1px solid rgba(159,180,160,0.4);
+}
+.sb-item svg{ width:14px; height:14px; flex-shrink:0; }
+
+/* Main column */
+.main{
+  flex:1; min-width:0;
+  padding:32px 48px 32px;
+  overflow:hidden;
+  display:flex; flex-direction:column;
+  gap:18px;
+}
+
+.eyebrow{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:4px 12px;
+  border:1px solid rgba(159,180,160,0.45);
+  border-radius:999px;
+  background:var(--sage-tint);
+  font-size:11px; font-weight:600;
+  color:var(--sage-ink);
+  letter-spacing:0.04em;
+  align-self:flex-start;
+}
+.eyebrow::before{
+  content:""; width:6px; height:6px; border-radius:50%; background:var(--sage-ink);
+}
+
+.h1-app{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:56px;
+  line-height:1.04;
+  letter-spacing:-0.022em;
+  color:var(--ink-900);
+}
+.sub-app{
+  font-size:16px; line-height:1.55; color:var(--ink-500);
+  max-width:760px;
+}
+
+/* Two-column layout: QR + URL details */
+.link-row{
+  display:grid;
+  grid-template-columns:340px 1fr;
+  gap:36px;
+  align-items:flex-start;
+  margin-top:8px;
+}
+.qr-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:24px;
+  display:flex; flex-direction:column;
+  align-items:center;
+}
+.qr-wrap{
+  width:280px; height:280px;
+  background:#fff;
+  position:relative;
+}
+.qr-svg{ width:100%; height:100%; }
+.qr-foot{
+  margin-top:14px;
+  font-size:11px; color:var(--ink-500);
+  letter-spacing:0.14em; text-transform:uppercase;
+  font-weight:600;
+}
+
+.url-card{
+  display:flex; flex-direction:column;
+  gap:18px;
+}
+.url-label{
+  font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
+  color:var(--ink-500); font-weight:600;
+}
+.url-row{
+  display:flex; align-items:center; gap:12px;
+  padding:16px 20px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  font-family:"Geist Mono", monospace;
+  font-size:16px;
+  color:var(--ink-700);
+}
+.url-row .domain{ color:var(--ink-500); }
+.url-row .token{
+  color:var(--ink-700);
+  background:transparent;
+  border-radius:5px;
+  padding:2px 5px;
+  margin:0 -5px;
+  display:inline-block;
+  transition:color 0.18s ease, background-color 0.18s ease;
+}
+.url-row .token.flipped{
+  color:var(--sage-ink);
+  background:var(--sage-tint);
+  font-weight:600;
+}
+.url-row .copy{
+  margin-left:auto;
+  padding:7px 16px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  font-family:"Geist", sans-serif;
+  font-size:12.5px;
+  font-weight:500;
+  color:var(--ink-700);
+  background:var(--paper);
+  flex-shrink:0;
+  display:inline-flex; align-items:center; gap:6px;
+  transition:background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.url-row .copy.copied{
+  background:var(--sage-tint);
+  color:var(--sage-ink);
+  border-color:rgba(159,180,160,0.55);
+  font-weight:600;
+}
+.url-row .copy svg{ width:13px; height:13px; }
+
+/* Bullets list */
+.bullets{
+  display:flex; flex-direction:column;
+  gap:11px;
+  padding:16px 20px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+}
+.bullet{
+  display:flex; align-items:center; gap:11px;
+  font-size:13.5px; color:var(--ink-700);
+}
+.bullet svg{ width:16px; height:16px; color:var(--sage-ink); flex-shrink:0; }
+.bullet b{ color:var(--ink-900); font-weight:600; }
+
+/* Action buttons */
+.actions{
+  display:flex; gap:12px;
+  margin-top:6px;
+}
+.action-btn{
+  flex:1;
+  padding:14px 20px;
+  border-radius:10px;
+  font-weight:600; font-size:13.5px;
+  display:flex; align-items:center; justify-content:center; gap:9px;
+}
+.action-btn.primary{
+  background:var(--sage-ink); color:var(--cream);
+  border:none;
+}
+.action-btn.ghost{
+  background:#fff; color:var(--ink-900);
+  border:1px solid var(--line);
+}
+.action-btn svg{ width:14px; height:14px; }
+
+/* Bottom — status row */
+.status-row{
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:14px;
+  margin-top:auto;
+}
+.status-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px 18px;
+}
+.status-eye{
+  font-size:9.5px; letter-spacing:0.16em; text-transform:uppercase;
+  color:var(--ink-500); font-weight:600;
+  margin-bottom:6px;
+}
+.status-val{
+  font-family:"Instrument Serif", serif;
+  font-size:24px; line-height:1;
+  color:var(--ink-900);
+  letter-spacing:-0.01em;
+}
+.status-foot{
+  font-size:10.5px; color:var(--ink-500);
+  margin-top:5px;
+}
+
+/* Hud */
+.hud{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  background:rgba(15,15,17,0.85);
+  color:#EAE3D2; font-family:"Geist Mono", monospace; font-size:11px;
+  padding:8px 14px; border-radius:999px;
+  display:flex; gap:14px; align-items:center; z-index:100;
+  letter-spacing:0.06em;
+}
+.hud button{
+  appearance:none; border:1px solid #555; background:transparent; color:#EAE3D2;
+  font-family:inherit; font-size:11px; padding:3px 10px; border-radius:999px; cursor:pointer;
+}
+.hud button:hover{ background:#222; }
+.hud .timer{ font-variant-numeric:tabular-nums; min-width:46px; }
+</style>
+</head>
+<body>
+
+<div class="frame-wrap" id="frame">
+  <div class="stage">
+    <!-- Scene 10 hand-off preview: a static frame of scene 10 (browser visible,
+         inner content not yet faded in) fades in during scene 9's exit so the
+         link box lands inside the visible address bar. -->
+    <img id="scene10Bg" src="../shared/img/s10-at-0.5s.jpg" alt=""
+         style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;z-index:1;pointer-events:none;">
+    <div class="grain"></div>
+    <div class="footer">CSIT321&nbsp;CAPSTONE</div>
+
+    <!-- Voice icon (carry-over from Scene 8 — centred at viewport) -->
+    <div class="voice-icon" id="voiceIcon">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="24" y="14" width="16" height="26" rx="8" fill="currentColor" stroke="none"/>
+        <path d="M16,30 a16,16 0 0 0 32,0"/>
+        <line x1="32" y1="46" x2="32" y2="54"/>
+        <line x1="22" y1="54" x2="42" y2="54"/>
+      </svg>
+    </div>
+
+    <!-- Generate button (carry-over from Scene 8 — y:200 below centre) -->
+    <button class="generate-btn" id="generateBtn">
+      <span class="pulse"></span>
+      Generate recording link
+    </button>
+
+    <!-- Cursor: Bootstrap Icons `hand-index-thumb-fill` (MIT). -->
+    <svg class="cursor-svg" id="cursor" viewBox="0 0 16 16" fill="#fff" stroke="#1F2622" stroke-width="0.5" stroke-linejoin="round" data-icon="bi-hand-index-thumb-fill">
+      <path d="M8.5 1.75v2.716l.047-.002c.312-.012.742-.016 1.051.046.28.056.543.18.738.288.273.152.456.385.56.642l.132-.012c.312-.024.794-.038 1.158.108.37.148.689.487.88.716q.113.137.195.248h.582a2 2 0 0 1 1.99 2.199l-.272 2.715a3.5 3.5 0 0 1-.444 1.389l-1.395 2.441A1.5 1.5 0 0 1 12.42 16H6.118a1.5 1.5 0 0 1-1.342-.83l-1.215-2.43L1.07 8.589a1.517 1.517 0 0 1 2.373-1.852L5 8.293V1.75a1.75 1.75 0 0 1 3.5 0"/>
+    </svg>
+
+    <!-- Half-circle ripple from bottom -->
+    <div class="ripple-half" id="rippleHalf"></div>
+
+    <!-- Full-page Voice Setup screen -->
+    <div class="app-card" id="appCard">
+      <!-- Top nav -->
+      <div class="topnav">
+        <div class="brand-mini">
+          <span class="brand-mini-mark">
+            <svg viewBox="0 0 18 18"><path d="M0,11 L3,11 L5,7 L7.5,14 L10,3 L12.5,11 L18,11" fill="none" stroke="#FBF8F2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div class="brand-mini-text">
+            <span class="nm">CareData</span>
+            <span class="tg">Health Analytics Portal</span>
+          </div>
+        </div>
+        <div class="nav-items">
+          <span class="nav-item">Dashboard</span>
+          <span class="nav-item">Data Entry</span>
+          <span class="nav-item active">Voice Screening</span>
+          <span class="nav-item">Reports</span>
+          <span class="nav-item">Benchmarking</span>
+        </div>
+        <div class="nav-user">
+          <span class="nav-user-avatar">N</span>
+          <span>Nelly</span>
+        </div>
+      </div>
+
+      <div class="body">
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <div class="sb-eyebrow">Voice screening</div>
+          <div class="sb-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+            Dashboard
+          </div>
+          <div class="sb-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="6" r="3"/><path d="M3 14c0-3 2.5-4.5 5-4.5s5 1.5 5 4.5"/></svg>
+            Residents
+          </div>
+          <div class="sb-item active">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="6" y="2" width="4" height="8" rx="2"/><path d="M3 8a5 5 0 0 0 10 0"/><line x1="8" y1="13" x2="8" y2="14.5"/></svg>
+            Recording link
+          </div>
+          <div class="sb-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M5 8l2 2 4-4"/></svg>
+            Alerts feed
+          </div>
+          <div class="sb-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 4h10M3 8h10M3 12h10"/></svg>
+            Settings
+          </div>
+        </div>
+
+        <!-- Main column -->
+        <div class="main">
+          <span class="eyebrow">Voice setup · Resident DR-0148, Room 12B</span>
+          <h1 class="h1-app">Recording link generated.</h1>
+          <p class="sub-app">Send this link to the resident's room device. Permanent, no expiry, works in any browser. No app install required.</p>
+
+          <!-- Two-column: QR + URL/details -->
+          <div class="link-row">
+            <div class="qr-card">
+              <div class="qr-wrap">
+                <svg class="qr-svg" viewBox="0 0 100 100" id="qrSvg">
+                  <rect width="100" height="100" fill="#fff"/>
+                  <g fill="#1F2622">
+                    <rect x="6" y="6" width="22" height="22" rx="2"/>
+                    <rect x="10" y="10" width="14" height="14" rx="1" fill="#fff"/>
+                    <rect x="13" y="13" width="8" height="8" rx="0.8"/>
+                  </g>
+                  <g fill="#1F2622">
+                    <rect x="72" y="6" width="22" height="22" rx="2"/>
+                    <rect x="76" y="10" width="14" height="14" rx="1" fill="#fff"/>
+                    <rect x="79" y="13" width="8" height="8" rx="0.8"/>
+                  </g>
+                  <g fill="#1F2622">
+                    <rect x="6" y="72" width="22" height="22" rx="2"/>
+                    <rect x="10" y="76" width="14" height="14" rx="1" fill="#fff"/>
+                    <rect x="13" y="79" width="8" height="8" rx="0.8"/>
+                  </g>
+                  <g class="qr-modules" fill="#1F2622" id="qrModules"></g>
+                </svg>
+              </div>
+              <div class="qr-foot">scan with any device</div>
+            </div>
+
+            <div class="url-card">
+              <div class="url-label">Recording URL</div>
+              <div class="url-row" id="urlRow">
+                <span><span class="domain">caredata.com/voice/r/</span><span class="token" id="urlToken">dr-0148-7n4kP3</span></span>
+                <span class="copy" id="copyBtn">Copy</span>
+              </div>
+
+              <div class="bullets">
+                <div class="bullet">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8l3 3 7-7"/></svg>
+                  <span><b>Permanent</b> — link never expires</span>
+                </div>
+                <div class="bullet">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8l3 3 7-7"/></svg>
+                  <span><b>No app install</b> — works in any browser</span>
+                </div>
+                <div class="bullet">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8l3 3 7-7"/></svg>
+                  <span><b>Auto-tagged</b> — recordings linked to Resident DR-0148</span>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="action-btn primary">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5h10v8H3z"/><path d="M3 5l5 4 5-4"/></svg>
+                  Send via SMS
+                </button>
+                <button class="action-btn ghost">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="9" height="9" rx="1"/><path d="M2 11V3a1 1 0 0 1 1-1h8"/></svg>
+                  Copy to clipboard
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom status row -->
+          <div class="status-row">
+            <div class="status-card">
+              <div class="status-eye">Resident</div>
+              <div class="status-val">DR-0148</div>
+              <div class="status-foot">Room 12B · enrolled 12 May 2026</div>
+            </div>
+            <div class="status-card">
+              <div class="status-eye">Recordings</div>
+              <div class="status-val">14<span style="font-size:13px; color:var(--ink-500); margin-left:6px;">past 14 days</span></div>
+              <div class="status-foot">last: 12 May, 08:34</div>
+            </div>
+            <div class="status-card">
+              <div class="status-eye">Baseline status</div>
+              <div class="status-val" style="color:var(--sage-ink);">Established</div>
+              <div class="status-foot">7-day rolling window</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hud">
+  <button id="replay">REPLAY</button>
+  <span class="timer" id="timer">0.00s</span>
+  <span style="opacity:.6">Scene 09 / Voice Setup Link</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+function fit(){
+  const wrap = document.getElementById('frame');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  /* zoom not transform: scale — natively rasterise at projected resolution; prevents 4K pixel break on 3D-rotated descendants. See ~/.claude/skills/hyperframes-video/rendering.md */
+  wrap.style.zoom = s;
+}
+fit();
+window.addEventListener('resize', fit);
+
+/* Procedurally fill QR data modules */
+function buildQRModules(){
+  const g = document.getElementById('qrModules');
+  if (g.dataset.built) return;
+  g.dataset.built = '1';
+  const cells = 25;
+  const cell = 100 / cells;
+  let svg = '';
+  function inFinder(r, c){
+    return (r < 7 && c < 7) || (r < 7 && c > 17) || (r > 17 && c < 7);
+  }
+  function bit(r, c){
+    const v = ((r * 73856093) ^ (c * 19349663)) >>> 0;
+    return (v & 1) === 1 ? 1 : ((v >> 7) & 1);
+  }
+  for (let r = 0; r < cells; r++){
+    for (let c = 0; c < cells; c++){
+      if (inFinder(r, c)) continue;
+      if (bit(r, c) === 1){
+        svg += `<rect x="${(c*cell).toFixed(2)}" y="${(r*cell).toFixed(2)}" width="${cell.toFixed(2)}" height="${cell.toFixed(2)}"/>`;
+      }
+    }
+  }
+  g.innerHTML = svg;
+}
+buildQRModules();
+
+let tl;
+
+/* Hardcoded landing target for Scene 10's address bar — verified visually via
+   earlier iframe-based ghost overlay (which was removed because Hyperframes
+   captured the offscreen iframe into the rendered frames). Coords computed from
+   Scene 10's CSS:
+     - browser CSS top:6% × 1080 = 65
+     - chrome-tabs 38px height + 8px padding-top = 46 → tabs end at 111
+     - chrome-url row + address-bar (32px height) inside → centre y ≈ 141
+     - address-bar is flex:1 inside chrome-url with chrome-controls (~120px)
+       on the left → width ≈ browser-inner-width − 140 ≈ 1100
+   Tunable if the merge looks off. */
+const linkLandingTarget = { x: 960, y: 141, w: 1100 };
+
+function build(){
+  /* === Initial state — exactly the END of Scene 8 ===
+     Voice icon centred at viewport (no y offset),
+     Generate button centred + 200px below the centre */
+  gsap.set('#voiceIcon', {
+    xPercent: -50, yPercent: -50,
+    x: 0, y: 0,                       /* dead-centre, matches Scene 8 final */
+    scale: 1, rotation: 0, opacity: 1,
+    filter: 'blur(0px)',
+    transformOrigin: '50% 50%',
+    visibility: 'visible'             /* unhide now that the translate is applied */
+  });
+  gsap.set('#generateBtn', {
+    xPercent: -50, yPercent: -50,
+    x: 0, y: 200,                     /* 200px below centre, matches Scene 8 final */
+    scale: 1, opacity: 1,
+    visibility: 'visible'             /* unhide now that the translate is applied */
+  });
+
+  gsap.set('#cursor', {
+    x: 1900, y: 540,
+    scale: 1, opacity: 0,
+    xPercent: 0, yPercent: 0
+  });
+
+  gsap.set('#rippleHalf', {
+    /* anchored at bottom-centre via CSS; reset transform here */
+    transform: 'translate(-50%, 50%) scale(0.2)',
+    opacity: 0
+  });
+
+  /* App card sits BELOW the frame, tilted LEFT, sharp (no blur — sits ABOVE the ripple) */
+  gsap.set('#appCard', {
+    opacity: 1,
+    transformPerspective: 2400,
+    transformOrigin: '50% 50%',
+    rotationY: -22, rotationX: 4,
+    scale: 1.0,
+    y: 1180,                          /* fully below the viewport */
+    filter: 'none'
+  });
+
+  /* Inner main starts at scrollY 0 (top) — will scroll down to expose lower content */
+  gsap.set('.main', { y: 0 });
+
+  /* Scene 10 hand-off background is fully invisible at scene start. */
+  gsap.set('#scene10Bg', { opacity: 0 });
+
+  document.getElementById('urlToken').classList.remove('flipped');
+
+  tl = gsap.timeline({
+    paused: true,
+    onUpdate: () => {
+      document.getElementById('timer').textContent = tl.time().toFixed(2) + 's';
+    }
+  });
+
+  /* ============================================================
+     TOTAL ~6.0s — beat-locked at 120 BPM. Opens with Scene 8 ending state.
+        b1  0.00      Cursor enters from off-right
+        b1+ 0.10      Cursor glides toward the Generate button
+        b2  0.50      Cursor lands; click pulse + button compresses
+        b3  1.00      Half-circle SAGE RIPPLE expands from bottom-centre
+                      Voice icon + button fade away, cursor exits
+        b4  1.50      Screen materialises tilted LEFT (rotationY -22°),
+                      showing the UPPER part (header, QR, URL row)
+        b5  2.00      Top content visible — URL token colour-flips to sage (M9)
+        b6  2.50      TILT TRANSITION: rotationY -22° → +22°
+                      Inner main scrolls down to expose lower content
+        b7  3.00      Right-tilted now showing LOWER part (bullets, actions, status)
+        b8  3.50      Hold — read
+        b9  4.00      Hold continues
+        b10 4.50      Hold continues
+        b11 5.00      Begin exit — screen flies off-frame (slides up + tilts)
+        b12 5.50      Scene end
+     ============================================================ */
+
+  /* === Phase A (b1-b2): Cursor enters and glides to the Generate button === */
+  tl.to('#cursor', { opacity: 1, duration: 0.10 }, 0.05);
+  tl.to('#cursor', {
+    x: 920, y: 720,                  /* button centre is (960, 540 + 200 = 740). Cursor tip at +8/+4. */
+    duration: 0.50, ease: 'cubic-bezier(.45,.10,.50,.90)'
+  }, 0.05);
+
+  /* === Phase B (b2): Click pulse === */
+  tl.to('#cursor', { scale: 0.85, duration: 0.10, ease: 'power2.in' }, 0.55);
+  tl.to('#cursor', { scale: 1.0, duration: 0.16, ease: 'power2.out' }, 0.65);
+  tl.to('#generateBtn', {
+    scale: 0.96, duration: 0.12, ease: 'power2.in'
+  }, 0.55);
+  tl.to('#generateBtn', {
+    scale: 1.0, duration: 0.18, ease: 'power2.out'
+  }, 0.67);
+
+  /* === Phase C (b3-b5): HUGE half-circle ripple rises from BOTTOM of viewport ===
+     The ripple is so large that only the top half-circle (a dome) is visible. The
+     dome physically PUSHES the icon + button up off the frame, while the new screen
+     pushes UP from below at the same time. No fading — pure translation. */
+  tl.to('#rippleHalf', {
+    transform: 'translate(-50%, 50%) scale(12)',     /* huge so visible portion is a dome */
+    opacity: 1,
+    duration: 1.20, ease: 'cubic-bezier(.34,.10,.30,.98)'
+  }, 1.00);
+  tl.to('#rippleHalf', {
+    opacity: 0,
+    duration: 0.40, ease: 'power2.in'
+  }, 2.00);
+
+  /* Voice icon + button get PUSHED UPWARD off-frame by the rising dome — NO fading */
+  tl.to('#voiceIcon', {
+    y: -1200,                        /* pushed up out of the top */
+    duration: 1.10, ease: 'cubic-bezier(.34,.10,.30,.98)'
+  }, 1.05);
+  tl.to('#generateBtn', {
+    y: -1100,                        /* same upward push */
+    duration: 1.10, ease: 'cubic-bezier(.34,.10,.30,.98)'
+  }, 1.05);
+  /* Cursor rides up with them */
+  tl.to('#cursor', {
+    y: -200,
+    duration: 0.45, ease: 'power3.in'
+  }, 1.05);
+  tl.to('#cursor', { opacity: 0, duration: 0.20 }, 1.45);
+
+  /* === Phase D: Screen pushes UP from below the frame, in sync with the dome ===
+     Screen is sharp (no blur) since it sits ABOVE the ripple in z-stack. */
+  tl.to('#appCard', {
+    y: 0,
+    duration: 1.10, ease: 'cubic-bezier(.34,.10,.30,.98)'
+  }, 1.05);
+
+  /* === Phase E: URL token colour flip — once screen settles, while LEFT tilt holds === */
+  tl.call(() => {
+    document.getElementById('urlToken').classList.add('flipped');
+  }, null, 2.40);
+
+  /* === Phase F: TILT FROM LEFT → RIGHT, scroll inner content (b6) === */
+  tl.to('#appCard', {
+    rotationY: 22, rotationX: -4,
+    duration: 0.70, ease: 'cubic-bezier(.45,.10,.50,.90)'
+  }, 3.00);
+  tl.to('.main', {
+    y: -180,
+    duration: 0.70, ease: 'cubic-bezier(.45,.10,.50,.90)'
+  }, 3.00);
+
+  /* === Phase G: Cursor returns and clicks the Copy button (live-measured) === */
+  const copyTarget = { x: 0, y: 0 };
+  tl.call(() => {
+    const btn = document.getElementById('copyBtn');
+    const r = btn.getBoundingClientRect();
+    const wrap = document.getElementById('frame').getBoundingClientRect();
+    const ws = wrap.width / 1920;
+    copyTarget.x = (r.left + r.width / 2 - wrap.left) / ws;
+    copyTarget.y = (r.top + r.height / 2 - wrap.top) / ws;
+  }, null, 3.70);
+
+  tl.set('#cursor', {
+    xPercent: 0, yPercent: 0,
+    x: 1900, y: 540, scale: 1
+  }, 3.72);
+  tl.to('#cursor', { opacity: 1, duration: 0.10 }, 3.75);
+  tl.to('#cursor', {
+    x: () => copyTarget.x - 18,
+    y: () => copyTarget.y - 12,
+    duration: 0.45, ease: 'cubic-bezier(.45,.10,.50,.90)'
+  }, 3.75);
+
+  /* Click pulse */
+  tl.to('#cursor', { scale: 0.85, duration: 0.10, ease: 'power2.in' }, 4.20);
+  tl.to('#cursor', { scale: 1.0, duration: 0.16, ease: 'power2.out' }, 4.30);
+
+  /* Copy button → "Copied" with check icon + sage background */
+  tl.call(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.classList.add('copied');
+    btn.innerHTML =
+      '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3 3 7-7"/></svg>Copied';
+  }, null, 4.30);
+
+  /* Cursor exits */
+  tl.to('#cursor', { opacity: 0, duration: 0.20 }, 4.45);
+
+  /* === Phase H: Screen tilts STRAIGHT (rotationY/X → 0) ===
+     Necessary so the URL row sits flat before we extract it as a free element. */
+  tl.to('#appCard', {
+    rotationY: 0, rotationX: 0,
+    duration: 0.55, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 4.45);
+
+  /* === Phase I prep: PRE-CREATE the flyBox element ===
+     GSAP resolves '#flyBox' selectors at tl.to() registration time (now, during
+     build()). If #flyBox doesn't exist yet, the tweens register with zero targets
+     and silently do nothing. So create the element NOW (hidden), populate + show
+     at the actual extract moment (5.00). */
+  let flyBoxW = 0, flyBoxH = 0;
+  {
+    const wrap = document.getElementById('frame');
+    const prior = document.getElementById('flyBox');
+    if (prior) prior.remove();
+    const placeholder = document.createElement('div');
+    placeholder.id = 'flyBox';
+    placeholder.style.cssText =
+      'position:absolute; left:0; top:0; margin:0; z-index:100;' +
+      'transform-style:preserve-3d; will-change:transform, box-shadow;' +
+      'visibility:hidden;';
+    wrap.appendChild(placeholder);
+    gsap.set('#flyBox', {
+      x: 0, y: 0, scale: 1,
+      transformPerspective: 1600,
+      transformOrigin: '50% 50%'
+    });
+  }
+
+  /* === Phase I (5.00): EXTRACT the URL row at runtime ===
+     Measure the live position of #urlRow (now flat after Phase H straightening),
+     copy its content + size into the pre-created #flyBox, position #flyBox at the
+     same viewport spot, make it visible, hide the original. */
+  tl.call(() => {
+    const orig = document.getElementById('urlRow');
+    const wrap = document.getElementById('frame');
+    const flyBox = document.getElementById('flyBox');
+    const wrapRect = wrap.getBoundingClientRect();
+    const r = orig.getBoundingClientRect();
+    const ws = wrapRect.width / 1920;
+    const cx = (r.left + r.width / 2 - wrapRect.left) / ws;
+    const cy = (r.top  + r.height / 2 - wrapRect.top)  / ws;
+    flyBoxW = r.width / ws;
+    flyBoxH = r.height / ws;
+    /* Copy the className so .url-row + .url-row .copy + .url-row .token CSS
+       all apply to the clone. (Earlier I tried inline-copying computed styles —
+       that left the children unstyled because their selectors target descendants
+       of .url-row.) Then copy the inner HTML — gives us the same DOM as the
+       original. Only positioning is set inline. */
+    flyBox.className = orig.className;
+    flyBox.innerHTML = orig.innerHTML;
+    flyBox.style.width = `${flyBoxW}px`;
+    /* Position the flyBox at the urlRow's current viewport spot, then unhide */
+    gsap.set('#flyBox', {
+      x: cx - flyBoxW / 2,
+      y: cy - flyBoxH / 2,
+      scale: 1
+    });
+    flyBox.style.visibility = 'visible';
+    /* hide the original urlRow inside the appCard */
+    orig.style.visibility = 'hidden';
+  }, null, 5.00);
+
+  /* Fade the appCard away so only the flying URL row remains visible */
+  tl.to('#appCard', {
+    opacity: 0, scale: 0.85,
+    duration: 0.45, ease: 'power2.in'
+  }, 5.00);
+
+  /* Scene 10 hand-off: cross-fade the static scene-10 background in as the
+     appCard fades out, so by the time the flyBox lands at the address-bar
+     position the browser mockup is already visible behind it. Hands off
+     seamlessly to scene 10 (which starts with the same browser visible). */
+  tl.to('#scene10Bg', {
+    opacity: 1,
+    duration: 0.50, ease: 'power2.inOut'
+  }, 5.30);
+
+  /* === Phase J (5.05–5.55): FLY to viewport centre, TOWARD camera ===
+     0.50s. Box scales up to 1.3× (moderate forward pop) with deepening shadow. */
+  tl.to('#flyBox', {
+    x: () => 960 - flyBoxW / 2,
+    y: () => 540 - flyBoxH / 2,
+    scale: 1.3,
+    boxShadow: '0 40px 100px rgba(0,0,0,0.40), 0 12px 36px rgba(0,0,0,0.30)',
+    duration: 0.50, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 5.05);
+
+  /* === Phase K (5.55–5.70): HOLD at centre (0.15s breath, half a beat) === */
+
+  /* === Phase L (5.70–6.20): FLY to top-centre, AWAY from camera ===
+     0.50s. Translate to Scene 10's measured address-bar position AND scale down
+     to its measured width. Drop-shadow shrinks to a flat-paper value as it lands. */
+  tl.to('#flyBox', {
+    x: () => linkLandingTarget.x - flyBoxW / 2,
+    y: () => linkLandingTarget.y - flyBoxH / 2,
+    scale: () => linkLandingTarget.w / flyBoxW,
+    boxShadow: '0 1px 2px rgba(0,0,0,0.10)',
+    duration: 0.50, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 5.70);
+
+  /* (Phase M ghost overlay removed — verified visually, no longer needed.
+     Hyperframes was capturing the offscreen iframe into the rendered frames.) */
+}
+
+function play(){
+  if (!tl) build();
+  tl.restart();
+  tl.play();
+}
+
+document.getElementById('replay').addEventListener('click', play);
+
+// IFRAME-AWARE BOOTSTRAP — patched by shared/patch-scenes.mjs
+window.addEventListener('load', () => {
+  const start = () => { build(); if (window.parent === window) play(); };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+  } else {
+    start();
+  }
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === 'play'  && typeof play === 'function')                          play();
+  if (t === 'pause' && typeof tl   !== 'undefined' && tl)                    tl.pause();
+  if (t === 'reset' && typeof tl   !== 'undefined' && tl) { tl.seek(0); tl.pause(); }
+});
+</script>
+</body>
+</html>

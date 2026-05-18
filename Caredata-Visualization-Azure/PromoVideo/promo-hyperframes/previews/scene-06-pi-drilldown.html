@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 6, PI Drilldown (preview) | CareData promo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --cream:#F6F2EB;
+  --paper:#FBF8F2;
+  --line-soft:#EAE3D2;
+  --line:#E1DBCC;
+  --ink-900:#1F2622;
+  --ink-700:#3D4743;
+  --ink-500:#6B7570;
+  --ink-300:#A4ABA4;
+  --sage:#9FB4A0;
+  --sage-bright:#B8D1B5;
+  --sage-ink:#4B6A55;
+  --sage-tint:#EEF1EC;
+  --clay:#C8B89B;
+  --clay-ink:#836B47;
+  --clay-bright:#D4C4A8;
+  --dusty-blue:#A6B6C4;
+  --status-bad:#B86F62;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background:#0E1211;
+  color:var(--cream);
+  font-family:"Geist",ui-sans-serif,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.frame-wrap{
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;     /* 4K canvas-fill */
+  perspective:2400px;
+  perspective-origin:50% 50%;
+}
+.stage{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.10), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%, rgba(200,184,155,0.05), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  overflow:hidden;
+}
+
+.grain{
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.05;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+.footer{
+  position:absolute; bottom:38px; left:60px;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--cream); opacity:0.45;
+  z-index:60;
+}
+
+/* Side reveal text — sits OUTSIDE the dashboard card edges, large serif */
+.side-text{
+  position:absolute;
+  top:50%;
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:64px;
+  line-height:1.05;
+  letter-spacing:-0.025em;
+  color:var(--cream);
+  z-index:15;                    /* sits ABOVE the card during entry */
+  white-space:nowrap;
+  opacity:0;
+  will-change:transform, opacity, filter;
+  text-shadow:0 2px 30px rgba(0,0,0,0.35);
+}
+.side-text-left{
+  /* sits just left of the dashboard frame (left edge of frame = 32% of 1920 = 614px) */
+  right:70%;            /* text right edge ~30% from left = 576px, ~38px gap to screen */
+  transform:translateY(-50%);
+  text-align:right;
+  max-width:520px;
+  padding-right:10px;
+}
+.side-text-right{
+  /* sits just right of the dashboard frame (right edge of frame at ~68% from left) */
+  left:70%;             /* text starts at 70% = 1344px, ~38px past screen right edge */
+  transform:translateY(-50%);
+  text-align:left;
+  max-width:520px;
+  padding-left:10px;
+}
+.side-text .accent{ color:var(--sage-bright); font-style:italic; }
+
+/* App card — VERTICAL rect at ~75% of full size, sits centred */
+.app-card{
+  position:absolute;
+  top:15%; left:32%;
+  width:36%; height:70%;       /* 691 × 756 — 75% of full, content visible without scaling */
+  border-radius:12px;
+  overflow:hidden;
+  background:var(--cream);
+  box-shadow:
+    0 60px 120px rgba(0,0,0,0.55),
+    0 30px 60px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.04);
+  z-index:10;
+  opacity:0;
+  display:flex; flex-direction:column;
+  font-family:"Geist", sans-serif;
+  color:var(--ink-900);
+  transform-style:preserve-3d;
+  will-change:transform, opacity, filter;
+}
+
+/* All sizing scaled down ~30% so the smaller screen still reads as a proper desktop UI */
+/* Top nav */
+.topnav{
+  height:42px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px;
+  background:var(--cream);
+  border-bottom:1px solid rgba(31,38,34,0.06);
+}
+.brand-mini{ display:flex; align-items:center; gap:10px; }
+.brand-mini-mark{
+  width:22px; height:22px;
+  background:linear-gradient(145deg, oklch(0.72 0.06 150) 0%, oklch(0.78 0.05 180) 100%);
+  border-radius:5px; position:relative; flex-shrink:0;
+}
+.brand-mini-mark svg{ position:absolute; inset:4px; }
+.brand-mini-text{ display:flex; flex-direction:column; line-height:1.05; }
+.brand-mini-text .nm{ font-weight:600; font-size:10px; color:var(--ink-900); letter-spacing:-0.01em;}
+.brand-mini-text .tg{ font-weight:400; font-size:7px; color:var(--ink-500); margin-top:1px; letter-spacing:0.02em;}
+
+.nav-items{
+  display:flex; align-items:center; gap:3px;
+  font-weight:500; font-size:9.5px;
+  color:var(--ink-700);
+}
+.nav-item{ padding:4px 9px; border-radius:999px; }
+.nav-item.active{ background:var(--ink-900); color:var(--cream); }
+
+.nav-user{
+  display:flex; align-items:center; gap:5px;
+  padding:3px 8px 3px 3px;
+  border:1px solid var(--line); border-radius:999px;
+  background:var(--paper);
+  font-size:9px;
+}
+.nav-user-avatar{
+  width:18px; height:18px; border-radius:50%;
+  background:var(--sage-tint); color:var(--sage-ink);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:600; font-size:8.5px;
+}
+
+/* Body */
+.body{
+  flex:1;
+  display:flex;
+  background:var(--cream);
+}
+.sidebar{
+  width:170px; flex-shrink:0;
+  padding:16px 12px;
+  border-right:1px solid rgba(31,38,34,0.05);
+}
+.sb-eyebrow{
+  font-size:7.5px; letter-spacing:0.16em; text-transform:uppercase;
+  color:var(--ink-500); font-weight:600;
+  padding:5px 8px 10px;
+}
+.sb-back{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 8px 8px;
+  font-size:9px; color:var(--ink-500);
+}
+.sb-list{
+  display:flex; flex-direction:column;
+}
+.sb-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:5px 8px;
+  font-size:9.5px;
+  color:var(--ink-700);
+  border-radius:5px;
+  border:1px solid transparent;
+}
+.sb-row.active{
+  background:var(--sage-tint);
+  color:var(--sage-ink);
+  font-weight:600;
+  border-color:rgba(159,180,160,0.4);
+}
+.sb-row .pct{
+  font-family:"Geist Mono", monospace;
+  font-size:8.5px;
+  color:var(--ink-500);
+  font-weight:500;
+}
+.sb-row.active .pct{ color:var(--sage-ink); }
+
+/* Main */
+.main{
+  flex:1; min-width:0;
+  padding:22px 28px 24px;
+  display:flex; flex-direction:column;
+  gap:16px;
+}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:2px 8px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--paper);
+  font-size:8.5px; font-weight:500;
+  color:var(--ink-500);
+}
+.h1-app{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:34px;
+  line-height:1.04;
+  letter-spacing:-0.02em;
+  color:var(--ink-900);
+}
+.sub-app{
+  font-size:11px; line-height:1.5; color:var(--ink-500);
+  max-width:520px;
+}
+
+/* Hero number row */
+.hero-row{
+  display:grid;
+  grid-template-columns:1.4fr 2fr;
+  gap:14px;
+}
+.hero-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:18px 20px 18px;
+  position:relative;
+  min-height:148px;             /* lock height so the counter can't make the card jump */
+  display:flex; flex-direction:column;
+  justify-content:flex-start;
+}
+.hero-card-eye{
+  font-size:7.5px; letter-spacing:0.16em; text-transform:uppercase;
+  color:var(--ink-500); font-weight:600;
+  margin-bottom:7px;
+}
+.hero-num{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:78px;
+  line-height:1;
+  letter-spacing:-0.025em;
+  color:var(--sage-ink);
+  font-variant-numeric:tabular-nums;     /* equal-width digits, no horizontal jitter */
+  display:flex;
+  align-items:baseline;
+}
+.hero-num #heroNumVal{
+  display:inline-block;
+  min-width:170px;                       /* reserve space for the widest "0.00"–"2.10" */
+  text-align:left;
+}
+.hero-num .pct{
+  font-family:"Geist", sans-serif;
+  font-size:24px;
+  font-weight:300;
+  color:var(--ink-700);
+  margin-left:3px;
+  letter-spacing:0;
+}
+.hero-meta{
+  display:flex; align-items:center; gap:9px;
+  margin-top:8px;
+  font-size:9px;
+  color:var(--ink-500);
+}
+.hero-meta .badge{
+  padding:2px 8px;
+  background:var(--sage-tint);
+  border:1px solid rgba(159,180,160,0.4);
+  border-radius:999px;
+  color:var(--sage-ink);
+  font-weight:600;
+  font-size:8px;
+  letter-spacing:0.06em;
+}
+
+/* Comparison panel: facility vs national */
+.compare-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:16px 18px 18px;
+  position:relative;
+}
+.compare-h{
+  font-size:10.5px; font-weight:600; color:var(--ink-900);
+  margin-bottom:3px;
+}
+.compare-sub{
+  font-size:9px; color:var(--ink-500); margin-bottom:14px;
+}
+.compare-bars{
+  display:flex; flex-direction:column; gap:10px;
+}
+.compare-row{
+  display:grid;
+  grid-template-columns:60px 1fr 50px;
+  gap:10px;
+  align-items:center;
+}
+.compare-label{
+  font-size:9px; font-weight:500; color:var(--ink-700);
+}
+.compare-track{
+  position:relative;
+  height:11px;
+  border-radius:6px;
+  background:var(--paper);
+  overflow:hidden;
+}
+.compare-fill{
+  position:absolute; top:0; left:0; bottom:0;
+  width:100%;
+  border-radius:6px;
+  transform-origin:left center;
+  will-change:transform;
+}
+.compare-fill.facility{ background:linear-gradient(90deg, var(--sage), var(--sage-bright)); }
+.compare-fill.national{ background:var(--clay); }
+.compare-val{
+  font-family:"Geist Mono", monospace;
+  font-size:9px; font-weight:600;
+  color:var(--ink-900);
+  text-align:right;
+}
+
+/* Stage distribution */
+.stage-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:16px 18px 18px;
+}
+.stage-h{
+  font-size:10.5px; font-weight:600; color:var(--ink-900);
+  margin-bottom:3px;
+}
+.stage-sub{
+  font-size:9px; color:var(--ink-500); margin-bottom:14px;
+}
+.stage-grid{
+  display:grid; grid-template-columns:repeat(6, 1fr); gap:10px;
+}
+.stage-cell{
+  display:flex; flex-direction:column; align-items:center;
+  padding:11px 6px 10px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:8px;
+}
+.stage-bar-wrap{
+  width:28px; height:70px;
+  background:rgba(31,38,34,0.04);
+  border-radius:5px;
+  position:relative;
+  margin-bottom:7px;
+}
+.stage-bar{
+  position:absolute; bottom:0; left:0; right:0;
+  background:linear-gradient(180deg, var(--sage-bright), var(--sage));
+  border-radius:4px;
+  height:0;
+}
+.stage-label{
+  font-family:"Geist Mono", monospace;
+  font-size:7.5px;
+  font-weight:600;
+  color:var(--ink-700);
+  letter-spacing:0.04em;
+}
+.stage-val{
+  font-family:"Instrument Serif", serif;
+  font-size:14px; line-height:1;
+  color:var(--ink-900);
+  margin-top:2px;
+  letter-spacing:-0.01em;
+}
+
+/* Trend chart */
+.trend-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:16px 18px 16px;
+  flex:1;
+  display:flex; flex-direction:column;
+  min-height:170px;
+}
+.trend-h{
+  font-size:10.5px; font-weight:600; color:var(--ink-900);
+  margin-bottom:3px;
+}
+.trend-sub{
+  font-size:9px; color:var(--ink-500); margin-bottom:10px;
+}
+.trend-svg{ width:100%; flex:1; min-height:120px; }
+
+/* Hud */
+.hud{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  background:rgba(15,15,17,0.85);
+  color:#EAE3D2; font-family:"Geist Mono", monospace; font-size:11px;
+  padding:8px 14px; border-radius:999px;
+  display:flex; gap:14px; align-items:center; z-index:100;
+  letter-spacing:0.06em;
+}
+.hud button{
+  appearance:none; border:1px solid #555; background:transparent; color:#EAE3D2;
+  font-family:inherit; font-size:11px; padding:3px 10px; border-radius:999px; cursor:pointer;
+}
+.hud button:hover{ background:#222; }
+.hud .timer{ font-variant-numeric:tabular-nums; min-width:46px; }
+</style>
+</head>
+<body>
+
+<div class="frame-wrap" id="frame">
+  <div class="stage">
+    <div class="grain"></div>
+    <div class="footer">CSIT321&nbsp;CAPSTONE</div>
+
+    <!-- Side reveal text -->
+    <div class="side-text side-text-left" id="sideLeft">Every <span class="accent">stage,</span></div>
+    <div class="side-text side-text-right" id="sideRight">every <span class="accent">quarter.</span></div>
+
+    <div class="app-card" id="appCard">
+      <!-- Top nav -->
+      <div class="topnav">
+        <div class="brand-mini">
+          <span class="brand-mini-mark">
+            <svg viewBox="0 0 18 18"><path d="M0,11 L3,11 L5,7 L7.5,14 L10,3 L12.5,11 L18,11" fill="none" stroke="#FBF8F2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div class="brand-mini-text">
+            <span class="nm">CareData</span>
+            <span class="tg">Health Analytics Portal</span>
+          </div>
+        </div>
+        <div class="nav-items">
+          <span class="nav-item active">Dashboard</span>
+          <span class="nav-item">Data Entry</span>
+          <span class="nav-item">Voice Screening</span>
+          <span class="nav-item">Reports</span>
+          <span class="nav-item">Benchmarking</span>
+        </div>
+        <div class="nav-user">
+          <span class="nav-user-avatar">N</span>
+          <span>Nelly</span>
+        </div>
+      </div>
+
+      <div class="body">
+        <!-- Sidebar - 14 indicators with PI selected -->
+        <div class="sidebar">
+          <div class="sb-back">← Back to overview</div>
+          <div class="sb-eyebrow">Quality indicators</div>
+          <div class="sb-list" id="sbList">
+            <div class="sb-row active"><span>Pressure injuries</span><span class="pct">2.10%</span></div>
+            <div class="sb-row"><span>Falls &amp; major injury</span><span class="pct">1.40%</span></div>
+            <div class="sb-row"><span>Unplanned weight loss</span><span class="pct">3.40%</span></div>
+            <div class="sb-row"><span>Medications</span><span class="pct">11.40%</span></div>
+            <div class="sb-row"><span>ADL</span><span class="pct">22.00%</span></div>
+            <div class="sb-row"><span>Incontinence care</span><span class="pct">2.65%</span></div>
+            <div class="sb-row"><span>Restrictive practices</span><span class="pct">12.90%</span></div>
+            <div class="sb-row"><span>Hospitalisation</span><span class="pct">6.30%</span></div>
+            <div class="sb-row"><span>Allied health</span><span class="pct">32.40%</span></div>
+            <div class="sb-row"><span>Consumer experience</span><span class="pct">19.30</span></div>
+            <div class="sb-row"><span>Quality of life</span><span class="pct">16.50</span></div>
+            <div class="sb-row"><span>Workforce</span><span class="pct">100.0%</span></div>
+            <div class="sb-row"><span>Enrolled nursing</span><span class="pct">91.0%</span></div>
+            <div class="sb-row"><span>Lifestyle officer</span><span class="pct">3.40%</span></div>
+          </div>
+        </div>
+
+        <!-- Main column -->
+        <div class="main">
+          <span class="eyebrow" id="elEyebrow">Quality indicator detail · Q1 2026 (Mar)</span>
+          <h1 class="h1-app" id="elH1">Pressure injuries</h1>
+          <p class="sub-app" id="elSub">Stage distribution and 12-month trend, compared against AIHW national medians.</p>
+
+          <!-- Hero row: 2.10% number + facility-vs-national bars -->
+          <div class="hero-row" id="elHero">
+            <div class="hero-card" id="heroCard">
+              <div class="hero-card-eye">Facility prevalence rate</div>
+              <div class="hero-num"><span id="heroNumVal">0.00</span><span class="pct">%</span></div>
+              <div class="hero-meta">
+                <span class="badge">↗ Improving</span>
+                <span>Q4 2025 → Q1 2026</span>
+              </div>
+            </div>
+
+            <div class="compare-card" id="compareCard">
+              <div class="compare-h">Facility vs national median</div>
+              <div class="compare-sub">AIHW Q1 2026 published medians for ACFI-registered facilities</div>
+              <div class="compare-bars">
+                <div class="compare-row">
+                  <span class="compare-label">Facility</span>
+                  <div class="compare-track">
+                    <div class="compare-fill facility" data-pct="2.10"></div>
+                  </div>
+                  <span class="compare-val">2.10%</span>
+                </div>
+                <div class="compare-row">
+                  <span class="compare-label">National</span>
+                  <div class="compare-track">
+                    <div class="compare-fill national" data-pct="10.20"></div>
+                  </div>
+                  <span class="compare-val">10.20%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stage distribution -->
+          <div class="stage-card" id="stageCard">
+            <div class="stage-h">Stage distribution</div>
+            <div class="stage-sub">Breakdown across pressure-injury stages, % of residents</div>
+            <div class="stage-grid" id="stageGrid">
+              <div class="stage-cell">
+                <div class="stage-bar-wrap"><div class="stage-bar" data-h="48"></div></div>
+                <div class="stage-label">S1</div>
+                <div class="stage-val">0.95<span style="font-size:11px;color:var(--ink-500);">%</span></div>
+              </div>
+              <div class="stage-cell">
+                <div class="stage-bar-wrap"><div class="stage-bar" data-h="32"></div></div>
+                <div class="stage-label">S2</div>
+                <div class="stage-val">0.62<span style="font-size:11px;color:var(--ink-500);">%</span></div>
+              </div>
+              <div class="stage-cell">
+                <div class="stage-bar-wrap"><div class="stage-bar" data-h="14"></div></div>
+                <div class="stage-label">S3</div>
+                <div class="stage-val">0.28<span style="font-size:11px;color:var(--ink-500);">%</span></div>
+              </div>
+              <div class="stage-cell">
+                <div class="stage-bar-wrap"><div class="stage-bar" data-h="6"></div></div>
+                <div class="stage-label">S4</div>
+                <div class="stage-val">0.12<span style="font-size:11px;color:var(--ink-500);">%</span></div>
+              </div>
+              <div class="stage-cell">
+                <div class="stage-bar-wrap"><div class="stage-bar" data-h="4"></div></div>
+                <div class="stage-label">UNS</div>
+                <div class="stage-val">0.08<span style="font-size:11px;color:var(--ink-500);">%</span></div>
+              </div>
+              <div class="stage-cell">
+                <div class="stage-bar-wrap"><div class="stage-bar" data-h="3"></div></div>
+                <div class="stage-label">DTI</div>
+                <div class="stage-val">0.05<span style="font-size:11px;color:var(--ink-500);">%</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trend chart Q1'25 → Q1'26 -->
+          <div class="trend-card" id="trendCard">
+            <div class="trend-h">12-month trend</div>
+            <div class="trend-sub">Quarterly prevalence vs AIHW national median (clay)</div>
+            <svg class="trend-svg" viewBox="0 0 600 140" preserveAspectRatio="none" id="trendSvg">
+              <!-- grid -->
+              <line x1="40" y1="20" x2="580" y2="20" stroke="#E1DBCC" stroke-width="0.5"/>
+              <line x1="40" y1="60" x2="580" y2="60" stroke="#E1DBCC" stroke-width="0.5"/>
+              <line x1="40" y1="100" x2="580" y2="100" stroke="#E1DBCC" stroke-width="0.5"/>
+              <line x1="40" y1="125" x2="580" y2="125" stroke="#E1DBCC" stroke-width="0.7"/>
+              <text x="32" y="22" font-family="Geist Mono" font-size="8" fill="#A4ABA4" text-anchor="end">12%</text>
+              <text x="32" y="62" font-family="Geist Mono" font-size="8" fill="#A4ABA4" text-anchor="end">8%</text>
+              <text x="32" y="102" font-family="Geist Mono" font-size="8" fill="#A4ABA4" text-anchor="end">4%</text>
+              <text x="32" y="127" font-family="Geist Mono" font-size="8" fill="#A4ABA4" text-anchor="end">0%</text>
+
+              <!-- National median line at 10.2% (~y=22) -->
+              <g id="natLine">
+                <line x1="40" y1="23" x2="580" y2="23"
+                  stroke="#C8B89B" stroke-width="1.6"
+                  stroke-dasharray="6 4"
+                  style="stroke-dasharray:540 540; stroke-dashoffset:540;"/>
+                <text x="585" y="26" font-family="Geist Mono" font-size="9" fill="#836B47" font-weight="600">10.2% national</text>
+              </g>
+
+              <!-- Facility trend line: Q1'25 (5%) → Q1'26 (2.1%) — improving -->
+              <polyline id="facLine"
+                fill="none" stroke="#4B6A55" stroke-width="2.4"
+                points="60,75 168,82 276,90 384,98 492,108 580,118"
+                style="stroke-dasharray:600; stroke-dashoffset:600;"/>
+
+              <!-- Quarter dots -->
+              <g id="trendDots" fill="#4B6A55">
+                <circle cx="60"  cy="75"  r="0" data-r="3"/>
+                <circle cx="168" cy="82"  r="0" data-r="3"/>
+                <circle cx="276" cy="90"  r="0" data-r="3"/>
+                <circle cx="384" cy="98"  r="0" data-r="3"/>
+                <circle cx="492" cy="108" r="0" data-r="3"/>
+                <circle cx="580" cy="118" r="0" data-r="4"/>
+              </g>
+
+              <!-- Quarter labels -->
+              <g font-family="Geist Mono" font-size="8" fill="#6B7570" text-anchor="middle">
+                <text x="60"  y="138">Q1 25</text>
+                <text x="168" y="138">Q2 25</text>
+                <text x="276" y="138">Q3 25</text>
+                <text x="384" y="138">Q4 25</text>
+                <text x="492" y="138">Q1 26</text>
+                <text x="580" y="138" font-weight="600" fill="#4B6A55">now</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hud">
+  <button id="replay">REPLAY</button>
+  <span class="timer" id="timer">0.00s</span>
+  <span style="opacity:.6">Scene 06 / PI Drilldown (pop in from far)</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+function fit(){
+  const wrap = document.getElementById('frame');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  /* zoom not transform: scale — natively rasterise at projected resolution; prevents 4K pixel break on 3D-rotated descendants. See ~/.claude/skills/hyperframes-video/rendering.md */
+  wrap.style.zoom = s;
+}
+fit();
+window.addEventListener('resize', fit);
+
+let tl;
+
+function build(){
+  const sbRows = Array.from(document.querySelectorAll('#sbList .sb-row'));
+  const stageBars = Array.from(document.querySelectorAll('.stage-bar'));
+  const stageCells = Array.from(document.querySelectorAll('.stage-cell'));
+  const trendDots = Array.from(document.querySelectorAll('#trendDots circle'));
+
+  /* ===== Initial state ===== */
+  /* App card flies in from far away, HEAVILY TILTED — visible 3D rotation as it travels */
+  gsap.set('#appCard', {
+    opacity: 0,
+    transformPerspective: 2400,
+    transformOrigin: '50% 50%',
+    scale: 0.08,
+    rotationY: -45, rotationX: 18, rotationZ: -14,
+    filter: 'blur(14px)',
+    boxShadow:
+      '0 0 0 2px rgba(184,209,181,0.65),' +
+      '0 0 80px rgba(184,209,181,0.70),' +
+      '0 0 200px rgba(184,209,181,0.50),' +
+      '0 60px 120px rgba(0,0,0,0.55)'
+  });
+
+  /* Side text starts off-screen, blurred */
+  gsap.set('#sideLeft',  { opacity: 0, x: -180, filter: 'blur(8px)' });
+  gsap.set('#sideRight', { opacity: 0, x:  180, filter: 'blur(8px)' });
+
+  gsap.set('#elEyebrow', { opacity: 0, y: 10 });
+  gsap.set('#elH1', { opacity: 0, y: 20 });
+  gsap.set('#elSub', { opacity: 0, y: 14 });
+  gsap.set('#heroCard', { opacity: 0, y: 18 });
+  gsap.set('#compareCard', { opacity: 0, y: 18 });
+  gsap.set('#stageCard', { opacity: 0, y: 18 });
+  gsap.set('#trendCard', { opacity: 0, y: 18 });
+  gsap.set(sbRows, { opacity: 0, x: -12 });
+  gsap.set('.compare-fill', { scaleX: 0 });
+  gsap.set(stageBars, { height: 0 });
+  gsap.set(trendDots, { attr: { r: 0 } });
+
+  document.getElementById('heroNumVal').textContent = '0.00';
+
+  tl = gsap.timeline({
+    paused: true,
+    onUpdate: () => {
+      document.getElementById('timer').textContent = tl.time().toFixed(2) + 's';
+    }
+  });
+
+  /* ============================================================
+     TOTAL ~4.5s — minimal pause, all 3 content sections animate in PARALLEL
+        0.00-0.75   Screen flies in TILTED
+        0.18-0.72   Side text in (left + right staggered)
+        0.75-1.14   Header + sidebar reveal (starts as fly-in nears completion)
+        1.00-1.34   ALL FOUR CONTENT CARDS fade up TOGETHER
+        1.10-1.75   Hero counter rolls + compare bars fill +
+                    stage bars rise + trend lines draw + dots pop
+                    — every internal animation runs IN PARALLEL
+        1.85-4.05   Long hold (audience reads the whole picture at once)
+        4.05-4.50   EXIT — text + screen tumble away together
+     ============================================================ */
+
+  /* === Phase A: Screen flies in tilted, ENDS tilted (does NOT straighten) === */
+  tl.to('#appCard', {
+    opacity: 1,
+    scale: 1.0,
+    rotationY: 18, rotationX: -4, rotationZ: -4,
+    filter: 'blur(0px)',
+    boxShadow:
+      '0 0 0 0px rgba(184,209,181,0.0),' +
+      '0 0 0px rgba(184,209,181,0.0),' +
+      '0 0 0px rgba(184,209,181,0.0),' +
+      '0 60px 120px rgba(0,0,0,0.55)',
+    duration: 0.75,
+    ease: 'power3.out'
+  }, 0);
+
+  /* Side text slides in from edges */
+  tl.to('#sideLeft', {
+    opacity: 1, x: 0,
+    filter: 'blur(0px)',
+    duration: 0.44, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 0.18);
+  tl.to('#sideRight', {
+    opacity: 1, x: 0,
+    filter: 'blur(0px)',
+    duration: 0.44, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 0.28);
+
+  /* Text exits SIMULTANEOUSLY with the screen at 2.50s (0.5s read-pause after all
+     internal animations finish ~2.03s — was 2.00s, pushed +0.5s per user feedback). */
+  tl.to('#sideLeft', {
+    opacity: 0, x: -120,
+    filter: 'blur(8px)',
+    duration: 0.40, ease: 'power3.in'
+  }, 2.50);
+  tl.to('#sideRight', {
+    opacity: 0, x: 120,
+    filter: 'blur(8px)',
+    duration: 0.40, ease: 'power3.in'
+  }, 2.50);
+
+  /* === Phase B: Header + sidebar reveal (right after fly-in) === */
+  tl.to('#elEyebrow', { opacity: 1, y: 0, duration: 0.22, ease: 'power2.out' }, 0.75);
+  tl.to('#elH1', { opacity: 1, y: 0, duration: 0.30, ease: 'power3.out' }, 0.80);
+  tl.to('#elSub', { opacity: 1, y: 0, duration: 0.24, ease: 'power2.out' }, 0.90);
+  tl.to(sbRows, {
+    opacity: 1, x: 0,
+    duration: 0.24, stagger: 0.018, ease: 'power2.out'
+  }, 0.75);
+
+  /* === Phase C: ALL THREE CONTENT SECTIONS animate AT THE SAME TIME === */
+  /* Hero card, comparison card, stage card, and trend card all fade up at 1.00s,
+     then their internal animations (counter, bars, lines, dots) all run in parallel. */
+  tl.to(['#heroCard', '#compareCard', '#stageCard', '#trendCard'], {
+    opacity: 1, y: 0,
+    duration: 0.34, ease: 'power3.out'
+  }, 1.00);
+
+  /* Hero counter rolls */
+  const heroObj = { v: 0 };
+  tl.to(heroObj, {
+    v: 2.10,
+    duration: 0.65, ease: 'power2.out',
+    onUpdate: () => {
+      document.getElementById('heroNumVal').textContent = heroObj.v.toFixed(2);
+    }
+  }, 1.10);
+
+  /* Comparison bars fill */
+  tl.to('.compare-fill.facility', {
+    scaleX: 0.175,
+    duration: 0.50, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 1.20);
+  tl.to('.compare-fill.national', {
+    scaleX: 0.850,
+    duration: 0.65, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 1.25);
+
+  /* Stage bars rise (faster stagger so they finish in sync with everything else) */
+  stageBars.forEach((bar, i) => {
+    const h = parseFloat(bar.dataset.h);
+    tl.to(bar, {
+      height: h,
+      duration: 0.40, ease: 'cubic-bezier(.22,.85,.30,1)'
+    }, 1.20 + i * 0.04);
+  });
+
+  /* Trend chart — national median + facility line + dots */
+  tl.to('#natLine line', {
+    strokeDashoffset: 0,
+    duration: 0.40, ease: 'power2.out'
+  }, 1.20);
+  tl.to('#facLine', {
+    strokeDashoffset: 0,
+    duration: 0.65, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 1.30);
+  trendDots.forEach((dot, i) => {
+    const r = parseFloat(dot.dataset.r);
+    tl.to(dot, {
+      attr: { r: r },
+      duration: 0.18, ease: 'back.out(2)'
+    }, 1.55 + i * 0.06);
+  });
+
+  /* === Phase F (2.90–3.32): Screen rotates + flies AWAY in sync with text exit.
+     Shifted from 2.50 to 2.90 (+0.40s) so exit lands at ~3.32, leaving only
+     ~0.18s blank tail before durSec=3.5 (was 0.57s, user complaint). */
+  tl.to('#appCard', {
+    rotationY: 42,
+    rotationX: -10,
+    rotationZ: -12,
+    scale: 0.18,
+    y: -160,
+    filter: 'blur(12px)',
+    duration: 0.42, ease: 'power3.in'
+  }, 2.90);
+  tl.to('#appCard', { opacity: 0, duration: 0.08 }, 3.25);
+}
+
+function play(){
+  if (!tl) build();
+  tl.restart();
+  tl.play();
+}
+
+document.getElementById('replay').addEventListener('click', play);
+
+// IFRAME-AWARE BOOTSTRAP — patched by shared/patch-scenes.mjs
+window.addEventListener('load', () => {
+  const start = () => { build(); if (window.parent === window) play(); };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+  } else {
+    start();
+  }
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === 'play'  && typeof play === 'function')                          play();
+  if (t === 'pause' && typeof tl   !== 'undefined' && tl)                    tl.pause();
+  if (t === 'reset' && typeof tl   !== 'undefined' && tl) { tl.seek(0); tl.pause(); }
+});
+</script>
+</body>
+</html>

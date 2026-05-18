@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 06 - Frontend Tour (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+
+  --win-bg:       #FFFFFF;
+  --win-border:   #E2DCCC;
+  --code-comment: #A4ABA4;
+  --code-keyword: #4B6A55;
+  --code-string:  #836B47;
+  --code-punct:   #6B7570;
+}
+
+body {
+  background: var(--paper);
+  display:flex; align-items:center; justify-content:center;
+}
+
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+  background: var(--paper);
+}
+
+/* ===== Stage: light cream paper, sage radial highlights ===== */
+.stage {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 20% 25%, rgba(159,180,160,0.10), transparent 55%),
+    radial-gradient(circle at 78% 72%, rgba(159,180,160,0.08), transparent 60%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* paper grain */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.35;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+/* ===== Watermarks ===== */
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist",sans-serif; font-weight:500;
+  font-size:11px; letter-spacing:0.20em;
+  color:var(--ink-500); opacity:0.55; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+
+/* ===== Code panes (light) ===== */
+.code-pane {
+  position:absolute;
+  background:var(--win-bg);
+  border:1px solid var(--win-border);
+  border-radius:10px;
+  overflow:hidden;
+  z-index:20;
+  box-shadow:
+    0 1px 0 #FFFFFF inset,
+    0 14px 30px rgba(80,70,40,0.10),
+    0 2px 6px rgba(80,70,40,0.06);
+}
+.pane-header {
+  display:flex; align-items:center;
+  height:42px;
+  padding:0 22px;
+  border-bottom:1px solid var(--win-border);
+  background:linear-gradient(180deg, #FAF7EE 0%, #F4EFE2 100%);
+  font-family:"Geist",sans-serif; font-weight:500;
+  font-size:22px; letter-spacing:0.01em;
+  color:var(--ink-500);
+}
+.code-body {
+  padding:18px 26px 22px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:22px; line-height:1.5;
+  color:var(--ink-900);
+  white-space:pre;
+  overflow:hidden;
+}
+.code-body .cm  { color:var(--code-comment); font-style:italic; }
+.code-body .kw  { color:var(--code-keyword); font-weight:600; }
+.code-body .st  { color:var(--code-string); }
+.code-body .pn  { color:var(--code-punct); }
+
+/* swatches */
+.swatch-row {
+  display:flex; gap:8px; flex-wrap:wrap;
+  padding:0 26px 18px;
+}
+.swatch {
+  width:14px; height:14px;
+  border-radius:3px;
+  border:1px solid rgba(31,38,34,0.20);
+  opacity:0;
+}
+
+/* live brand mark preview */
+.mark-preview {
+  position:absolute;
+  width:220px; height:220px;
+  border-radius:18px;
+  background:linear-gradient(145deg, oklch(0.72 0.06 150), oklch(0.78 0.05 180));
+  box-shadow:
+    0 14px 30px rgba(75,106,85,0.22),
+    0 2px 6px rgba(75,106,85,0.12);
+  z-index:25;
+  opacity:0;
+  overflow:hidden;
+}
+
+/* annotation under bottom pane */
+.clip-annotation {
+  position:absolute;
+  font-family:"Geist",sans-serif; font-style:italic;
+  font-size:22px; color:var(--sage-ink);
+  max-width:1100px; text-align:center;
+  z-index:30;
+  opacity:0;
+}
+
+/* side caption next to vite pane */
+.caption-side {
+  position:absolute;
+  font-family:"Geist",sans-serif;
+  font-style:italic;
+  font-size:22px; color:var(--ink-700);
+  z-index:30;
+  opacity:0;
+}
+
+/* tokens caption between panes */
+.caption-tokens {
+  position:absolute;
+  font-family:"Geist",sans-serif;
+  font-size:24px; color:var(--ink-700);
+  text-align:center;
+  z-index:30;
+  opacity:0;
+}
+
+/* footer captions */
+.footer-captions {
+  position:absolute;
+  left:0; right:0; bottom:36px;
+  text-align:center;
+  z-index:35;
+}
+.footer-line {
+  display:none;
+  font-family:"Geist",sans-serif;
+  font-size:22px; color:var(--ink-500);
+  margin-bottom:8px;
+  letter-spacing:0.01em;
+}
+.footer-line:last-child { margin-bottom:0; }
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO · CARE-DATA · 06 / 12</div>
+
+  <!-- ===== Top-left: vite.config.js ===== -->
+  <div class="code-pane" id="pane-vite"
+       style="left:60px; top:90px; width:920px; height:560px;">
+    <div class="pane-header">vite.config.js</div>
+    <div class="code-body" id="vite-code"></div>
+  </div>
+
+  <!-- side caption to the right of vite pane -->
+  <div class="caption-side" id="caption-vite"
+       style="left:1010px; top:330px; width:420px;">
+    Vite dev server. /api proxied to FastAPI.
+  </div>
+
+  <!-- ===== Top-right: tailwind.config.js ===== -->
+  <div class="code-pane" id="pane-tailwind"
+       style="right:60px; top:90px; width:820px; height:560px;">
+    <div class="pane-header">tailwind.config.js</div>
+    <div class="code-body" id="tailwind-code"></div>
+    <div class="swatch-row" id="swatch-row"></div>
+  </div>
+
+  <!-- caption between panes (tokens) -->
+  <div class="caption-tokens" id="caption-tokens"
+       style="left:50%; top:678px; transform:translateX(-50%); max-width:1100px;">
+    Single source of truth, mirrored into shared/tokens.css for the Hyperframes promo.
+  </div>
+
+  <!-- ===== Bottom-full: BrandMark.jsx ===== -->
+  <div class="code-pane" id="pane-brand"
+       style="left:60px; top:730px; width:1480px; height:280px;">
+    <div class="pane-header">src/components/common/BrandMark.jsx</div>
+    <div class="code-body" id="brand-code"></div>
+  </div>
+
+  <!-- live mark preview, bottom-right -->
+  <div class="mark-preview" id="mark-preview"
+       style="right:80px; top:760px;">
+    <svg viewBox="0 0 220 220" width="220" height="220" style="position:absolute; inset:0;">
+      <path id="ekg-stroke"
+            d="M 0 132 L 40 132 L 62 88 L 92 165 L 123 44 L 154 132 L 220 132"
+            stroke="#FBF8F2" stroke-width="44" fill="none"
+            stroke-linecap="butt" stroke-linejoin="miter"
+            pathLength="100"
+            stroke-dasharray="100"
+            stroke-dashoffset="100"/>
+    </svg>
+  </div>
+
+  <!-- M6 zoom annotation -->
+  <div class="clip-annotation" id="clip-annotation"
+       style="left:50%; top:1020px; transform:translate(-50%, 0);">
+    Flat, small bump, dip, big spike, return to flat. A heart-rate trace, not a triangle, not three sine waves.
+  </div>
+
+  <!-- footer captions (revealed M19 stagger 34.5/36.0/37.5) -->
+  <div class="footer-captions" id="footer-captions">
+    <div class="footer-line" id="foot-1">Framer Motion handles route + element transitions.</div>
+    <div class="footer-line" id="foot-2">@heroicons/react + lucide-react for the icon set.</div>
+    <div class="footer-line" id="foot-3">Auth via Google OAuth (VITE_GOOGLE_CLIENT_ID).</div>
+  </div>
+
+  <!-- SFX -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3" preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function() {
+  await document.fonts.ready;
+
+  /* fit to viewport via zoom (Iron Rule) */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((vw - fw) / 2) + 'px';
+    frame.style.top  = ((vh - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* refs */
+  const paneVite     = document.getElementById('pane-vite');
+  const paneTailwind = document.getElementById('pane-tailwind');
+  const paneBrand    = document.getElementById('pane-brand');
+  const viteCode     = document.getElementById('vite-code');
+  const tailwindCode = document.getElementById('tailwind-code');
+  const brandCode    = document.getElementById('brand-code');
+  const captionVite  = document.getElementById('caption-vite');
+  const captionToks  = document.getElementById('caption-tokens');
+  const swatchRow    = document.getElementById('swatch-row');
+  const markPreview  = document.getElementById('mark-preview');
+  const ekgStroke    = document.getElementById('ekg-stroke');
+  const clipAnnot    = document.getElementById('clip-annotation');
+  const foot1        = document.getElementById('foot-1');
+  const foot2        = document.getElementById('foot-2');
+  const foot3        = document.getElementById('foot-3');
+
+  const sfxType   = document.getElementById('sfx-type');
+  const sfxWhoosh = document.getElementById('sfx-whoosh');
+  const sfxClick  = document.getElementById('sfx-click');
+
+  function play(audio) {
+    try { audio.currentTime = 0; audio.play(); } catch(_) {}
+  }
+
+  /* initial state */
+  gsap.set([paneVite, paneTailwind, paneBrand], { opacity: 0 });
+  gsap.set(markPreview, { opacity: 0, scale: 0.9 });
+  gsap.set([captionVite, captionToks, clipAnnot], { opacity: 0 });
+
+  const ease1 = 'cubic-bezier(0.16,0.85,0.30,1)';
+  const ease2 = 'cubic-bezier(0.22,0.85,0.30,1)';
+
+  const tl = gsap.timeline();
+
+  /* ============================================================== */
+  /* 0.0 - 0.5  panes fade in as wireframes (low opacity)           */
+  /* ============================================================== */
+  tl.to([paneVite, paneTailwind, paneBrand], {
+    opacity: 0.4, duration: 0.45, ease: 'sine.out'
+  }, 0.00);
+
+  /* settle to full opacity at 0.5 so typing reads cleanly */
+  tl.to(paneVite, { opacity: 1, duration: 0.30, ease: 'sine.out' }, 0.50);
+
+  /* ============================================================== */
+  /* 0.5 - 6.5  vite.config.js types in (snippet 06a verbatim)       */
+  /* ============================================================== */
+  // We type a HTML-coloured version of the snippet line by line.
+  // The snippet (verbatim from compositions/snippets/06a-vite.txt):
+  const viteLines = [
+    { html: '<span class="kw">import</span> { defineConfig, loadEnv } <span class="kw">from</span> <span class="st">"vite"</span>;', t: 0.50 },
+    { html: '<span class="kw">import</span> react <span class="kw">from</span> <span class="st">"@vitejs/plugin-react"</span>;', t: 1.00 },
+    { html: '', t: 1.50 },
+    { html: '<span class="kw">export default</span> defineConfig(({ mode }) => {', t: 1.50 },
+    { html: '  <span class="kw">const</span> env = loadEnv(mode, process.cwd(), <span class="st">""</span>);', t: 2.00 },
+    { html: '  <span class="kw">const</span> apiUrl = (env.VITE_API_BASE_URL || <span class="st">""</span>).replace(/\\/+$/, <span class="st">""</span>);', t: 2.50 },
+    { html: '', t: 3.00 },
+    { html: '  <span class="kw">return</span> {', t: 3.00 },
+    { html: '    plugins: [react()],', t: 3.50 },
+    { html: '    server: {', t: 4.00 },
+    { html: '      port: <span class="st">5173</span>,', t: 4.50 },
+    { html: '      proxy: { <span class="st">"/api"</span>: <span class="st">"http://localhost:8000"</span> },', t: 5.50 },
+    { html: '    },', t: 5.90 },
+    { html: '  };', t: 6.10 },
+    { html: '});', t: 6.30 },
+  ];
+
+  // typing SFX bursts (one sustained pulse per burst, not per line)
+  [0.5, 1.5, 2.5, 3.5, 4.5, 5.5].forEach(t => {
+    tl.call(() => play(sfxType), null, t);
+  });
+
+  // append each line at its scheduled t
+  viteLines.forEach(line => {
+    tl.call(() => {
+      viteCode.innerHTML += (viteCode.innerHTML ? '\n' : '') + line.html;
+    }, null, line.t);
+  });
+
+  // 5.0  mouse click + side caption fade-in
+  tl.call(() => play(sfxClick), null, 5.00);
+  tl.to(captionVite, { opacity: 1, duration: 0.50, ease: 'sine.out' }, 5.00);
+
+  /* ============================================================== */
+  /* 6.5 - 14.0  tailwind.config.js types in + swatches build       */
+  /* ============================================================== */
+  tl.to(paneTailwind, { opacity: 1, duration: 0.30, ease: 'sine.out' }, 6.30);
+
+  // tailwind snippet (verbatim from 06b-tailwind.txt, theme.extend block)
+  const twLines = [
+    { html: '<span class="cm">// theme.extend block (excerpt)</span>',                           t: 6.50 },
+    { html: 'theme: {',                                                                            t: 6.80 },
+    { html: '  extend: {',                                                                         t: 7.10 },
+    { html: '    colors: {',                                                                       t: 7.40 },
+    { html: '      <span class="kw">ink</span>: { 900: <span class="st">"#1F2622"</span>, 700: <span class="st">"#3D4743"</span>, 500: <span class="st">"#6B7570"</span> },', t: 8.00, swatch: 0 },
+    { html: '      <span class="kw">sage</span>:       <span class="st">"#9FB4A0"</span>,',         t: 9.00, swatch: 1 },
+    { html: '      <span class="kw">"sage-ink"</span>: <span class="st">"#4B6A55"</span>,',         t: 9.80, swatch: 2 },
+    { html: '      <span class="kw">clay</span>:       <span class="st">"#C8B89B"</span>,',         t:10.60, swatch: 3 },
+    { html: '      <span class="kw">cream</span>:      <span class="st">"#F6F2EB"</span>,',         t:11.40, swatch: 4 },
+    { html: '      <span class="kw">paper</span>:      <span class="st">"#FBF8F2"</span>,',         t:12.20, swatch: 5 },
+    { html: '    },',                                                                              t:12.80 },
+    { html: '    fontFamily: { mono: [<span class="st">"\'Geist Mono\'"</span>, <span class="st">"monospace"</span>] },', t: 13.20, swatch: 6 },
+    { html: '  },',                                                                                t:13.60 },
+    { html: '},',                                                                                  t:13.85 },
+  ];
+
+  // typing bursts for tailwind block
+  [6.5, 8.0, 9.5, 11.0, 12.5].forEach(t => {
+    tl.call(() => play(sfxType), null, t);
+  });
+
+  twLines.forEach(line => {
+    tl.call(() => {
+      tailwindCode.innerHTML += (tailwindCode.innerHTML ? '\n' : '') + line.html;
+    }, null, line.t);
+  });
+
+  // 7 swatches; each spec'd to appear when its colour key types
+  const TOKEN_SWATCHES = [
+    { key: 'ink',       hex: '#1F2622' },
+    { key: 'sage',      hex: '#9FB4A0' },
+    { key: 'sage-ink',  hex: '#4B6A55' },
+    { key: 'clay',      hex: '#C8B89B' },
+    { key: 'cream',     hex: '#F6F2EB' },
+    { key: 'paper',     hex: '#FBF8F2' },
+    { key: 'mono-fam',  hex: '#3D4743' },
+  ];
+
+  // swatch reveal cue times (matches script SFX cue table)
+  const swatchTimes = [6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5];
+  swatchTimes.forEach((t, i) => {
+    tl.call(() => {
+      const sw = document.createElement('div');
+      sw.className = 'swatch';
+      sw.style.background = TOKEN_SWATCHES[i].hex;
+      swatchRow.appendChild(sw);
+      gsap.to(sw, { opacity: 1, duration: 0.18, ease: ease2 });
+      play(sfxClick);
+    }, null, t);
+  });
+
+  /* ============================================================== */
+  /* 14.0 - 16.0  tokens caption fades in                            */
+  /* ============================================================== */
+  tl.call(() => play(sfxClick), null, 14.00);
+  tl.to(captionToks, { opacity: 1, duration: 0.55, ease: 'sine.out' }, 14.00);
+
+  /* ============================================================== */
+  /* 16.0 - 28.0  BrandMark.jsx types in                             */
+  /* ============================================================== */
+  tl.to(paneBrand, { opacity: 1, duration: 0.30, ease: 'sine.out' }, 15.80);
+
+  // BrandMark snippet (verbatim from 06c-brand-mark.txt, condensed)
+  const brandLines = [
+    { html: '<span class="cm">// src/components/common/BrandMark.jsx (excerpt)</span>',         t:16.00 },
+    { html: '<span class="kw">export function</span> BrandMark({ size = <span class="st">40</span> }) {',                t:16.60 },
+    { html: '  <span class="kw">return</span> (',                                                t:18.00 },
+    { html: '    &lt;div style={{ width: size, height: size, borderRadius: <span class="st">10</span>,',                  t:19.00 },
+    { html: '      background: <span class="st">"linear-gradient(145deg, oklch(0.72 0.06 150), oklch(0.78 0.05 180))"</span> }}&gt;', t:20.40 },
+    { html: '      <span id="clip-line">&lt;div style={{ clipPath: <span class="st">"polygon(0 60%, 18% 60%, 28% 40%, 42% 75%, 56% 20%, 70% 60%, 100% 60%, 100% 65%, 68% 65%, 56% 30%, 42% 82%, 28% 50%, 18% 65%, 0 65%)"</span>,</span>', t:22.30 },
+    { html: '              background: <span class="st">"#FBF8F2"</span> }} /&gt;',              t:24.20 },
+    { html: '    &lt;/div&gt;',                                                                  t:25.10 },
+    { html: '  );',                                                                              t:25.40 },
+    { html: '}',                                                                                 t:25.60 },
+  ];
+
+  // typing bursts (one per code burst, not per chunk)
+  [16.0, 18.0, 20.0, 22.0, 24.0, 26.0].forEach(t => {
+    tl.call(() => play(sfxType), null, t);
+  });
+
+  brandLines.forEach(line => {
+    tl.call(() => {
+      brandCode.innerHTML += (brandCode.innerHTML ? '\n' : '') + line.html;
+    }, null, line.t);
+  });
+
+  // After the clipPath polygon types in (~25.0 s), live mark preview fades in
+  tl.to(markPreview, {
+    opacity: 1, scale: 1.0,
+    duration: 0.40, ease: ease1
+  }, 25.00);
+
+  // EKG polygon draws via M5 trim-path (stroke-dashoffset 100 -> 0 over 0.8 s)
+  tl.to(ekgStroke, {
+    attr: { 'stroke-dashoffset': 0 },
+    duration: 0.80, ease: ease1
+  }, 25.50);
+
+  /* ============================================================== */
+  /* 28.0 - 32.0  M6 step-zoom on clipPath line                      */
+  /* ============================================================== */
+  tl.call(() => play(sfxWhoosh), null, 28.00);
+  // transform-origin set to the y of the clipPath line within the brand pane.
+  // Brand pane sits at top:730 height:280. clipPath line sits roughly mid-pane.
+  // We zoom the brand pane around that point. Since pane width spans most of
+  // the frame, zoom only on Y so adjacent live mark stays visible.
+  tl.to(paneBrand, {
+    scale: 1.3,
+    transformOrigin: '20% 60%',
+    duration: 0.45, ease: ease1
+  }, 28.00);
+  tl.to(clipAnnot, {
+    opacity: 1, duration: 0.50, ease: 'sine.out'
+  }, 28.40);
+
+  /* zoom out at 32.0 */
+  tl.call(() => play(sfxWhoosh), null, 32.00);
+  tl.to(paneBrand, {
+    scale: 1.0, duration: 0.45, ease: ease1
+  }, 32.00);
+  tl.to(clipAnnot, {
+    opacity: 0, duration: 0.35, ease: 'sine.in'
+  }, 32.00);
+
+  /* hello wave on live mark: 220 -> 260 -> 220 with sine.inOut */
+  tl.to(markPreview, {
+    scale: 260/220, duration: 0.50, ease: 'sine.inOut'
+  }, 32.00);
+  tl.to(markPreview, {
+    scale: 1.0, duration: 0.40, ease: 'sine.inOut'
+  }, 32.50);
+
+  /* ============================================================== */
+  /* 34.5 - 39.0  footer captions reveal (M19 stagger)               */
+  /* ============================================================== */
+  const footerLines = [
+    { el: foot1, t: 34.50 },
+    { el: foot2, t: 36.00 },
+    { el: foot3, t: 37.50 },
+  ];
+  footerLines.forEach(({ el, t }) => {
+    tl.call(() => {
+      el.style.display = 'block';
+      gsap.fromTo(el,
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.40, ease: ease1 }
+      );
+      play(sfxType);
+    }, null, t);
+  });
+
+  /* ============================================================== */
+  /* 39.0 - 40.0  M25 whip-pan: panes + mark slide off to the right  */
+  /* ============================================================== */
+  tl.call(() => play(sfxWhoosh), null, 39.00);
+  tl.to([paneVite, paneTailwind, paneBrand, markPreview], {
+    x: 2400,
+    opacity: 0,
+    filter: 'blur(12px)',
+    duration: 1.00,
+    ease: 'power3.in'
+  }, 39.00);
+  tl.to([captionVite, captionToks, clipAnnot], {
+    opacity: 0, duration: 0.40, ease: 'sine.in'
+  }, 39.00);
+  tl.to('.footer-line', {
+    opacity: 0, y: -8, duration: 0.50, ease: 'sine.in'
+  }, 39.00);
+
+  /* scene ends ~40.0 s */
+})();
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

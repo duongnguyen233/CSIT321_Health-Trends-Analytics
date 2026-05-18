@@ -1,0 +1,238 @@
+/* =========================================================================
+   CareData Promo — Master Playthrough UI
+   Layout for the 16-scene compositor: stage, HUD, scrubber, scene markers.
+   ========================================================================= */
+
+*, *::before, *::after{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+
+body{
+  background:#000;
+  color:var(--cream);
+  font-family:var(--font-ui);
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+/* === The 16:9 master stage that holds all scene iframes === */
+.film{
+  position:relative;
+  width:1920px; height:1080px;
+  background:#000;
+  transform-origin:50% 50%;
+  /* JS sets transform: scale(...) to fit viewport */
+  box-shadow:
+    0 60px 140px rgba(0,0,0,0.55),
+    0 30px 70px  rgba(0,0,0,0.40),
+    0 0 0 1px rgba(255,255,255,0.04);
+}
+
+/* All scenes layer on top of each other; opacity controls who's visible */
+.scene-frame{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  border:0;
+  opacity:0;
+  background:transparent;
+  pointer-events:none;
+  will-change:opacity;
+  transition:opacity 0.30s var(--ease-soft);
+}
+.scene-frame.is-active{ opacity:1; }
+
+/* === Idle title card shown before play === */
+.idle{
+  position:absolute; inset:0;
+  z-index:50;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:28px;
+  background:var(--bg-dark-stage);
+  color:var(--cream);
+  transition:opacity 0.45s var(--ease-soft);
+}
+.idle.gone{ opacity:0; pointer-events:none; }
+
+.idle .mark{
+  width:120px; height:120px;
+  border-radius:28px;
+  background:linear-gradient(145deg, oklch(0.72 0.06 150) 0%, oklch(0.78 0.05 180) 100%);
+  position:relative;
+  box-shadow:0 22px 50px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.06);
+}
+.idle .mark::after{
+  content:'';
+  position:absolute; inset:18%;
+  background:var(--paper);
+  clip-path:polygon(
+    0 60%, 18% 60%, 28% 40%, 42% 75%, 56% 20%, 70% 60%, 100% 60%,
+    100% 65%, 68% 65%, 56% 30%, 42% 82%, 28% 50%, 18% 65%, 0 65%
+  );
+}
+.idle .word{
+  font-family:var(--font-display);
+  font-size:96px; line-height:1;
+  letter-spacing:-0.025em;
+  color:var(--cream);
+}
+.idle .word em{ font-style:italic; color:var(--sage-bright); }
+.idle .meta{
+  font-family:var(--font-mono);
+  font-size:12px; letter-spacing:0.18em;
+  color:var(--ink-300); text-transform:uppercase;
+}
+.idle .play-cta{
+  margin-top:14px;
+  padding:14px 28px;
+  background:var(--sage-ink);
+  color:var(--cream);
+  border:none; border-radius:999px;
+  font-family:var(--font-ui);
+  font-weight:600; font-size:15px;
+  letter-spacing:0.04em;
+  cursor:pointer;
+  display:inline-flex; align-items:center; gap:10px;
+  box-shadow:0 8px 30px rgba(75,106,85,0.45);
+  transition:transform 0.18s var(--ease-soft), box-shadow 0.18s var(--ease-soft);
+}
+.idle .play-cta:hover{
+  transform:translateY(-1px);
+  box-shadow:0 12px 36px rgba(75,106,85,0.55);
+}
+.idle .play-cta svg{ width:14px; height:14px; }
+
+/* === Bottom HUD with scrubber + scene chip + transport === */
+.hud{
+  position:fixed;
+  bottom:24px; left:50%;
+  transform:translateX(-50%);
+  display:flex; align-items:center; gap:18px;
+  padding:12px 18px 12px 12px;
+  border-radius:999px;
+  background:rgba(15,15,17,0.92);
+  border:1px solid rgba(255,255,255,0.06);
+  color:var(--cream);
+  font-family:var(--font-mono);
+  font-size:11px; letter-spacing:0.06em;
+  z-index:120;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 12px 40px rgba(0,0,0,0.45);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.40s var(--ease-soft);
+}
+.hud.is-shown{ opacity:1; pointer-events:auto; }
+
+.hud .btn{
+  appearance:none; border:1px solid rgba(255,255,255,0.10);
+  background:rgba(255,255,255,0.03);
+  color:var(--cream);
+  width:36px; height:36px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  transition:background 0.18s var(--ease-soft), border-color 0.18s var(--ease-soft);
+}
+.hud .btn:hover{ background:rgba(255,255,255,0.10); border-color:rgba(255,255,255,0.20); }
+.hud .btn svg{ width:14px; height:14px; }
+
+.hud .timer{
+  min-width:96px;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum";
+  text-align:center;
+  color:var(--ink-300);
+}
+.hud .timer .now{ color:var(--cream); }
+
+.hud .scene-chip{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 12px;
+  border-radius:999px;
+  background:rgba(184,209,181,0.08);
+  border:1px solid rgba(184,209,181,0.20);
+  color:var(--sage-bright);
+  font-size:10.5px; font-weight:500;
+  letter-spacing:0.08em;
+  white-space:nowrap;
+}
+.hud .scene-chip .num{ color:var(--cream); font-weight:600; }
+
+/* === Scrubber: scene-marker bar === */
+.scrubber{
+  position:relative;
+  width:520px; height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.08);
+  overflow:hidden;
+  cursor:pointer;
+}
+.scrubber-fill{
+  position:absolute; left:0; top:0; height:100%;
+  width:0%;
+  background:linear-gradient(90deg, var(--sage-bright), var(--sage));
+  border-radius:999px;
+  will-change:width;
+}
+.scrubber .marker{
+  position:absolute; top:-3px;
+  width:2px; height:12px;
+  background:rgba(255,255,255,0.20);
+  pointer-events:none;
+}
+
+/* === Brand watermark in the corner of the master === */
+.brand-watermark{
+  position:fixed;
+  top:24px; right:28px;
+  display:inline-flex; align-items:center; gap:9px;
+  z-index:110;
+  font-family:var(--font-ui);
+  font-size:13px; font-weight:600;
+  color:var(--cream);
+  opacity:0.55;
+  letter-spacing:-0.005em;
+  pointer-events:none;
+}
+.brand-watermark .mark{
+  width:22px; height:22px;
+  border-radius:6px;
+  background:linear-gradient(145deg, oklch(0.72 0.06 150) 0%, oklch(0.78 0.05 180) 100%);
+  position:relative;
+}
+.brand-watermark .mark::after{
+  content:'';
+  position:absolute; inset:18%;
+  background:var(--paper);
+  clip-path:polygon(
+    0 60%, 18% 60%, 28% 40%, 42% 75%, 56% 20%, 70% 60%, 100% 60%,
+    100% 65%, 68% 65%, 56% 30%, 42% 82%, 28% 50%, 18% 65%, 0 65%
+  );
+}
+
+/* === Scene-name caption (top-left, fades on cut) === */
+.scene-cap{
+  position:fixed;
+  top:28px; left:32px;
+  z-index:110;
+  display:flex; flex-direction:column; gap:2px;
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(4px);
+  transition:opacity 0.4s var(--ease-soft), transform 0.4s var(--ease-soft);
+}
+.scene-cap.is-shown{ opacity:0.45; transform:translateY(0); }
+.scene-cap .num{
+  font-family:var(--font-mono);
+  font-size:10px; letter-spacing:0.22em;
+  color:var(--ink-300); text-transform:uppercase;
+}
+.scene-cap .name{
+  font-family:var(--font-display);
+  font-style:italic;
+  font-size:18px;
+  color:var(--cream);
+  letter-spacing:-0.005em;
+}

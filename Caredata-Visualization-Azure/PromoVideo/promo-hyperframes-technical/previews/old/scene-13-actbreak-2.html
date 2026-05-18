@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 13 - Act Break II Shards (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+}
+
+body {
+  background: var(--paper);
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* Iron Rule: transform-origin 0 0 on frame-wrap for correct 4K zoom anchor */
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+  background:
+    radial-gradient(circle at 20% 25%, rgba(159,180,160,0.10), transparent 55%),
+    radial-gradient(circle at 78% 72%, rgba(159,180,160,0.08), transparent 60%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* ===== Stage: light cream paper with sage radial warmth ===== */
+.stage {
+  position:absolute; inset:0;
+  z-index:0;
+  background:
+    radial-gradient(60vw 50vw at 50% 35%, rgba(159,180,160,0.07), transparent 70%),
+    radial-gradient(50vw 50vw at 8% 100%, rgba(200,184,155,0.06), transparent 65%),
+    radial-gradient(45vw 45vw at 100% 0%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* paper grain */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.35;
+  mix-blend-mode:multiply;
+  z-index:5;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+/* ===== Tablet bezel tease -- intrinsically dark physical object, sits over cream stage ===== */
+#tablet-tease {
+  position:absolute;
+  left:50%; top:50%;
+  transform:translate(-50%, -50%);
+  width:560px; height:760px;
+  border-radius:32px;
+  background:linear-gradient(180deg, #1F2622, #0E1211);
+  box-shadow:0 0 80px rgba(159,180,160,0.18);
+  opacity:0;
+  z-index:2;
+}
+
+/* ===== Three.js canvas -- z above grain and bezel tease ===== */
+#three-canvas {
+  position:absolute;
+  inset:0;
+  width:1920px; height:1080px;
+  z-index:10;
+  pointer-events:none;
+}
+
+/* ===== Subtitle ===== */
+#subtitle {
+  position:absolute;
+  left:50%; top:50%;
+  transform:translate(-50%, -50%);
+  z-index:20;
+  font-family:"Geist", sans-serif;
+  font-weight:500;
+  font-size:56px;
+  letter-spacing:-0.01em;
+  color:var(--ink-700);
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+}
+#subtitle .flip {
+  font-style:italic;
+  color:var(--ink-700);
+  transition:none;
+}
+
+/* ===== Caret (returns at 19.5 s) ===== */
+#caret {
+  position:absolute;
+  left:50%; top:50%;
+  transform:translate(-50%, -50%);
+  width:2px;
+  height:56px;
+  background:var(--sage-ink);
+  z-index:25;
+  opacity:0;
+  animation:blink 0.85s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ===== Watermarks ===== */
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.20em;
+  color:var(--ink-500); opacity:0.55; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+<main class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <!-- Tablet bezel tease: dark physical object behind shards, fades in with subtitle -->
+  <div id="tablet-tease"></div>
+
+  <canvas id="three-canvas" width="1920" height="1080"></canvas>
+
+  <div id="subtitle"><span id="sub-pre"></span><em class="flip" id="sub-flip"></em><span id="sub-post"></span></div>
+  <div id="caret"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO · CARE-DATA · 13 / 12</div>
+
+  <!-- SFX: only whoosh.mp3 and typing.mp3 per hard constraint -->
+  <audio id="sfx-whoosh"  src="../audio/whoosh.mp3"  preload="auto"></audio>
+  <audio id="sfx-whoosh2" src="../audio/whoosh.mp3"  preload="auto"></audio>
+  <audio id="sfx-whoosh3" src="../audio/whoosh.mp3"  preload="auto"></audio>
+  <audio id="sfx-type"    src="../audio/typing.mp3"  preload="auto"></audio>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
+
+(async function() {
+  await document.fonts.ready;
+
+  /* Iron Rule: zoom not transform:scale. transform-origin:0 0 on .frame-wrap (set in CSS). */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((vw - fw) / 2) + 'px';
+    frame.style.top  = ((vh - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* ===== Three.js setup ===== */
+  const canvas = document.getElementById('three-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setSize(1920, 1080, false);
+  renderer.setPixelRatio(2);
+  renderer.setClearColor(0x000000, 0); // transparent so cream paper shows through
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 0.1, 100);
+  camera.position.set(0, 0, 5);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+  const key = new THREE.DirectionalLight(0xffffff, 0.8);
+  key.position.set(2, 3, 5);
+  scene.add(key);
+
+  /* ===== Shard material: warmer palette -- sage -> clay -> cream
+     (Scene 7 used sage -> dusty-blue; this break feels warmer per script)
+     emissiveIntensity 0.32, metalness 0.45, roughness 0.45 so shards
+     punch off cream without disappearing into the paper highlights. ===== */
+  function shardMaterial() {
+    const sage  = new THREE.Color('#9FB4A0');
+    const clay  = new THREE.Color('#C8B89B');
+    const cream = new THREE.Color('#F6F2EB');
+    const mix = Math.random();
+    let c;
+    if (mix < 0.5) c = sage.clone().lerp(clay, mix * 2);
+    else           c = clay.clone().lerp(cream, (mix - 0.5) * 2);
+    return new THREE.MeshStandardMaterial({
+      color: c,
+      emissive: c,
+      emissiveIntensity: 0.32,
+      metalness: 0.45,
+      roughness: 0.45,
+    });
+  }
+
+  /* Exactly 8 shards per QA checklist */
+  const shards = [];
+  for (let i = 0; i < 8; i++) {
+    const geo = new THREE.BoxGeometry(
+      0.6 + Math.random() * 0.3,
+      0.9 + Math.random() * 0.4,
+      0.08 + Math.random() * 0.04
+    );
+    const m = new THREE.Mesh(geo, shardMaterial());
+    m.position.set(
+      (Math.random() - 0.5) * 6,
+      (Math.random() - 0.5) * 3.4,
+      -8
+    );
+    m.rotation.set(
+      Math.random() * Math.PI,
+      Math.random() * Math.PI,
+      Math.random() * Math.PI
+    );
+    scene.add(m);
+    shards.push(m);
+  }
+
+  /* ===== Refs ===== */
+  const subtitle   = document.getElementById('subtitle');
+  const subPre     = document.getElementById('sub-pre');
+  const subFlip    = document.getElementById('sub-flip');
+  const subPost    = document.getElementById('sub-post');
+  const caret      = document.getElementById('caret');
+  const tabletTease= document.getElementById('tablet-tease');
+  const sfxWhoosh  = document.getElementById('sfx-whoosh');
+  const sfxWhoosh2 = document.getElementById('sfx-whoosh2');
+  const sfxWhoosh3 = document.getElementById('sfx-whoosh3');
+  const sfxType    = document.getElementById('sfx-type');
+
+  /* ===== Chunked typewriter helper (1-1-3 rhythm) ===== */
+  function chunkText(text) {
+    const chunks = []; let i = 0, phase = 0;
+    while (i < text.length) {
+      const n = phase === 2 ? 3 : 1;
+      chunks.push(text.slice(i, Math.min(i + n, text.length)));
+      i += n; phase = (phase + 1) % 3;
+    }
+    return chunks;
+  }
+  function typeChunked(tl, el, text, { at = 0, tickMs = 80, sfx = null, onChunk = null } = {}) {
+    const chunks = chunkText(text);
+    if (sfx) {
+      tl.call(() => { try { sfx.currentTime = 0; sfx.play(); } catch (_) {} }, null, at);
+    }
+    chunks.forEach((c, i) => {
+      tl.call(() => {
+        el.textContent += c;
+        if (onChunk) onChunk(i, chunks.length);
+      }, null, at + i * tickMs / 1000);
+    });
+    return chunks.length * tickMs / 1000;
+  }
+
+  /* ===== Initial state ===== */
+  gsap.set(subtitle,    { opacity: 0, x: 0 });
+  gsap.set(caret,       { opacity: 0 });
+  gsap.set(tabletTease, { opacity: 0, scale: 1 });
+
+  /* ===== Three.js shard animation ===== */
+  shards.forEach((m) => {
+    // Phase 1: tumble +Z toward camera (peak at 0.55 s)
+    gsap.to(m.position, {
+      z: 1.2 + Math.random() * 0.5,
+      duration: 0.55,
+      ease: 'expo.out'
+    });
+    gsap.to(m.rotation, {
+      x: m.rotation.x + Math.PI * (1 + Math.random()),
+      y: m.rotation.y + Math.PI * (1 + Math.random()),
+      duration: 0.7,
+      ease: 'cubic-bezier(.22,.85,.30,1)'
+    });
+    // Phase 2: shards recede +Z away and scale down at 0.7 s
+    gsap.to(m.position, { z: -3, duration: 0.8, ease: 'power2.in', delay: 0.7 });
+    gsap.to(m.scale,    { x: 0.4, y: 0.4, z: 0.4, duration: 0.8, ease: 'power2.in', delay: 0.7 });
+  });
+
+  /* ===== Render loop (active until ~1.7 s, then idles) ===== */
+  let t0 = performance.now();
+  function loop() {
+    const t = (performance.now() - t0) / 1000;
+    renderer.render(scene, camera);
+    if (t < 1.7) requestAnimationFrame(loop);
+  }
+  loop();
+
+  /* ===== Master timeline (scene total: 20.0 s) ===== */
+  const tl = gsap.timeline();
+
+  /* 0.00 -- shard burst SFX: whoosh + low-volume re-trigger for body (sub-thud layer) */
+  tl.call(() => {
+    try {
+      sfxWhoosh.volume = 1.0;
+      sfxWhoosh.currentTime = 0;
+      sfxWhoosh.play();
+    } catch(_) {}
+  }, null, 0.00);
+  tl.call(() => {
+    try {
+      sfxWhoosh2.volume = 0.55;
+      sfxWhoosh2.currentTime = 0;
+      sfxWhoosh2.play();
+    } catch(_) {}
+  }, null, 0.18);
+
+  /* 1.50 -- Tablet bezel tease fades in (stays at opacity 0.55 until handoff) */
+  tl.to(tabletTease, { opacity: 0.55, duration: 0.6, ease: 'sine.out' }, 1.50);
+
+  /* 1.50 -- Subtitle types in (M3 typewriter + M15 italic colour flip) */
+  // Subtitle: "From the chart to the voice."
+  // pre  = "From the chart to "  (ink-700, upright)
+  // flip = "the voice"           (italic, colour flips ink-700 -> sage-ink as it types)
+  // post = "."                   (ink-700, upright)
+  tl.to(subtitle, { opacity: 1, duration: 0.25, ease: 'sine.out' }, 1.50);
+
+  const preText  = 'From the chart to ';
+  const flipText = 'the voice';
+  const postText = '.';
+  const tickMs   = 80;
+
+  // typing SFX fires with the first pre-chunk (subtitle landing cue)
+  const preDur = typeChunked(tl, subPre, preText, {
+    at: 1.55,
+    tickMs,
+    sfx: sfxType
+  });
+
+  // Italic flip section: per-chunk colour interpolation ink-700 (#3D4743) -> sage-ink (#4B6A55)
+  const flipStart = 1.55 + preDur + 0.05;
+  typeChunked(tl, subFlip, flipText, {
+    at: flipStart,
+    tickMs,
+    sfx: null,
+    onChunk: (i, total) => {
+      const progress = (i + 1) / total;
+      const r1 = 0x3D, g1 = 0x47, b1 = 0x43; // ink-700
+      const r2 = 0x4B, g2 = 0x6A, b2 = 0x55; // sage-ink
+      const r = Math.round(r1 + (r2 - r1) * progress);
+      const g = Math.round(g1 + (g2 - g1) * progress);
+      const b = Math.round(b1 + (b2 - b1) * progress);
+      subFlip.style.color = `rgb(${r},${g},${b})`;
+    }
+  });
+  const flipChunks = chunkText(flipText);
+  const flipDur = flipChunks.length * tickMs / 1000;
+
+  // Period
+  const postStart = flipStart + flipDur + 0.04;
+  typeChunked(tl, subPost, postText, {
+    at: postStart,
+    tickMs,
+    sfx: null
+  });
+
+  /* 3.00 -> 16.50 -- Hold and breathe (13.5 s editorial rest). Tablet bezel holds at opacity 0.55. */
+
+  /* 16.50 -> 19.00 -- Subtitle fades out on M12 horizontal track-out */
+  tl.to(subtitle, {
+    x: 60,
+    opacity: 0,
+    duration: 1.5,
+    ease: 'sine.in'
+  }, 16.50);
+
+  /* 19.00 -> 20.00 -- Tablet bezel scales up slightly (1.0 -> 1.04) as handoff to Scene 14 */
+  tl.to(tabletTease, {
+    scale: 1.04,
+    duration: 1.0,
+    ease: 'sine.inOut'
+  }, 19.00);
+
+  /* 19.50 -- Caret reappears centre-frame + whoosh SFX */
+  tl.to(caret, { opacity: 1, duration: 0.001 }, 19.50);
+  tl.call(() => {
+    try {
+      sfxWhoosh3.volume = 1.0;
+      sfxWhoosh3.currentTime = 0;
+      sfxWhoosh3.play();
+    } catch(_) {}
+  }, null, 19.50);
+
+  /* Scene ends at 20.00 s */
+
+})();
+</script>
+<script src="_nav.js" defer></script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

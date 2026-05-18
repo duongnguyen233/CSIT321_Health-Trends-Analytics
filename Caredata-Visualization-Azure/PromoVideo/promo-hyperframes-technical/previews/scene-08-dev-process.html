@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 08 - Development Process — Requirements to Deployment (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+  --win-bg:       #FFFFFF;
+  --win-chrome:   #F2EEE4;
+  --win-border:   #E2DCCC;
+}
+
+body {
+  background: var(--paper);
+  display:flex; align-items:center; justify-content:center;
+}
+
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+  background: var(--paper);
+}
+
+/* ===== Stage ===== */
+.stage {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(60vw 50vw at 50% 35%, rgba(159,180,160,0.09), transparent 70%),
+    radial-gradient(50vw 50vw at 8% 100%, rgba(200,184,155,0.06), transparent 65%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* ===== Paper grain ===== */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.35;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+/* ===== Watermarks ===== */
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.20em;
+  color:var(--ink-500); opacity:0.55; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+
+/* ===== Section header ===== */
+#dev-head {
+  position:absolute;
+  top:52px;
+  left:0; right:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  opacity:0;
+  z-index:10;
+}
+#dev-head .eyebrow {
+  font-family:"Geist Mono",monospace;
+  font-size:12px;
+  letter-spacing:0.22em;
+  color:var(--sage-ink);
+  text-transform:uppercase;
+}
+#dev-head h2 {
+  font-family:"Instrument Serif",serif;
+  font-weight:400;
+  font-size:56px;
+  color:var(--ink-900);
+  line-height:1.1;
+}
+
+/* ===== Timeline SVG layer ===== */
+#tl-svg {
+  position:absolute;
+  top:0; left:0;
+  width:1920px; height:1080px;
+  pointer-events:none;
+  z-index:5;
+}
+
+/* ===== Phase cards ===== */
+.phase-card {
+  position:absolute;
+  width:340px;
+  height:300px;
+  background:var(--win-bg);
+  border:1px solid var(--win-border);
+  border-radius:12px;
+  box-shadow:0 4px 18px rgba(31,38,34,0.08), 0 1px 4px rgba(31,38,34,0.05);
+  padding:20px 22px 18px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  opacity:0;
+  z-index:20;
+}
+
+/* Connector: dashed vertical line from card bottom to timeline */
+.connector {
+  position:absolute;
+  width:1px;
+  border-left:1.5px dashed var(--sage);
+  opacity:0;
+  z-index:4;
+}
+
+.phase-tag {
+  display:inline-block;
+  font-family:"Geist Mono",monospace;
+  font-weight:700;
+  font-size:11px;
+  letter-spacing:0.18em;
+  color:var(--sage-ink);
+  background:var(--sage-tint);
+  border-radius:4px;
+  padding:3px 8px;
+  align-self:flex-start;
+}
+
+.phase-title {
+  font-family:"Geist",sans-serif;
+  font-weight:600;
+  font-size:22px;
+  color:var(--ink-900);
+}
+
+.phase-items {
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+.phase-items li {
+  font-family:"Geist",sans-serif;
+  font-weight:400;
+  font-size:15px;
+  color:var(--ink-700);
+  display:flex;
+  align-items:flex-start;
+  gap:7px;
+}
+.phase-items li::before {
+  content:"·";
+  color:var(--sage-ink);
+  font-size:16px;
+  line-height:1.2;
+  flex-shrink:0;
+}
+
+/* Phase card positions — centered at x1=280, x2=720, x3=1200, x4=1640; top=185px */
+#phase-1 { left:calc(280px - 170px); top:185px; }
+#phase-2 { left:calc(720px - 170px); top:185px; }
+#phase-3 { left:calc(1200px - 170px); top:185px; }
+#phase-4 { left:calc(1640px - 170px); top:185px; }
+
+/* Connectors: from card bottom (y=485) to node top edge (y=537), node center y=555; x = card center */
+#conn-1 { left:calc(280px - 0.5px); top:485px; height:52px; }
+#conn-2 { left:calc(720px - 0.5px); top:485px; height:52px; }
+#conn-3 { left:calc(1200px - 0.5px); top:485px; height:52px; }
+#conn-4 { left:calc(1640px - 0.5px); top:485px; height:52px; }
+
+/* ===== Sprint markers ===== */
+.sprint-marker {
+  position:absolute;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  opacity:0;
+  z-index:6;
+}
+.sprint-tick {
+  width:1px;
+  height:16px;
+  background:var(--ink-500);
+  opacity:0.8;
+}
+.sprint-label {
+  font-family:"Geist Mono",monospace;
+  font-size:13px;
+  color:var(--ink-500);
+  letter-spacing:0.10em;
+  opacity:0.9;
+  white-space:nowrap;
+}
+
+/* Sprint marker positions: between nodes at y=580 */
+/* Between n1(280) and n2(720): mid=500 */
+#sprint-1 { left:calc(500px - 20px); top:580px; }
+/* Between n2(720) and n3(1200): mid=960 */
+#sprint-2 { left:calc(960px - 20px); top:580px; }
+/* Between n3(1200) and n4(1640): mid=1420 */
+#sprint-3 { left:calc(1420px - 20px); top:580px; }
+
+/* ===== Challenge card ===== */
+#challenge-card {
+  position:absolute;
+  left:50%;
+  top:800px;
+  transform:translateX(-50%);
+  width:900px;
+  height:130px;
+  background:rgba(200,184,155,0.18);
+  border:1px solid rgba(131,107,71,0.28);
+  border-radius:12px;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  padding:0 28px;
+  gap:20px;
+  opacity:0;
+  z-index:20;
+}
+
+/* Left accent bar */
+#challenge-card::before {
+  content:"";
+  position:absolute;
+  left:0; top:0; bottom:0;
+  width:4px;
+  background:var(--clay);
+  border-radius:12px 0 0 12px;
+}
+
+.challenge-inner {
+  padding-left:8px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.challenge-label {
+  font-family:"Geist Mono",monospace;
+  font-size:11px;
+  letter-spacing:0.12em;
+  color:var(--clay-ink);
+  text-transform:uppercase;
+}
+
+.challenge-body {
+  font-family:"Geist",sans-serif;
+  font-weight:400;
+  font-size:18px;
+  color:var(--ink-700);
+  line-height:1.4;
+}
+
+/* ===== Agile badge ===== */
+#agile-badge {
+  position:absolute;
+  right:80px;
+  top:840px;
+  font-family:"Geist Mono",monospace;
+  font-size:11px;
+  letter-spacing:0.18em;
+  color:var(--ink-300);
+  opacity:0;
+  z-index:20;
+}
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE · GROUP W08 / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO · CARE-DATA · 08 / 18</div>
+
+  <!-- ===== Section header ===== -->
+  <div id="dev-head">
+    <span class="eyebrow">DEVELOPMENT PROCESS</span>
+    <h2>From requirements to deployment.</h2>
+  </div>
+
+  <!-- ===== Timeline SVG ===== -->
+  <svg id="tl-svg" viewBox="0 0 1920 1080" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Horizontal track line: x1=100 to x2=1820, y=450 -->
+    <!-- pathLength="1" used for normalized dashoffset animation -->
+    <line id="tl-line"
+      x1="100" y1="555" x2="1820" y2="555"
+      stroke="#9FB4A0" stroke-width="2"
+      pathLength="1"
+      stroke-dasharray="1"
+      stroke-dashoffset="1"
+    />
+
+    <!-- Node 1 at x=280, y=450 -->
+    <circle id="node-1" cx="280" cy="555" r="18"
+      fill="#EEF1EC" stroke="#9FB4A0" stroke-width="2"
+      opacity="0"/>
+    <text id="node-text-1" x="280" y="560"
+      text-anchor="middle" dominant-baseline="middle"
+      font-family="'Geist Mono',monospace" font-weight="700" font-size="14"
+      fill="#4B6A55" opacity="0">01</text>
+
+    <!-- Node 2 at x=720, y=450 -->
+    <circle id="node-2" cx="720" cy="555" r="18"
+      fill="#EEF1EC" stroke="#9FB4A0" stroke-width="2"
+      opacity="0"/>
+    <text id="node-text-2" x="720" y="560"
+      text-anchor="middle" dominant-baseline="middle"
+      font-family="'Geist Mono',monospace" font-weight="700" font-size="14"
+      fill="#4B6A55" opacity="0">02</text>
+
+    <!-- Node 3 at x=1200, y=450 -->
+    <circle id="node-3" cx="1200" cy="555" r="18"
+      fill="#EEF1EC" stroke="#9FB4A0" stroke-width="2"
+      opacity="0"/>
+    <text id="node-text-3" x="1200" y="560"
+      text-anchor="middle" dominant-baseline="middle"
+      font-family="'Geist Mono',monospace" font-weight="700" font-size="14"
+      fill="#4B6A55" opacity="0">03</text>
+
+    <!-- Node 4 at x=1640, y=450 -->
+    <circle id="node-4" cx="1640" cy="555" r="18"
+      fill="#EEF1EC" stroke="#9FB4A0" stroke-width="2"
+      opacity="0"/>
+    <text id="node-text-4" x="1640" y="560"
+      text-anchor="middle" dominant-baseline="middle"
+      font-family="'Geist Mono',monospace" font-weight="700" font-size="14"
+      fill="#4B6A55" opacity="0">04</text>
+  </svg>
+
+  <!-- ===== Phase cards ===== -->
+
+  <!-- Phase 1: Requirements -->
+  <div class="phase-card" id="phase-1">
+    <span class="phase-tag">PHASE 01</span>
+    <div class="phase-title">Requirements</div>
+    <ul class="phase-items">
+      <li>AIHW QI Program Manual 4.0</li>
+      <li>14 categories, 44 indicators defined</li>
+      <li>DON, Quality Manager + Auditor personas</li>
+      <li>Weekly supervisor review sessions</li>
+    </ul>
+  </div>
+
+  <!-- Phase 2: UI Design -->
+  <div class="phase-card" id="phase-2">
+    <span class="phase-tag">PHASE 02</span>
+    <div class="phase-title">UI Design</div>
+    <ul class="phase-items">
+      <li>Figma wireframes for all 5 pages</li>
+      <li>User flow mapping per persona</li>
+      <li>Geist + Tailwind CSS design system</li>
+      <li>40+ reusable React components</li>
+    </ul>
+  </div>
+
+  <!-- Phase 3: Development -->
+  <div class="phase-card" id="phase-3">
+    <span class="phase-tag">PHASE 03</span>
+    <div class="phase-title">Development</div>
+    <ul class="phase-items">
+      <li>FastAPI backend built first</li>
+      <li>React + Vite frontend, 5 main pages</li>
+      <li>Azure Tables + Blob cloud storage</li>
+      <li>Voice biomarker: 108-d feature pipeline</li>
+    </ul>
+  </div>
+
+  <!-- Phase 4: Testing + Deployment -->
+  <div class="phase-card" id="phase-4">
+    <span class="phase-tag">PHASE 04</span>
+    <div class="phase-title">Testing + Deployment</div>
+    <ul class="phase-items">
+      <li>pytest suite: 40+ automated tests</li>
+      <li>Git feature branches + PR review</li>
+      <li>Azure Static Web Apps deployment</li>
+      <li>Google OAuth + HTTPS in production</li>
+    </ul>
+  </div>
+
+  <!-- ===== Connectors ===== -->
+  <div class="connector" id="conn-1"></div>
+  <div class="connector" id="conn-2"></div>
+  <div class="connector" id="conn-3"></div>
+  <div class="connector" id="conn-4"></div>
+
+  <!-- ===== Sprint markers ===== -->
+  <div class="sprint-marker" id="sprint-1">
+    <div class="sprint-tick"></div>
+    <div class="sprint-label">Sprint 1</div>
+  </div>
+  <div class="sprint-marker" id="sprint-2">
+    <div class="sprint-tick"></div>
+    <div class="sprint-label">Sprint 2</div>
+  </div>
+  <div class="sprint-marker" id="sprint-3">
+    <div class="sprint-tick"></div>
+    <div class="sprint-label">Sprint 3</div>
+  </div>
+
+  <!-- ===== Challenge card ===== -->
+  <div id="challenge-card">
+    <div class="challenge-inner">
+      <span class="challenge-label">KEY CHALLENGE</span>
+      <p class="challenge-body">Maintaining 44 indicator definitions accurate to the AIHW QI Manual 4.0 across all phases — and keeping voice biomarker framing clinically appropriate throughout.</p>
+    </div>
+  </div>
+
+  <!-- ===== Agile badge ===== -->
+  <div id="agile-badge">AGILE · 24 WEEKS · GIT FLOW</div>
+
+  <!-- ===== SFX ===== -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3" preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function() {
+  await document.fonts.ready;
+
+  /* ===== Iron Rule: zoom not transform:scale; transform-origin:0 0 ===== */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((vw - fw) / 2) + 'px';
+    frame.style.top  = ((vh - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* ===== Element refs ===== */
+  const devHead      = document.getElementById('dev-head');
+
+  const tlLine       = document.getElementById('tl-line');
+
+  const node1        = document.getElementById('node-1');
+  const nodeText1    = document.getElementById('node-text-1');
+  const node2        = document.getElementById('node-2');
+  const nodeText2    = document.getElementById('node-text-2');
+  const node3        = document.getElementById('node-3');
+  const nodeText3    = document.getElementById('node-text-3');
+  const node4        = document.getElementById('node-4');
+  const nodeText4    = document.getElementById('node-text-4');
+
+  const phase1       = document.getElementById('phase-1');
+  const phase2       = document.getElementById('phase-2');
+  const phase3       = document.getElementById('phase-3');
+  const phase4       = document.getElementById('phase-4');
+
+  const conn1        = document.getElementById('conn-1');
+  const conn2        = document.getElementById('conn-2');
+  const conn3        = document.getElementById('conn-3');
+  const conn4        = document.getElementById('conn-4');
+
+  const sprint1      = document.getElementById('sprint-1');
+  const sprint2      = document.getElementById('sprint-2');
+  const sprint3      = document.getElementById('sprint-3');
+
+  const challengeCard = document.getElementById('challenge-card');
+  const agileBadge   = document.getElementById('agile-badge');
+
+  const sfxType   = document.getElementById('sfx-type');
+  const sfxWhoosh = document.getElementById('sfx-whoosh');
+
+  /* ===== SFX helper ===== */
+  function playSfx(el, vol) {
+    try { el.volume = (vol !== undefined ? vol : 1.0); el.currentTime = 0; el.play(); } catch (_) {}
+  }
+
+  /* ===== Easing presets ===== */
+  const easeSettle = 'cubic-bezier(0.16,0.85,0.30,1)';
+  const easeSine   = 'sine.out';
+
+  /* ===== Initial state ===== */
+  gsap.set(devHead, { opacity: 0 });
+
+  /* SVG line: start fully hidden via dashoffset=1 (set in markup) */
+  /* Nodes and node labels */
+  gsap.set([node1, nodeText1, node2, nodeText2, node3, nodeText3, node4, nodeText4],
+    { opacity: 0 });
+
+  /* Phase cards: hidden and shifted down */
+  gsap.set([phase1, phase2, phase3, phase4], { opacity: 0, y: 30 });
+
+  /* Connectors: hidden */
+  gsap.set([conn1, conn2, conn3, conn4], { opacity: 0 });
+
+  /* Sprint markers */
+  gsap.set([sprint1, sprint2, sprint3], { opacity: 0 });
+
+  /* Challenge card: hidden, shifted down */
+  gsap.set(challengeCard, { opacity: 0, y: 20 });
+
+  /* Agile badge */
+  gsap.set(agileBadge, { opacity: 0 });
+
+  /* ===== Build master timeline ===== */
+  const tl = gsap.timeline();
+
+  /* 1.0 s: section header fades in (0.4 s) */
+  tl.to(devHead, { opacity: 1, duration: 0.4, ease: easeSine }, 1.0);
+
+  /* 3.0 s: timeline SVG line draws left to right via stroke-dashoffset 1→0 (1.5 s ease.inOut) */
+  tl.to(tlLine, {
+    attr: { 'stroke-dashoffset': 0 },
+    duration: 1.5,
+    ease: 'sine.inOut'
+  }, 3.0);
+
+  /* ---- Phase card + node reveal helper ---- */
+  /* Each card slides up (y:30→0, opacity:0→1) simultaneously with its node appearing */
+
+  /* 4.0 s: phase-1 + node 1 + connector 1 + whoosh */
+  tl.call(() => playSfx(sfxWhoosh, 0.45), null, 4.0);
+  tl.to(phase1, { opacity: 1, y: 0, duration: 0.4, ease: easeSettle }, 4.0);
+  tl.to([node1, nodeText1], { opacity: 1, duration: 0.25, ease: easeSine }, 4.0);
+  tl.to(conn1, { opacity: 1, duration: 0.25, ease: easeSine }, 4.1);
+
+  /* 5.5 s: phase-2 + node 2 + connector 2 + whoosh */
+  tl.call(() => playSfx(sfxWhoosh, 0.45), null, 5.5);
+  tl.to(phase2, { opacity: 1, y: 0, duration: 0.4, ease: easeSettle }, 5.5);
+  tl.to([node2, nodeText2], { opacity: 1, duration: 0.25, ease: easeSine }, 5.5);
+  tl.to(conn2, { opacity: 1, duration: 0.25, ease: easeSine }, 5.6);
+
+  /* 7.0 s: phase-3 + node 3 + connector 3 + whoosh */
+  tl.call(() => playSfx(sfxWhoosh, 0.45), null, 7.0);
+  tl.to(phase3, { opacity: 1, y: 0, duration: 0.4, ease: easeSettle }, 7.0);
+  tl.to([node3, nodeText3], { opacity: 1, duration: 0.25, ease: easeSine }, 7.0);
+  tl.to(conn3, { opacity: 1, duration: 0.25, ease: easeSine }, 7.1);
+
+  /* 8.5 s: phase-4 + node 4 + connector 4 + whoosh */
+  tl.call(() => playSfx(sfxWhoosh, 0.45), null, 8.5);
+  tl.to(phase4, { opacity: 1, y: 0, duration: 0.4, ease: easeSettle }, 8.5);
+  tl.to([node4, nodeText4], { opacity: 1, duration: 0.25, ease: easeSine }, 8.5);
+  tl.to(conn4, { opacity: 1, duration: 0.25, ease: easeSine }, 8.6);
+
+  /* 9.5 s: sprint markers fade in (0.3 s) */
+  tl.to([sprint1, sprint2, sprint3], { opacity: 1, duration: 0.3, ease: easeSine }, 9.5);
+
+  /* 11.0 s: challenge-card slides up + type sfx */
+  tl.call(() => playSfx(sfxType, 0.55), null, 11.0);
+  tl.to(challengeCard, { opacity: 1, y: 0, duration: 0.4, ease: easeSettle }, 11.0);
+
+  /* 13.0 s: agile-badge fades in (0.3 s) */
+  tl.to(agileBadge, { opacity: 1, duration: 0.3, ease: easeSine }, 13.0);
+
+  /* 13.0 – 60.0 s: hold */
+
+})();
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

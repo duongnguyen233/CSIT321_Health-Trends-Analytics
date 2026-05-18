@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 3, Hero Headline (preview) | CareData promo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --cream:#F6F2EB;
+  --paper:#FBF8F2;
+  --ink-900:#1F2622;
+  --ink-700:#3D4743;
+  --ink-500:#6B7570;
+  --sage:#9FB4A0;
+  --sage-bright:#B8D1B5;
+  --sage-ink:#4B6A55;
+  --dusty-blue:#A6B6C4;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background:
+    radial-gradient(60vw 50vw at 50% 50%, rgba(159,180,160,0.06), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  color:var(--cream);
+  font-family:"Geist",ui-sans-serif,system-ui,sans-serif;
+  font-feature-settings:"ss01","cv11";
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.frame-wrap{
+  position:relative;
+  width:1920px; height:1080px;
+  /* transform-origin top-left so fit()'s scale(2) at 4K fills the canvas
+     from (0,0) → (3840,2160). Center origin shifts the scaled visual
+     off-canvas at 4K, leaving the right/bottom black. */
+  transform-origin:0 0;
+}
+.stage{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.10), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%, rgba(200,184,155,0.05), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  overflow:hidden;
+}
+
+.grain{
+  position:absolute; inset:0;
+  pointer-events:none;
+  opacity:0.05;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+.footer{
+  position:absolute; bottom:38px; left:60px;
+  font-family:"Geist",sans-serif;
+  font-weight:400;
+  font-size:11px;
+  letter-spacing:0.18em;
+  color:var(--cream);
+  opacity:0.45;
+}
+
+/* ===== Hero stack ===== */
+.hero-center{
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  z-index:10;
+}
+.hero-stack{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+}
+
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  padding:9px 20px;
+  border:1px solid rgba(159,180,160,0.55);
+  border-radius:999px;
+  background:rgba(159,180,160,0.06);
+  font-family:"Geist",sans-serif;
+  font-weight:500;
+  font-size:14px;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  color:var(--cream);
+  margin-bottom:48px;
+  opacity:0;
+  box-shadow:
+    0 0 22px rgba(159,180,160,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.eyebrow-dot{
+  width:7px; height:7px;
+  border-radius:50%;
+  background:var(--sage-bright);
+  box-shadow:0 0 8px rgba(184,209,181,0.6);
+}
+
+.hero-h1{
+  font-family:"Instrument Serif", "EB Garamond", "Georgia", serif;
+  font-weight:400;
+  font-size:108px;
+  line-height:1.04;
+  letter-spacing:-0.022em;
+  color:var(--cream);
+  text-align:center;
+  white-space:nowrap;
+}
+.hero-line{
+  display:block;
+  opacity:0;
+  will-change:transform, opacity;
+}
+.italic-line{
+  font-style:italic;
+}
+.italic-line .ch{
+  display:inline-block;
+  color:var(--cream);
+  transition:color 0.18s ease-out;
+}
+.italic-line .ch.flipped{
+  color:var(--sage-bright);
+}
+
+.sub-copy{
+  font-family:"Geist",sans-serif;
+  font-weight:400;
+  font-size:24px;
+  line-height:1.5;
+  letter-spacing:-0.005em;
+  color:rgba(246,242,235,0.72);
+  max-width:880px;
+  margin-top:48px;
+  opacity:0;
+  will-change:transform, opacity;
+}
+
+/* Replay hud */
+.hud{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  background:rgba(15,15,17,0.85);
+  color:#EAE3D2; font-family:"Geist Mono", monospace; font-size:11px;
+  padding:8px 14px; border-radius:999px;
+  display:flex; gap:14px; align-items:center; z-index:100;
+  letter-spacing:0.06em;
+}
+.hud button{
+  appearance:none; border:1px solid #555; background:transparent; color:#EAE3D2;
+  font-family:inherit; font-size:11px; padding:3px 10px; border-radius:999px; cursor:pointer;
+  letter-spacing:0.06em;
+}
+.hud button:hover{ background:#222; }
+.hud .timer{ font-variant-numeric:tabular-nums; min-width:46px; }
+</style>
+</head>
+<body>
+
+<div class="frame-wrap" id="frame">
+  <div class="stage">
+    <div class="grain"></div>
+    <div class="footer">CSIT321&nbsp;CAPSTONE</div>
+
+    <div class="hero-center">
+      <div class="hero-stack">
+        <span class="eyebrow" id="eyebrow">
+          <span class="eyebrow-dot"></span>
+          Australian Digital Health, FHIR aligned
+        </span>
+
+        <h1 class="hero-h1">
+          <div class="hero-line" id="line1">Quiet clarity for</div>
+          <div class="hero-line italic-line" id="line2"></div>
+          <div class="hero-line" id="line3">quality data.</div>
+        </h1>
+
+        <p class="sub-copy" id="subCopy">CareData Portal turns messy facility records into government-standard indicators, upload once, see insights, file with confidence.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hud">
+  <button id="replay">REPLAY</button>
+  <span class="timer" id="timer">0.00s</span>
+  <span style="opacity:.6">Scene 03 / Hero</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+function fit(){
+  const wrap = document.getElementById('frame');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  /* zoom not transform: scale — natively rasterise at projected resolution; prevents 4K pixel break on 3D-rotated descendants. See ~/.claude/skills/hyperframes-video/rendering.md */
+  wrap.style.zoom = s;
+}
+fit();
+window.addEventListener('resize', fit);
+
+let tl;
+
+/* Build the italic line "aged-care" with each character in its own span for the colour flip stagger */
+function buildItalicLine(){
+  const text = "aged-care";
+  const line = document.getElementById('line2');
+  line.innerHTML = '';
+  for (let i = 0; i < text.length; i++){
+    const span = document.createElement('span');
+    span.className = 'ch';
+    span.textContent = text[i];
+    line.appendChild(span);
+  }
+}
+
+function build(){
+  buildItalicLine();
+  const italicChars = Array.from(document.querySelectorAll('#line2 .ch'));
+
+  /* Initial state, every reveal-able element hidden */
+  gsap.set('#eyebrow', { opacity: 0, y: 14 });
+  gsap.set('#line1', { opacity: 0, y: 32 });
+  gsap.set('#line2', { opacity: 0, y: 32 });
+  gsap.set('#line3', { opacity: 0, y: 32 });
+  gsap.set('#subCopy', { opacity: 0, y: 22 });
+
+  tl = gsap.timeline({
+    paused: true,
+    onUpdate: () => {
+      document.getElementById('timer').textContent = tl.time().toFixed(2) + 's';
+    }
+  });
+
+  /* ============================================================
+     TOTAL 3.0s. Beat-locked at 120 BPM. 6 beats = 3.0s. One reveal per beat.
+        0.000  (b1)    eyebrow chip slides up + fades in
+        0.500  (b2)    line 1 "Quiet clarity for" slides up
+        1.000  (b3)    line 2 "aged-care" slides up + per-char colour flip cream to sage-bright
+        1.500  (b4)    line 3 "quality data." slides up
+        2.000  (b5)    sub-copy slides up
+        2.500  (b6)    hold, hero registers
+        3.000  (b7)    end
+     ============================================================ */
+
+  /* reset italic chars on every replay */
+  tl.call(()=>{
+    italicChars.forEach(c => c.classList.remove('flipped'));
+  }, null, 0);
+
+  /* === eyebrow chip on b1 === */
+  tl.to('#eyebrow', {
+    opacity: 1, y: 0,
+    duration: 0.40,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 0);
+
+  /* === line 1 on b2 === */
+  tl.to('#line1', {
+    opacity: 1, y: 0,
+    duration: 0.40,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 0.500);
+
+  /* === line 2 on b3, italic with colour flip === */
+  tl.to('#line2', {
+    opacity: 1, y: 0,
+    duration: 0.40,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 1.000);
+
+  /* per-char colour flip stagger, runs as line 2 settles in */
+  italicChars.forEach((c, i) => {
+    tl.call(()=> c.classList.add('flipped'), null, 1.100 + i * 0.05);
+  });
+
+  /* === line 3 on b4 === */
+  tl.to('#line3', {
+    opacity: 1, y: 0,
+    duration: 0.40,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 1.500);
+
+  /* === sub-copy on b5 === */
+  tl.to('#subCopy', {
+    opacity: 1, y: 0,
+    duration: 0.40,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 2.000);
+
+  /* === Hold 2.500 to 3.000, hero registers (b6 to b7) === */
+}
+
+function play(){
+  if (!tl) build();
+  tl.restart();
+  tl.play();
+}
+
+document.getElementById('replay').addEventListener('click', play);
+
+// IFRAME-AWARE BOOTSTRAP — patched by shared/patch-scenes.mjs
+window.addEventListener('load', () => {
+  const start = () => { build(); if (window.parent === window) play(); };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+  } else {
+    start();
+  }
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === 'play'  && typeof play === 'function')                          play();
+  if (t === 'pause' && typeof tl   !== 'undefined' && tl)                    tl.pause();
+  if (t === 'reset' && typeof tl   !== 'undefined' && tl) { tl.seek(0); tl.pause(); }
+});
+</script>
+</body>
+</html>

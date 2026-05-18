@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 01 - Hook Tech (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+
+  --win-bg:       #FFFFFF;
+  --win-chrome:   #F2EEE4;
+  --win-border:   #E2DCCC;
+  --code-comment: #8E948D;
+  --code-keyword: #4B6A55;
+  --code-fn:      #3D4743;
+  --code-string:  #836B47;
+  --code-punct:   #6B7570;
+  --code-good:    #6F8E76;
+}
+
+body {
+  background: var(--paper);
+  display:flex; align-items:center; justify-content:center;
+}
+
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+  background: var(--paper);
+}
+
+/* ===== Stage: light paper with subtle warmth ===== */
+.stage {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(60vw 50vw at 50% 35%, rgba(159,180,160,0.07), transparent 70%),
+    radial-gradient(50vw 50vw at 8% 100%, rgba(200,184,155,0.06), transparent 65%),
+    radial-gradient(45vw 45vw at 100% 0%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* paper grain */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.35;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+/* ===== Watermarks ===== */
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist",sans-serif; font-weight:500;
+  font-size:11px; letter-spacing:0.20em;
+  color:var(--ink-500); opacity:0.55; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+
+/* ===== Stack labels above each column ===== */
+.stack-label {
+  position:absolute;
+  font-family:"Geist Mono",monospace;
+  font-size:13px; font-weight:600;
+  letter-spacing:0.22em;
+  color:var(--sage-ink);
+  z-index:25; opacity:0;
+}
+.stack-label .dot {
+  display:inline-block; width:6px; height:6px;
+  border-radius:50%;
+  background:var(--sage);
+  margin-right:10px; vertical-align:middle;
+  transform:translateY(-1px);
+}
+.stack-label.left  { left:142px;  top:88px; }
+.stack-label.right { right:142px; top:88px; }
+
+/* ===== Center vertical divider ===== */
+.divider {
+  position:absolute;
+  left:50%; top:80px; bottom:80px;
+  width:1px;
+  background-image: linear-gradient(to bottom, transparent 0, var(--ink-300) 18%, var(--ink-300) 82%, transparent 100%);
+  opacity:0;
+  transform-origin:50% 0%;
+  z-index:10;
+}
+
+/* ===== IDE window cards ===== */
+.win {
+  position:absolute;
+  background:var(--win-bg);
+  border:1px solid var(--win-border);
+  border-radius:8px;
+  overflow:hidden;
+  z-index:20;
+  opacity:0;
+  box-shadow:
+    0 1px 0 #FFFFFF inset,
+    0 12px 28px rgba(60,55,40,0.10),
+    0 2px 6px rgba(60,55,40,0.06);
+}
+.win-chrome {
+  display:flex; align-items:center;
+  height:32px;
+  background:var(--win-chrome);
+  border-bottom:1px solid var(--win-border);
+  padding:0 14px;
+  font-family:"Geist Mono",monospace;
+  font-size:11px; font-weight:500;
+  letter-spacing:0.04em;
+  color:var(--ink-500);
+}
+.win-chrome .lights {
+  display:inline-flex; gap:6px;
+  margin-right:14px;
+}
+.win-chrome .lights span {
+  width:10px; height:10px; border-radius:50%;
+  background:#D9D3C4;
+  border:1px solid rgba(0,0,0,0.04);
+}
+.win-chrome .lights span:first-child  { background:#D8B0A4; }
+.win-chrome .lights span:nth-child(2) { background:#D9CDA4; }
+.win-chrome .lights span:nth-child(3) { background:#B0C5B2; }
+.win-body {
+  padding:18px 22px 20px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:15px; line-height:1.55;
+  color:var(--ink-900);
+  white-space:pre;
+  overflow:hidden;
+}
+.win-body .cm  { color:var(--code-comment); font-style:italic; }
+.win-body .kw  { color:var(--code-keyword); font-weight:600; }
+.win-body .fn  { color:var(--code-fn); font-weight:600; }
+.win-body .st  { color:var(--code-string); }
+.win-body .pn  { color:var(--code-punct); }
+.win-body .ok  { color:var(--code-good); }
+.win-body .tag { color:var(--sage-ink); font-weight:600; }
+
+/* badge inside window */
+.win-badge {
+  display:inline-block;
+  background:var(--sage-tint);
+  color:var(--sage-ink);
+  border:1px solid rgba(75,106,85,0.18);
+  border-radius:4px;
+  padding:1px 6px;
+  font-family:"Geist Mono",monospace;
+  font-size:11px; font-weight:600;
+  letter-spacing:0.04em;
+}
+
+/* ===== Headline strip ===== */
+#headline-wrap {
+  position:absolute;
+  left:0; right:0; top:478px;
+  text-align:center;
+  z-index:30;
+  pointer-events:none;
+}
+#headline {
+  font-family:"Instrument Serif",serif;
+  font-weight:400;
+  font-size:84px;
+  line-height:1.05;
+  color:var(--ink-900);
+  letter-spacing:-0.015em;
+  opacity:0;
+}
+#headline .sage  { color:var(--sage-ink); font-style:italic; }
+
+#sub {
+  margin-top:22px;
+  font-family:"Geist Mono",monospace;
+  font-size:22px; font-weight:500;
+  letter-spacing:0.02em;
+  color:var(--ink-500);
+  opacity:0;
+}
+#sub .caret {
+  display:inline-block;
+  width:2px; height:1em;
+  background:var(--sage-ink);
+  margin-left:4px;
+  vertical-align:text-bottom;
+  animation:blink 0.85s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ===== Headline scrim so it reads cleanly over windows ===== */
+.headline-scrim {
+  position:absolute;
+  left:0; right:0; top:430px; height:240px;
+  background: radial-gradient(60% 100% at 50% 50%, rgba(251,248,242,0.92) 0%, rgba(251,248,242,0.65) 55%, rgba(251,248,242,0) 100%);
+  z-index:25;
+  opacity:0;
+  pointer-events:none;
+}
+
+/* ===== Curtain (kept for clean cut to next scene) ===== */
+#curtain {
+  position:absolute; inset:0;
+  background:#0E1211; opacity:0;
+  pointer-events:none; z-index:100;
+}
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO · CARE-DATA · 01 / 12</div>
+
+  <!-- column labels -->
+  <div class="stack-label left"  id="lbl-left"><span class="dot"></span>BACKEND · FASTAPI · AZURE</div>
+  <div class="stack-label right" id="lbl-right"><span class="dot"></span>FRONTEND · REACT · VITE</div>
+
+  <!-- vertical divider -->
+  <div class="divider" id="divider"></div>
+
+  <!-- ===== Backend windows (left column) ===== -->
+
+  <!-- Win 1: app/main.py -->
+  <div class="win" id="win-1" data-side="left"
+       style="left:142px; top:140px; width:640px; height:280px;">
+    <div class="win-chrome">
+      <span class="lights"><span></span><span></span><span></span></span>
+      Backend / app / main.py
+    </div>
+    <div class="win-body"><span class="cm"># FastAPI entrypoint</span>
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="kw">from</span> .api <span class="kw">import</span> qi, voice, mydata
+
+app = <span class="fn">FastAPI</span>()
+
+<span class="kw">@</span><span class="fn">app.on_event</span>(<span class="st">"startup"</span>)
+<span class="kw">async def</span> <span class="fn">_seed</span>():
+    <span class="fn">seed_v2_demo_data</span>()</div>
+  </div>
+
+  <!-- Win 2: pytest output -->
+  <div class="win" id="win-2" data-side="left"
+       style="left:142px; top:730px; width:640px; height:230px;">
+    <div class="win-chrome">
+      <span class="lights"><span></span><span></span><span></span></span>
+      Backend / pytest tests/ -q
+    </div>
+    <div class="win-body"><span class="ok">.....................................................
+.....................................................
+...................</span>
+<span class="ok">142 passed</span><span class="cm"> in 9.84s</span>
+
+<span class="cm">$</span> <span class="kw">git</span> status
+<span class="cm">  branch is up to date with origin/nelly_main</span></div>
+  </div>
+
+  <!-- ===== Frontend windows (right column) ===== -->
+
+  <!-- Win 3: App.jsx routes -->
+  <div class="win" id="win-3" data-side="right"
+       style="right:142px; top:140px; width:640px; height:280px;">
+    <div class="win-chrome">
+      <span class="lights"><span></span><span></span><span></span></span>
+      Frontend / src / App.jsx
+    </div>
+    <div class="win-body"><span class="cm">// React Router routes</span>
+<span class="kw">return</span> (
+  <span class="tag">&lt;Routes&gt;</span>
+    <span class="tag">&lt;Route</span> <span class="fn">path</span>=<span class="st">"/data-entry"</span>     <span class="tag">/&gt;</span>
+    <span class="tag">&lt;Route</span> <span class="fn">path</span>=<span class="st">"/qi-dashboard"</span>   <span class="tag">/&gt;</span>
+    <span class="tag">&lt;Route</span> <span class="fn">path</span>=<span class="st">"/benchmarking"</span>   <span class="tag">/&gt;</span>
+    <span class="tag">&lt;Route</span> <span class="fn">path</span>=<span class="st">"/voice/dashboard"</span> <span class="tag">/&gt;</span>
+  <span class="tag">&lt;/Routes&gt;</span>
+)</div>
+  </div>
+
+  <!-- Win 4: tailwind.config.js -->
+  <div class="win" id="win-4" data-side="right"
+       style="right:142px; top:730px; width:640px; height:230px;">
+    <div class="win-chrome">
+      <span class="lights"><span></span><span></span><span></span></span>
+      Frontend / tailwind.config.js
+    </div>
+    <div class="win-body">theme: {
+  <span class="fn">extend</span>: {
+    <span class="fn">colors</span>: {
+      <span class="kw">sage</span>:  <span class="st">'#9FB4A0'</span>,
+      <span class="kw">cream</span>: <span class="st">'#F6F2EB'</span>,
+      <span class="kw">clay</span>:  <span class="st">'#C8B89B'</span>,
+    }
+  }
+}</div>
+  </div>
+
+  <!-- ===== Headline strip ===== -->
+  <div class="headline-scrim" id="scrim"></div>
+  <div id="headline-wrap">
+    <h1 id="headline">
+      <span id="hl-1"></span>
+      <br>
+      <span id="hl-2a"></span><span id="hl-2b" class="sage"></span><span id="hl-2c"></span>
+    </h1>
+    <div id="sub"><span id="sub-text"></span><span class="caret"></span></div>
+  </div>
+
+  <!-- Curtain -->
+  <div id="curtain"></div>
+
+  <!-- SFX -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function() {
+  await document.fonts.ready;
+
+  /* fit to viewport via zoom (Iron Rule: zoom not transform:scale) */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((vw - fw) / 2) + 'px';
+    frame.style.top  = ((vh - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* refs */
+  const lblLeft  = document.getElementById('lbl-left');
+  const lblRight = document.getElementById('lbl-right');
+  const divider  = document.getElementById('divider');
+  const wins     = [...document.querySelectorAll('.win')];
+  const winsLeft  = wins.filter(w => w.dataset.side === 'left');
+  const winsRight = wins.filter(w => w.dataset.side === 'right');
+  const scrim    = document.getElementById('scrim');
+  const headline = document.getElementById('headline');
+  const hl1      = document.getElementById('hl-1');
+  const hl2a     = document.getElementById('hl-2a');
+  const hl2b     = document.getElementById('hl-2b');
+  const hl2c     = document.getElementById('hl-2c');
+  const subEl    = document.getElementById('sub');
+  const subText  = document.getElementById('sub-text');
+  const curtain  = document.getElementById('curtain');
+  const sfxType  = document.getElementById('sfx-type');
+  const sfxWhoosh= document.getElementById('sfx-whoosh');
+
+  /* chunked 1-1-3 typing helper */
+  function chunkText(text) {
+    const chunks = []; let i = 0, phase = 0;
+    while (i < text.length) {
+      const n = phase === 2 ? 3 : 1;
+      chunks.push(text.slice(i, Math.min(i + n, text.length)));
+      i += n; phase = (phase + 1) % 3;
+    }
+    return chunks;
+  }
+  function typeChunked(tl, el, text, { at = 0, tickMs = 60, sfx = null } = {}) {
+    const chunks = chunkText(text);
+    if (sfx) {
+      tl.call(() => { try { sfx.currentTime = 0; sfx.play(); } catch (_) {} }, null, at);
+    }
+    chunks.forEach((c, i) => {
+      tl.call(() => { el.textContent += c; }, null, at + i * tickMs / 1000);
+    });
+    return chunks.length * tickMs / 1000;
+  }
+
+  /* initial state */
+  gsap.set(lblLeft,  { opacity: 0, x: -16 });
+  gsap.set(lblRight, { opacity: 0, x:  16 });
+  gsap.set(divider,  { opacity: 0, scaleY: 0 });
+  gsap.set(winsLeft,  { opacity: 0, x: -60, y: 0, scale: 0.985 });
+  gsap.set(winsRight, { opacity: 0, x:  60, y: 0, scale: 0.985 });
+  gsap.set(scrim,     { opacity: 0 });
+  gsap.set(headline,  { opacity: 0, y: 14 });
+  gsap.set(subEl,     { opacity: 0 });
+  gsap.set(curtain,   { opacity: 0 });
+
+  const ease1 = 'cubic-bezier(0.16,0.85,0.30,1)';
+  const ease2 = 'cubic-bezier(0.22,0.85,0.30,1)';
+  const tl = gsap.timeline();
+
+  /* 0.0-0.5  divider draws + labels fade in */
+  tl.to(divider, { opacity: 0.55, scaleY: 1, duration: 0.55, ease: ease1 }, 0.00);
+  tl.to(lblLeft,  { opacity: 1, x: 0, duration: 0.40, ease: ease2 }, 0.20);
+  tl.to(lblRight, { opacity: 1, x: 0, duration: 0.40, ease: ease2 }, 0.20);
+
+  /* 0.55  whoosh as windows arrive */
+  tl.call(() => { try { sfxWhoosh.currentTime = 0; sfxWhoosh.play(); } catch(_){} }, null, 0.55);
+
+  /* 0.55-1.85  4 windows arrive (paired stagger left/right) */
+  const winOrder = [winsLeft[0], winsRight[0], winsLeft[1], winsRight[1]];
+  winOrder.forEach((w, i) => {
+    tl.to(w, {
+      opacity: 1, x: 0, scale: 1.0,
+      duration: 0.65, ease: ease2
+    }, 0.55 + i * 0.18);
+  });
+
+  /* 2.10  scrim fades up so headline reads cleanly */
+  tl.to(scrim, { opacity: 1, duration: 0.45, ease: 'sine.out' }, 2.10);
+
+  /* 2.30  headline appears (whole line in one beat) */
+  tl.to(headline, { opacity: 1, y: 0, duration: 0.55, ease: ease1 }, 2.30);
+  tl.call(() => {
+    hl1.textContent  = 'One repository.';
+    hl2a.textContent = 'Two ';
+    hl2b.textContent = 'stacks';
+    hl2c.textContent = '.';
+  }, null, 2.30);
+
+  /* 3.30  subtitle types in (chunked, with typing SFX) */
+  tl.to(subEl, { opacity: 1, duration: 0.25, ease: 'sine.out' }, 3.30);
+  typeChunked(tl, subText, 'Here is how CareData is built.', { at: 3.35, tickMs: 60, sfx: sfxType });
+
+  /* 4.50-5.30  hold + gentle window breathing (separate continuous tweens) */
+  wins.forEach((w, i) => {
+    gsap.to(w, {
+      y: '+=4', duration: 2.2, yoyo: true, repeat: -1,
+      ease: 'sine.inOut', delay: 2.4 + i * 0.30
+    });
+  });
+
+  /* 5.30-5.80  exit: whoosh + windows slide outward, headline lifts */
+  tl.call(() => { try { sfxWhoosh.currentTime = 0; sfxWhoosh.play(); } catch(_){} }, null, 5.30);
+  tl.to(winsLeft,  { x: -120, opacity: 0, filter: 'blur(4px)', duration: 0.45, ease: 'power3.in' }, 5.30);
+  tl.to(winsRight, { x:  120, opacity: 0, filter: 'blur(4px)', duration: 0.45, ease: 'power3.in' }, 5.30);
+  tl.to([lblLeft, lblRight, divider], { opacity: 0, duration: 0.30, ease: 'sine.in' }, 5.30);
+  tl.to([headline, subEl, scrim], { opacity: 0, y: -10, duration: 0.40, ease: 'sine.in' }, 5.40);
+
+  /* 5.80  curtain crash to dark for clean handoff */
+  tl.to(curtain, { opacity: 1, duration: 0.20, ease: 'power2.in' }, 5.80);
+
+  /* scene ends ~6.0s */
+})();
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 05 - Auth + Storage (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+
+  --win-bg:       #FFFFFF;
+  --win-border:   #E2DCCC;
+  --code-comment: #8E948D;
+  --code-keyword: #4B6A55;
+  --code-fn:      #3D4743;
+  --code-string:  #836B47;
+  --code-punct:   #6B7570;
+}
+
+body {
+  background: var(--paper);
+  display:flex; align-items:center; justify-content:center;
+}
+
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+  background: var(--paper);
+}
+
+/* ===== Stage: light paper with subtle warmth ===== */
+.stage {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 20% 25%, rgba(159,180,160,0.10), transparent 55%),
+    radial-gradient(circle at 78% 72%, rgba(159,180,160,0.08), transparent 60%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* paper grain */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.35;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+/* ===== Watermarks ===== */
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist",sans-serif; font-weight:500;
+  font-size:11px; letter-spacing:0.20em;
+  color:var(--ink-500); opacity:0.55; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+
+/* ===== Code panes (light theme) ===== */
+.code-pane {
+  position:absolute;
+  background:var(--win-bg);
+  border:1px solid var(--win-border);
+  border-radius:14px;
+  padding:22px 26px;
+  color:var(--ink-900);
+  z-index:20;
+  opacity:0;
+  box-shadow:
+    0 1px 0 #FFFFFF inset,
+    0 18px 48px rgba(60,55,40,0.12),
+    0 2px 6px rgba(60,55,40,0.06);
+  overflow:hidden;
+}
+.pane-header {
+  font-family:"Geist",sans-serif;
+  font-weight:500;
+  font-size:22px;
+  color:var(--ink-500);
+  margin-bottom:16px;
+  letter-spacing:0.01em;
+}
+.pane-code {
+  font-family:"JetBrains Mono",monospace;
+  font-size:22px;
+  line-height:1.55;
+  color:var(--ink-900);
+  white-space:pre;
+  transform-origin:0 0;
+  transition: transform 0.40s cubic-bezier(0.16,0.85,0.30,1);
+}
+
+/* code colour classes */
+.cm  { color:var(--code-comment); font-style:italic; }
+.kw  { color:var(--code-keyword); font-weight:600; }
+.fn  { color:var(--code-fn); font-weight:600; }
+.st  { color:var(--code-string); }
+.pn  { color:var(--code-punct); }
+.lit-num { color:var(--clay-ink); }
+
+/* Dict key colour-flip (M15) */
+.key-flip {
+  color:var(--ink-900);
+  transition: color 0.18s ease;
+}
+.key-flip.lit { color: var(--sage-ink); }
+
+/* hidden-by-default chunk classes (used so JS can flip display) */
+.chunk { display:none; }
+.chunk.shown { display:inline; }
+
+/* ===== Conftest dark overlay (terminal style) ===== */
+#conftest-overlay {
+  position:absolute;
+  bottom:0; left:60px;
+  width:1800px; height:200px;
+  background:rgba(14,18,17,0.98);
+  border:1px solid var(--ink-700);
+  border-radius:12px 12px 0 0;
+  padding:18px 28px;
+  transform:translateY(220px);
+  z-index:30;
+}
+#conftest-overlay .pane-header {
+  color:#9FB4A0;
+  font-family:"Geist Mono",monospace;
+  font-size:13px;
+  letter-spacing:0.18em;
+  margin-bottom:10px;
+  text-transform:uppercase;
+  opacity:0.85;
+}
+#conftest-code {
+  font-family:"JetBrains Mono",monospace;
+  font-size:20px;
+  color:var(--paper-warm);
+  line-height:1.5;
+  white-space:pre;
+}
+#conftest-code .cm { color:#9FB4A0; font-style:italic; }
+#conftest-code .kw { color:#B8D1B5; font-weight:600; }
+#conftest-code .st { color:#D9C49B; }
+
+/* ===== Side captions ===== */
+.caption {
+  position:absolute;
+  font-family:"Geist",sans-serif;
+  font-size:22px;
+  font-style:italic;
+  line-height:1.4;
+  opacity:0;
+  z-index:25;
+}
+#caption-auth    { top:480px;  left:980px;  width:480px; color:var(--ink-500); }
+#caption-storage { top:580px;  right:980px; width:480px; color:var(--ink-500); }
+#caption-conftest{ bottom:80px; right:80px; width:520px; color:var(--sage-ink); }
+
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO · CARE-DATA · 05 / 12</div>
+
+  <!-- Left pane: auth.py -->
+  <div id="pane-auth" class="code-pane"
+       style="top:80px; left:60px; width:880px; height:880px;">
+    <div class="pane-header">app/api/auth.py</div>
+    <div id="auth-code" class="pane-code"></div>
+  </div>
+
+  <!-- Right pane: assessment_db.py -->
+  <div id="pane-storage" class="code-pane"
+       style="top:80px; right:60px; width:880px; height:880px;">
+    <div class="pane-header">app/services/assessment_db.py</div>
+    <div id="storage-code" class="pane-code"></div>
+  </div>
+
+  <!-- Bottom dark conftest overlay -->
+  <div id="conftest-overlay">
+    <div class="pane-header">tests/conftest.py</div>
+    <div id="conftest-code"></div>
+  </div>
+
+  <!-- Side captions -->
+  <div id="caption-auth"     class="caption">python-jose 3.3.0, HS256, 7-day TTL. Claims: sub, email, first_name, last_name, role.</div>
+  <div id="caption-storage"  class="caption">Graceful degrade. Tests + offline dev never hit prod Azure.</div>
+  <div id="caption-conftest" class="caption">Production conn string never reaches tests.</div>
+
+  <!-- SFX -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3" preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function() {
+  await document.fonts.ready;
+
+  /* ===== fit to viewport via zoom (Iron Rule: zoom not transform:scale) ===== */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((vw - fw) / 2) + 'px';
+    frame.style.top  = ((vh - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* ===== refs ===== */
+  const paneAuth     = document.getElementById('pane-auth');
+  const paneStorage  = document.getElementById('pane-storage');
+  const authCode     = document.getElementById('auth-code');
+  const storageCode  = document.getElementById('storage-code');
+  const conftestOv   = document.getElementById('conftest-overlay');
+  const conftestCode = document.getElementById('conftest-code');
+  const capAuth      = document.getElementById('caption-auth');
+  const capStorage   = document.getElementById('caption-storage');
+  const capConftest  = document.getElementById('caption-conftest');
+  const sfxType      = document.getElementById('sfx-type');
+  const sfxWhoosh    = document.getElementById('sfx-whoosh');
+  const sfxClick     = document.getElementById('sfx-click');
+
+  function playSfx(el) { try { el.currentTime = 0; el.play(); } catch(_){} }
+
+  /* ===== initial state ===== */
+  gsap.set([paneAuth, paneStorage], { opacity: 0, y: 14 });
+  gsap.set([capAuth, capStorage, capConftest], { opacity: 0, x: 24 });
+
+  const ease1 = 'cubic-bezier(0.16,0.85,0.30,1)';
+  const ease2 = 'cubic-bezier(0.22,0.85,0.30,1)';
+  const tl = gsap.timeline();
+
+  /* =============================================================
+     LEFT PANE bursts (auth.py)
+     Each burst = one logical block. Burst contains pre-built HTML
+     appended in chunked 1-1-3 character ticks for the typewriter
+     feel. Dict-key spans get .lit added shortly after they appear.
+     ============================================================= */
+
+  // Burst content (HTML strings so syntax colours land immediately).
+  // Bursts are timed at 1.0, 3.0, 5.0, 7.0, 8.0, 10.0, 12.0 s.
+  // Order:
+  //   B1  imports
+  //   B2  ALGO + ACCESS_TTL constants
+  //   B3  def issue_token signature
+  //   B4  function body (payload dict with key-flip spans)
+  //   B5  return jwt.encode(...)
+  //   B6  blank line + def verify_token signature + return
+
+  const authBursts = [
+    // B1 imports
+    `<span class="cm"># app/api/auth.py (excerpt)</span>\n` +
+    `<span class="kw">from</span> jose <span class="kw">import</span> jwt\n` +
+    `<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timedelta, timezone\n\n`,
+
+    // B2 constants
+    `<span class="kw">ALGO</span> = <span class="st">"HS256"</span>\n` +
+    `<span class="kw">ACCESS_TTL_MIN</span> = settings.<span class="fn">ACCESS_TOKEN_EXPIRE_MINUTES</span>  <span class="cm"># default 10080 = 7 days</span>\n\n`,
+
+    // B3 issue_token signature
+    `<span class="kw">def</span> <span class="fn">issue_token</span>(sub: <span class="kw">str</span>, email: <span class="kw">str</span>, first_name: <span class="kw">str</span>,\n` +
+    `                 last_name: <span class="kw">str</span>, role: <span class="kw">str</span>) -&gt; <span class="kw">str</span>:\n`,
+
+    // B4 body with payload dict (key-flip spans)
+    `    now = <span class="fn">datetime.now</span>(timezone.utc)\n` +
+    `    payload = {\n` +
+    `        <span class="key-flip" data-flip="k-sub">"sub"</span>:        sub,\n` +
+    `        <span class="key-flip" data-flip="k-role">"email"</span>:     email,\n` +
+    `        <span class="key-flip" data-flip="k-iat">"first_name"</span>: first_name,\n` +
+    `        <span class="key-flip" data-flip="k-exp">"last_name"</span>:  last_name,\n` +
+    `        <span class="key-flip">"role"</span>:       role,\n` +
+    `        <span class="key-flip">"iat"</span>: <span class="fn">int</span>(now.<span class="fn">timestamp</span>()),\n` +
+    `        <span class="key-flip">"exp"</span>: <span class="fn">int</span>((now + <span class="fn">timedelta</span>(minutes=ACCESS_TTL_MIN)).<span class="fn">timestamp</span>()),\n` +
+    `    }\n`,
+
+    // B5 return jwt.encode
+    `    <span class="kw">return</span> jwt.<span class="fn">encode</span>(payload, settings.SECRET_KEY, algorithm=ALGO)\n\n`,
+
+    // B6 verify_token
+    `<span class="kw">def</span> <span class="fn">verify_token</span>(token: <span class="kw">str</span>) -&gt; <span class="kw">dict</span>:\n` +
+    `    <span class="kw">return</span> jwt.<span class="fn">decode</span>(token, settings.SECRET_KEY, algorithms=[ALGO])\n`,
+  ];
+
+  // Burst start times for left pane.
+  const authBurstAt = [1.0, 3.0, 5.0, 7.0, 8.5, 10.5];
+
+  /* =============================================================
+     RIGHT PANE bursts (assessment_db.py)
+     ============================================================= */
+
+  const storageBursts = [
+    // B1 _in_memory
+    `<span class="cm"># app/services/assessment_db.py (excerpt)</span>\n` +
+    `_in_memory: <span class="kw">dict</span>[<span class="kw">str</span>, <span class="kw">dict</span>[<span class="kw">str</span>, <span class="kw">dict</span>]] = {}\n\n`,
+
+    // B2 _get_table signature + conn read
+    `<span class="kw">def</span> <span class="fn">_get_table</span>():\n` +
+    `    conn = <span class="fn">getattr</span>(settings, <span class="st">"AZURE_STORAGE_CONNECTION_STRING"</span>, <span class="kw">None</span>) \\\n` +
+    `           <span class="kw">or</span> os.environ.<span class="fn">get</span>(<span class="st">"AZURE_STORAGE_CONNECTION_STRING"</span>)\n`,
+
+    // B3 the early-return (M6 zoom target)
+    `    <span id="zoom-line-1" class="key-flip" data-flip="k-conn"><span class="kw">if not</span> conn:</span>\n` +
+    `<span id="zoom-line-2">        <span class="kw">return</span> <span class="kw">None</span>        <span class="cm"># in-memory fallback path</span></span>\n`,
+
+    // B4 try/except with TableServiceClient
+    `    <span class="kw">try</span>:\n` +
+    `        <span class="kw">from</span> azure.data.tables <span class="kw">import</span> TableServiceClient\n` +
+    `        client = TableServiceClient.<span class="fn">from_connection_string</span>(conn)\n` +
+    `        <span class="kw">return</span> client.<span class="fn">get_table_client</span>(TABLE_NAME)\n` +
+    `    <span class="kw">except</span> <span class="kw">Exception</span> <span class="kw">as</span> e:\n` +
+    `        logger.<span class="fn">warning</span>(<span class="st">"Azure %s not available: %s"</span>, TABLE_NAME, e)\n` +
+    `        <span class="kw">return</span> <span class="kw">None</span>\n\n`,
+
+    // B5 put_assessments signature + docstring
+    `<span class="kw">def</span> <span class="fn">put_assessments</span>(sub, assessment_date, rows, upload_id):\n` +
+    `    <span class="st">"""Batch upsert resident rows; returns count stored."""</span>\n` +
+    `    table = <span class="fn">_get_table</span>()\n`,
+
+    // B6 if table branch
+    `    <span class="kw">if</span> table:\n` +
+    `        operations = [(TransactionOperation.UPSERT, e) <span class="kw">for</span> e <span class="kw">in</span> entities]\n` +
+    `        table.<span class="fn">submit_transaction</span>(operations)\n` +
+    `        <span class="kw">return</span> <span class="fn">len</span>(entities)\n`,
+
+    // B7 in-memory fallback branch
+    `    <span class="cm"># In-memory fallback</span>\n` +
+    `    <span class="kw">for</span> e <span class="kw">in</span> entities:\n` +
+    `        _in_memory[pk][e[<span class="st">"RowKey"</span>]] = e\n` +
+    `    <span class="kw">return</span> <span class="fn">len</span>(entities)\n`,
+  ];
+
+  // Burst start times for right pane.
+  const storageBurstAt = [16.0, 18.0, 20.0, 22.0, 27.0, 29.0, 31.0];
+
+  /* =============================================================
+     Conftest content (dark overlay)
+     ============================================================= */
+  const conftestLines = [
+    `<span class="cm"># tests/conftest.py</span>\n`,
+    `<span class="kw">import</span> os\n`,
+    `os.environ.<span class="fn">pop</span>(<span class="st">"AZURE_STORAGE_CONNECTION_STRING"</span>, <span class="kw">None</span>)\n`,
+    `<span class="cm"># tests run against in-memory fallback only.</span>\n`,
+  ];
+  const conftestAt = [33.2, 33.7, 34.2, 34.7];
+
+  /* =============================================================
+     Helpers: paste-burst with chunked (1-1-3) reveal
+     We append the entire HTML burst to a hidden buffer first to get
+     final character count, then progressively reveal characters by
+     re-rendering from the source string with substring().
+     ============================================================= */
+
+  function scheduleBurst(tl, el, html, at, sfxOnce) {
+    // estimate visible character count by stripping HTML tags
+    const visible = html.replace(/<[^>]+>/g, '');
+    const totalChars = visible.length;
+    const tickMs = 14;             // ms per "1" in the 1-1-3 grouping
+    // chunk plan
+    let chunks = []; let i = 0, phase = 0;
+    while (i < totalChars) {
+      const n = phase === 2 ? 3 : 1;
+      const take = Math.min(n, totalChars - i);
+      chunks.push(take);
+      i += take; phase = (phase + 1) % 3;
+    }
+
+    // play one typing burst at the start
+    if (sfxOnce) {
+      tl.call(() => playSfx(sfxType), null, at);
+    }
+
+    // For each chunk we reveal a slice of the underlying HTML up to
+    // the visible-char count. We need a function to map visible idx
+    // → html idx so tags don't break.
+    function htmlSliceForVisible(htmlSrc, n) {
+      let out = '', vCount = 0, j = 0;
+      while (j < htmlSrc.length && vCount < n) {
+        if (htmlSrc[j] === '<') {
+          const close = htmlSrc.indexOf('>', j);
+          if (close === -1) { out += htmlSrc.slice(j); break; }
+          out += htmlSrc.slice(j, close + 1);
+          j = close + 1;
+        } else if (htmlSrc[j] === '&') {
+          // handle entities (&gt; &lt; &amp; etc.) as 1 visible char
+          const semi = htmlSrc.indexOf(';', j);
+          if (semi !== -1 && semi - j <= 6) {
+            out += htmlSrc.slice(j, semi + 1);
+            j = semi + 1;
+            vCount += 1;
+          } else {
+            out += htmlSrc[j]; j += 1; vCount += 1;
+          }
+        } else {
+          out += htmlSrc[j]; j += 1; vCount += 1;
+        }
+      }
+      // append any closing tags after last visible char
+      while (j < htmlSrc.length && htmlSrc[j] === '<') {
+        const close = htmlSrc.indexOf('>', j);
+        if (close === -1) break;
+        out += htmlSrc.slice(j, close + 1);
+        j = close + 1;
+      }
+      return out;
+    }
+
+    // Each burst keeps a running "base" for the element by closing
+    // over the buffer object.
+    let visSoFar = 0;
+    chunks.forEach((take, idx) => {
+      visSoFar += take;
+      const target = visSoFar;
+      tl.call(() => {
+        // accumulate by appending to el.dataset.buffer (raw html accumulated)
+        // We store the cumulative html for this burst on a per-burst slot
+        // and build the full element html from all completed bursts + this one.
+        scheduleBurst._partial = scheduleBurst._partial || new WeakMap();
+        const partial = scheduleBurst._partial.get(el) || { committed: '', current: '', currentSrc: '' };
+        partial.currentSrc = html;
+        partial.current = htmlSliceForVisible(html, target);
+        el.innerHTML = partial.committed + partial.current;
+        scheduleBurst._partial.set(el, partial);
+      }, null, at + (idx * tickMs) / 1000);
+    });
+
+    // commit the burst at the end so the next burst appends after it
+    const totalDur = (chunks.length * tickMs) / 1000;
+    tl.call(() => {
+      scheduleBurst._partial = scheduleBurst._partial || new WeakMap();
+      const partial = scheduleBurst._partial.get(el) || { committed: '', current: '', currentSrc: '' };
+      partial.committed += html;
+      partial.current = '';
+      partial.currentSrc = '';
+      el.innerHTML = partial.committed;
+      scheduleBurst._partial.set(el, partial);
+    }, null, at + totalDur + 0.001);
+
+    return totalDur;
+  }
+
+  /* ===== 0.0 - 1.0 : both panes fade in ===== */
+  tl.to(paneAuth,    { opacity: 1, y: 0, duration: 0.65, ease: ease1 }, 0.10);
+  tl.to(paneStorage, { opacity: 1, y: 0, duration: 0.65, ease: ease1 }, 0.25);
+
+  /* ===== Left pane bursts ===== */
+  authBursts.forEach((html, i) => {
+    scheduleBurst(tl, authCode, html, authBurstAt[i], true);
+  });
+
+  /* M15 dict-key flips (B4 lands ~7.0s, give each key ~0.18s lead after burst start) */
+  // Burst 4 starts at 7.0; chunks reveal over ~1.8s. The keys land roughly evenly through
+  // the burst — flip them at +0.45, +0.85, +1.25, +1.65.
+  const keyFlipTimes = [
+    { id: 'k-sub',  t: 7.45 },
+    { id: 'k-role', t: 7.85 },
+    { id: 'k-iat',  t: 8.25 },
+    { id: 'k-exp',  t: 8.65 },
+  ];
+  keyFlipTimes.forEach(k => {
+    tl.call(() => {
+      const node = document.querySelector(`[data-flip="${k.id}"]`);
+      if (node) node.classList.add('lit');
+    }, null, k.t);
+  });
+
+  /* ===== Caption auth slide-in at 8.0s (M11) + click SFX ===== */
+  tl.call(() => playSfx(sfxClick), null, 8.0);
+  tl.to(capAuth, { opacity: 1, x: 0, duration: 0.45, ease: ease2 }, 8.0);
+
+  /* ===== 14.0 - 16.0 brief pause (no-op) ===== */
+
+  /* ===== Right pane bursts ===== */
+  storageBursts.forEach((html, i) => {
+    scheduleBurst(tl, storageCode, html, storageBurstAt[i], true);
+  });
+
+  /* M15 flip on `conn` early-return key (after B3 ~22.0s, lands ~22.6s) */
+  tl.call(() => {
+    const node = document.querySelector('[data-flip="k-conn"]');
+    if (node) node.classList.add('lit');
+  }, null, 22.6);
+
+  /* ===== M6 step-zoom on right pane at 23.0s -> 25.0s ===== */
+  // We scale the .pane-code container via transform; transform-origin is
+  // the y-coordinate of the `if not conn:` line within the pane.
+  // The line is roughly the 5th visible line of code (header + comment
+  // line + blank + def + read + this) — top:80px stage + pane padding 22 +
+  // header+margin (~38) = ~140px from pane top, then 4 lines * 22*1.55 ≈ 137px
+  // → roughly y ≈ 277px from pane top.  We anchor transform-origin there.
+  tl.call(() => playSfx(sfxWhoosh), null, 23.0);
+  tl.to(storageCode, {
+    scale: 1.4,
+    duration: 0.40,
+    ease: ease1,
+    transformOrigin: '120px 195px',
+  }, 23.0);
+  tl.to(capStorage, { opacity: 1, x: 0, duration: 0.40, ease: ease2 }, 23.2);
+
+  /* ===== Zoom out at 25.0s ===== */
+  tl.call(() => playSfx(sfxWhoosh), null, 25.0);
+  tl.to(storageCode, {
+    scale: 1.0,
+    duration: 0.45,
+    ease: ease1,
+    transformOrigin: '120px 195px',
+  }, 25.0);
+
+  /* ===== Right caption click at 27.0s (per SFX cue table) ===== */
+  tl.call(() => playSfx(sfxClick), null, 27.0);
+
+  /* ===== Conftest overlay slide-up at 33.0s (M10) ===== */
+  tl.call(() => playSfx(sfxWhoosh), null, 33.0);
+  tl.call(() => playSfx(sfxClick),  null, 33.0);
+  tl.to(conftestOv, {
+    y: -220, duration: 0.35, ease: ease1
+  }, 33.0);
+
+  /* Conftest caption slide-in (sage) */
+  tl.to(capConftest, { opacity: 1, x: 0, duration: 0.40, ease: ease2 }, 33.15);
+
+  /* Conftest lines type in at 33.2 / 33.7 / 34.2 / 34.7 */
+  conftestLines.forEach((html, i) => {
+    scheduleBurst(tl, conftestCode, html, conftestAt[i], true);
+  });
+
+  /* ===== 36.0 - 38.0 hold ===== */
+
+  /* ===== 38.0 - 38.5 M25 whip-pan out ===== */
+  tl.call(() => playSfx(sfxWhoosh), null, 38.0);
+  tl.to([paneAuth, paneStorage], {
+    x: -3000,
+    opacity: 0,
+    filter: 'blur(12px)',
+    duration: 0.50,
+    ease: 'power3.in'
+  }, 38.0);
+  tl.to(conftestOv, {
+    y: 220,
+    duration: 0.50,
+    ease: 'power3.in'
+  }, 38.0);
+  tl.to([capAuth, capStorage, capConftest], {
+    opacity: 0,
+    duration: 0.30,
+    ease: 'sine.in'
+  }, 38.0);
+
+  /* Scene ends at 40.0 s. Hold black-ish empty stage for the last 1.5s. */
+})();
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>
