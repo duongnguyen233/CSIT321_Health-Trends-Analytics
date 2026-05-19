@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 15 - Recording Battery (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+  --win-bg:       #FFFFFF;
+  --win-chrome:   #F2EEE4;
+  --win-border:   #E2DCCC;
+}
+
+body {
+  background: var(--paper);
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* Iron Rule: zoom not transform:scale; transform-origin:0 0 on frame-wrap */
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+}
+
+/* ===== Light cream paper stage ===== */
+.stage {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 20% 25%, rgba(159,180,160,0.10), transparent 55%),
+    radial-gradient(circle at 78% 72%, rgba(159,180,160,0.08), transparent 60%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* paper grain */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.35;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+  z-index:2;
+}
+
+/* ===== Watermarks ===== */
+.watermark-bl {
+  position:absolute; bottom:36px; left:48px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:36px; right:48px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+
+/* ===== Tablet device chassis (physical dark bezel -- device not stage) ===== */
+#tablet {
+  position:absolute;
+  /* centred in upper ~70% of frame so console panel gets the bottom */
+  left:50%; top:50%;
+  transform:translate(-50%, -54%) rotateY(-8deg);
+  transform-style:preserve-3d;
+  width:740px; height:940px;
+  border-radius:44px; padding:40px;
+  background:linear-gradient(180deg, #1F2622, #0E1211);
+  box-shadow:
+    0 0 80px rgba(159,180,160,0.18),
+    0 48px 96px rgba(0,0,0,0.38);
+  z-index:20;
+}
+
+/* Tablet on-screen UI: light theme matching VoiceRecordPage.jsx */
+.tablet-screen {
+  width:100%; height:100%;
+  background:var(--paper); border-radius:22px;
+  overflow:hidden; position:relative;
+}
+
+/* Tablet header */
+.t-header {
+  padding:18px 22px;
+  border-bottom:1px solid #E5E0D5;
+  display:flex; align-items:center; gap:10px;
+}
+.t-header .status-dot {
+  width:10px; height:10px; border-radius:50%;
+  background:var(--sage);
+  box-shadow:0 0 10px rgba(159,180,160,0.7);
+  flex-shrink:0;
+}
+.t-header .title-text {
+  font-family:"Geist",sans-serif; font-weight:500; font-size:15px;
+  color:var(--ink-900);
+}
+
+/* Stage indicator dots row */
+#stage-dots {
+  padding:16px 22px;
+  display:flex; gap:22px; align-items:center;
+}
+.stage-dot {
+  font-family:"Geist",sans-serif; font-size:20px;
+  color:var(--ink-300); transition:color 0.3s;
+}
+.stage-dot.active { color:var(--sage-ink); }
+.stage-dot.done   { color:var(--sage);     }
+
+/* Context chips */
+#context-chips {
+  padding:0 22px 14px; display:flex; gap:8px; flex-wrap:wrap;
+}
+.context-chip {
+  font-family:"Geist",sans-serif; font-size:12px; font-weight:500;
+  color:var(--ink-700);
+  background:var(--win-chrome); border:1px solid var(--win-border);
+  border-radius:6px; padding:5px 12px;
+  cursor:pointer; transition:background 0.2s, color 0.2s;
+}
+.context-chip.checked {
+  background:var(--sage-tint); color:var(--sage-ink);
+  border-color:rgba(75,106,85,0.22);
+}
+
+/* Stage card host */
+#stage-card-host {
+  padding:16px 22px;
+}
+.stage-card {
+  background:var(--win-bg); border:1px solid #E5E0D5;
+  border-radius:12px; padding:20px;
+}
+.sc-label {
+  font-family:"Geist",sans-serif; font-weight:600; font-size:14px;
+  color:var(--ink-700);
+}
+.sc-prompt {
+  margin-top:8px;
+  font-family:"Instrument Serif",serif; font-weight:400; font-size:24px;
+  color:var(--ink-900); line-height:1.25;
+}
+.sc-hint {
+  margin-top:10px;
+  font-family:"Geist",sans-serif; font-size:12px; font-style:italic;
+  color:var(--ink-500);
+}
+
+/* Record area */
+#record-area {
+  padding:14px 22px;
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+}
+#mic-icon {
+  width:88px; height:88px; border-radius:50%;
+  background:var(--sage);
+  box-shadow:0 0 24px rgba(159,180,160,0.45);
+  display:flex; align-items:center; justify-content:center;
+  font-size:42px;
+}
+#waveform {
+  display:flex; gap:4px; height:56px; align-items:flex-end;
+}
+.bar {
+  width:7px; height:4px;
+  background:var(--sage); border-radius:2px;
+}
+#progress-arc { display:block; }
+#btn-record {
+  padding:12px 26px;
+  background:var(--sage); color:#FFFFFF;
+  font-family:"Geist",sans-serif; font-weight:600; font-size:16px;
+  border:none; border-radius:10px; cursor:pointer;
+}
+
+/* Processing panel (replaces stage card + record area after stage 4) */
+#processing-panel {
+  display:none;
+  padding:24px 22px; align-items:center; justify-content:center;
+  flex-direction:column; gap:20px;
+}
+#processing-panel.visible { display:flex; }
+.spinner-wrap {
+  position:relative; width:100px; height:100px;
+}
+.spinner-wrap svg { position:absolute; inset:0; animation:spin 1.1s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.processing-label {
+  font-family:"Geist",sans-serif; font-weight:500; font-size:18px;
+  color:var(--ink-500);
+}
+
+/* ===== Dark console panel (IDE sub-panel on cream stage) ===== */
+#console {
+  position:absolute; bottom:0; left:60px; right:60px; height:300px;
+  background:rgba(14,18,17,0.96);
+  border:1px solid var(--ink-700);
+  border-radius:12px 12px 0 0;
+  padding:16px 22px;
+  font-family:"JetBrains Mono",monospace; font-size:14px; line-height:1.6;
+  color:#F6F2EB;
+  overflow:hidden;
+  z-index:30;
+  opacity:0;
+}
+.term-line { display:none; }
+.term-line.visible { display:block; }
+.term-ok   { color:#9FB4A0; }
+.term-dim  { color:#6B7570; }
+.term-hi   { color:#C8B89B; }
+
+/* ===== PyAV annotation overlay ===== */
+#pyav-annotation {
+  position:absolute;
+  right:80px; bottom:330px;
+  background:var(--win-bg);
+  border:1px solid var(--win-border);
+  border-radius:10px;
+  padding:16px 24px;
+  font-family:"Geist",sans-serif; font-size:17px; font-weight:500;
+  color:var(--ink-700);
+  box-shadow:0 8px 24px rgba(60,55,40,0.12);
+  max-width:540px;
+  opacity:0;
+  z-index:40;
+}
+#pyav-annotation .tag-label {
+  font-family:"Geist Mono",monospace; font-size:11px; font-weight:600;
+  letter-spacing:0.14em;
+  color:var(--sage-ink);
+  display:block; margin-bottom:6px;
+}
+
+/* ===== Finger cursor (64x64 -- tablet context, per QA checklist) ===== */
+#finger-cursor {
+  position:absolute;
+  width:64px; height:64px;
+  border-radius:50%;
+  border:3px solid var(--sage-ink);
+  background:rgba(75,106,85,0.12);
+  pointer-events:none;
+  z-index:50;
+  display:none;
+  transform:translate(-50%,-50%);
+}
+
+/* ===== Curtain ===== */
+#curtain {
+  position:absolute; inset:0;
+  background:#0E1211; opacity:0;
+  pointer-events:none; z-index:100;
+}
+
+/* ===== Console zoom-lens overlay (M6 zoom of a single line) ===== */
+#pyav-zoom-line {
+  position:absolute;
+  left:60px; bottom:218px; right:60px;
+  background:rgba(14,18,17,0.97);
+  border:1px solid var(--sage-ink);
+  border-radius:8px;
+  padding:12px 22px;
+  font-family:"JetBrains Mono",monospace; font-size:22px; color:#9FB4A0;
+  z-index:35;
+  opacity:0;
+  transform-origin:0 100%;
+}
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO · CARE-DATA · 15 / 12</div>
+
+  <!-- ===== Tablet device ===== -->
+  <div id="tablet">
+    <div class="tablet-screen">
+
+      <!-- Header -->
+      <div class="t-header">
+        <div class="status-dot"></div>
+        <div class="title-text">Daily check-in &middot; Resident, Room 12B &middot; 12 May 2026</div>
+      </div>
+
+      <!-- Stage indicator dots -->
+      <div id="stage-dots">
+        <span class="stage-dot active" data-stage="1">&#9679;</span>
+        <span class="stage-dot" data-stage="2">&#9675;</span>
+        <span class="stage-dot" data-stage="3">&#9675;</span>
+        <span class="stage-dot" data-stage="4">&#9675;</span>
+      </div>
+
+      <!-- Context flag chips -->
+      <div id="context-chips">
+        <button class="context-chip" data-key="cold">Cold &#9744;</button>
+        <button class="context-chip" data-key="dentures">Dentures out &#9744;</button>
+        <button class="context-chip" data-key="just-woke" id="chip-just-woke">Just woke up &#9744;</button>
+        <button class="context-chip" data-key="pain">Pain &#9744;</button>
+      </div>
+
+      <!-- Stage card host -->
+      <div id="stage-card-host">
+        <div class="stage-card" id="stage-card-initial">
+          <div class="sc-label">Stage 1</div>
+          <div class="sc-prompt">Hold the sound &ldquo;aaaah&rdquo; for 5 seconds.</div>
+          <div class="sc-hint">Sustained vowel.</div>
+        </div>
+      </div>
+
+      <!-- Record area -->
+      <div id="record-area">
+        <div id="mic-icon">&#127908;</div>
+
+        <!-- Live waveform: 24 sage bars -->
+        <div id="waveform"></div>
+
+        <!-- Progress arc (clockwise) -->
+        <svg id="progress-arc" width="110" height="110">
+          <circle cx="55" cy="55" r="47" stroke="rgba(159,180,160,0.20)" stroke-width="4" fill="none"/>
+          <circle id="arc-fill" cx="55" cy="55" r="47"
+                  stroke="#9FB4A0" stroke-width="4" fill="none"
+                  stroke-dasharray="295.3" stroke-dashoffset="295.3"
+                  transform="rotate(-90 55 55)"/>
+        </svg>
+
+        <button id="btn-record">Start</button>
+      </div>
+
+      <!-- Processing panel (shown after stage 4 completes) -->
+      <div id="processing-panel">
+        <div class="spinner-wrap">
+          <svg width="100" height="100">
+            <circle cx="50" cy="50" r="42" stroke="rgba(159,180,160,0.20)" stroke-width="5" fill="none"/>
+            <circle cx="50" cy="50" r="42" stroke="#9FB4A0" stroke-width="5" fill="none"
+                    stroke-dasharray="263.9" stroke-dashoffset="197.9"
+                    transform="rotate(-90 50 50)"/>
+          </svg>
+        </div>
+        <div class="processing-label">Processing...</div>
+      </div>
+
+    </div><!-- /tablet-screen -->
+  </div><!-- /tablet -->
+
+  <!-- ===== Dark console panel ===== -->
+  <div id="console">
+    <div class="term-line" id="tl-01"><span class="term-dim">[09:12:04]</span> <span class="term-ok">getUserMedia ✓</span> <span class="term-dim">{channelCount:1, EC:on, NS:off, AGC:off}</span></div>
+    <div class="term-line" id="tl-02"><span class="term-dim">[09:12:05]</span> MediaRecorder started <span class="term-dim">(mimeType: audio/webm;codecs=opus, 96 kbps)</span></div>
+    <div class="term-line" id="tl-03"><span class="term-dim">[09:12:10]</span> stage 1 (vowel) blob <span class="term-hi">28.1 KB</span>, duration 5.02 s</div>
+    <div class="term-line" id="tl-04"><span class="term-dim">[09:12:11]</span> POST /api/voice/v2/upload <span class="term-ok">&#8594; 202 Accepted</span></div>
+    <div class="term-line" id="tl-05"><span class="term-dim">[09:12:11]</span> server: <span class="term-ok">PyAV decode webm/opus &#8594; wav 16 kHz mono</span> <span class="term-ok">&#10003;</span></div>
+    <div class="term-line" id="tl-06"><span class="term-dim">[09:12:12]</span> feature extraction queued <span class="term-dim">(job v2-...e2c)</span></div>
+    <div class="term-line" id="tl-07"><span class="term-dim">[09:12:16]</span> stage 2 (DDK) blob <span class="term-hi">28.4 KB</span>, duration 5.01 s</div>
+    <div class="term-line" id="tl-08"><span class="term-dim">[09:12:17]</span> POST /api/voice/v2/upload <span class="term-ok">&#8594; 202 Accepted</span></div>
+    <div class="term-line" id="tl-09"><span class="term-dim">[09:12:17]</span> server: <span class="term-ok">PyAV decode webm/opus &#8594; wav 16 kHz mono</span> <span class="term-ok">&#10003;</span></div>
+    <div class="term-line" id="tl-10"><span class="term-dim">[09:12:24]</span> stage 3 (passage) blob <span class="term-hi">28.0 KB</span>, duration 5.03 s</div>
+    <div class="term-line" id="tl-11"><span class="term-dim">[09:12:25]</span> POST /api/voice/v2/upload <span class="term-ok">&#8594; 202 Accepted</span></div>
+    <div class="term-line" id="tl-12"><span class="term-dim">[09:12:25]</span> server: <span class="term-ok">PyAV decode webm/opus &#8594; wav 16 kHz mono</span> <span class="term-ok">&#10003;</span></div>
+    <div class="term-line" id="tl-13"><span class="term-dim">[09:12:32]</span> stage 4 (open prompt) blob <span class="term-hi">27.9 KB</span>, duration 5.00 s</div>
+    <div class="term-line" id="tl-14"><span class="term-dim">[09:12:33]</span> POST /api/voice/v2/upload <span class="term-ok">&#8594; 202 Accepted</span></div>
+    <div class="term-line" id="tl-15"><span class="term-dim">[09:12:33]</span> server: <span class="term-ok">PyAV decode webm/opus &#8594; wav 16 kHz mono</span> <span class="term-ok">&#10003;</span></div>
+    <div class="term-line" id="tl-16"><span class="term-dim">[09:12:48]</span> all 4 stages collected, <span class="term-hi">n_blobs=4</span>, total 112.4 KB</div>
+    <div class="term-line" id="tl-17"><span class="term-dim">[09:12:49]</span> context flags updated: <span class="term-hi">{just_woke_up: true}</span></div>
+    <div class="term-line" id="tl-18">feature: <span class="term-ok">opensmile eGeMAPSv02: 88 functionals</span> <span class="term-ok">&#10003;</span> <span class="term-dim">(1.4 s)</span></div>
+    <div class="term-line" id="tl-19">feature: <span class="term-ok">parselmouth Praat: jitter/shimmer/HNR/CPP/MPT 9-d</span> <span class="term-ok">&#10003;</span> <span class="term-dim">(0.6 s)</span></div>
+    <div class="term-line" id="tl-20">feature: <span class="term-ok">faster-whisper + spacy linguistic 9-d</span> <span class="term-ok">&#10003;</span> <span class="term-dim">(0.2 s)</span></div>
+    <div class="term-line" id="tl-21">feature: <span class="term-ok">DDK rate + ISI CV 2-d</span> <span class="term-ok">&#10003;</span> <span class="term-dim">(0.1 s)</span></div>
+    <div class="term-line" id="tl-22"><span class="term-ok">build_full_vector()</span> <span class="term-dim">&#8594; ndarray(108,)</span>  <span class="term-dim"># 88 + 9 + 9 + 2 = 108</span></div>
+  </div>
+
+  <!-- ===== PyAV zoom line (M6 highlight beat) ===== -->
+  <div id="pyav-zoom-line">
+    <span style="color:#6B7570;">[09:12:11]</span> server: <span style="color:#9FB4A0;">PyAV decode webm/opus &#8594; wav 16 kHz mono</span> <span style="color:#9FB4A0;">&#10003;</span>
+  </div>
+
+  <!-- ===== PyAV annotation card ===== -->
+  <div id="pyav-annotation">
+    <span class="tag-label">ENGINEERING NOTE</span>
+    PyAV fallback, no system ffmpeg required, works on any host.
+  </div>
+
+  <!-- ===== Finger cursor (64x64 tablet metaphor) ===== -->
+  <div id="finger-cursor"></div>
+
+  <!-- Curtain -->
+  <div id="curtain"></div>
+
+  <!-- SFX (only the three canonical files) -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"       preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3"  preload="auto"></audio>
+</div><!-- /frame-wrap -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function () {
+  await document.fonts.ready;
+
+  /* ── Iron Rule: fit via zoom, transform-origin:0 0 ── */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((window.innerWidth  - fw) / 2) + 'px';
+    frame.style.top  = ((window.innerHeight - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* ── Refs ── */
+  const tablet       = document.getElementById('tablet');
+  const console_     = document.getElementById('console');
+  const pyavZoom     = document.getElementById('pyav-zoom-line');
+  const pyavAnno     = document.getElementById('pyav-annotation');
+  const cursor       = document.getElementById('finger-cursor');
+  const curtain      = document.getElementById('curtain');
+  const stageDots    = document.querySelectorAll('.stage-dot');
+  const contextChips = document.querySelectorAll('.context-chip');
+  const chipJustWoke = document.getElementById('chip-just-woke');
+  const stageCardHost= document.getElementById('stage-card-host');
+  const recordArea   = document.getElementById('record-area');
+  const procPanel    = document.getElementById('processing-panel');
+  const arcFill      = document.getElementById('arc-fill');
+  const btnRecord    = document.getElementById('btn-record');
+  const micIcon      = document.getElementById('mic-icon');
+  const waveformEl   = document.getElementById('waveform');
+  const sfxType      = document.getElementById('sfx-type');
+  const sfxWhoosh    = document.getElementById('sfx-whoosh');
+  const sfxClick     = document.getElementById('sfx-click');
+
+  /* ── Easing ── */
+  const ease1 = 'cubic-bezier(0.16,0.85,0.30,1)';
+  const ease2 = 'cubic-bezier(0.22,0.85,0.30,1)';
+
+  /* ── SFX helpers ── */
+  function playType()   { try { sfxType.currentTime  = 0; sfxType.play();   } catch(_){} }
+  function playWhoosh() { try { sfxWhoosh.currentTime = 0; sfxWhoosh.play(); } catch(_){} }
+  function playClick(vol) {
+    try { sfxClick.currentTime = 0; sfxClick.volume = (vol != null ? vol : 1.0); sfxClick.play(); } catch(_){}
+  }
+
+  /* ── Build 24-bar waveform ── */
+  for (let i = 0; i < 24; i++) {
+    const b = document.createElement('div');
+    b.className = 'bar';
+    waveformEl.appendChild(b);
+  }
+  const bars = waveformEl.querySelectorAll('.bar');
+
+  let waveInterval = null;
+  function startWaveform(durationSec) {
+    stopWaveform();
+    waveInterval = setInterval(() => {
+      bars.forEach(b => {
+        b.style.height = (4 + Math.random() * 48) + 'px';
+      });
+    }, 70);
+    setTimeout(stopWaveform, durationSec * 1000);
+  }
+  function stopWaveform() {
+    if (waveInterval) { clearInterval(waveInterval); waveInterval = null; }
+    bars.forEach(b => { b.style.height = '4px'; });
+  }
+
+  /* ── Progress arc: stroke-dasharray = 2*pi*47 = ~295.3 ── */
+  const ARC_CIRC = 295.3;
+  function setArcPct(pct) {
+    arcFill.setAttribute('stroke-dashoffset', ARC_CIRC * (1 - pct));
+  }
+  setArcPct(0);
+
+  /* ── Stage card renderer ── */
+  const STAGES = [
+    { title:'Stage 1', prompt:'Hold the sound “aaaah” for 5 seconds.', hint:'Sustained vowel.' },
+    { title:'Stage 2', prompt:'Say “puh-puh-puh” as fast as you can for 5 seconds.', hint:'DDK.' },
+    { title:'Stage 3', prompt:'Read aloud: “The rainbow is a division of white light…”', hint:'Passage.' },
+    { title:'Stage 4', prompt:'Tell me about your morning.', hint:'Open prompt.' },
+  ];
+  function renderStageCard(idx) {
+    const s = STAGES[idx];
+    stageCardHost.innerHTML =
+      '<div class="stage-card">' +
+        '<div class="sc-label">' + s.title + '</div>' +
+        '<div class="sc-prompt">' + s.prompt + '</div>' +
+        '<div class="sc-hint">' + s.hint + '</div>' +
+      '</div>';
+  }
+
+  /* ── Reveal a console term-line ── */
+  function revealLine(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('visible');
+  }
+
+  /* ── Move finger cursor to an (x,y) in frame coords ── */
+  function moveCursor(x, y) {
+    cursor.style.display = 'block';
+    cursor.style.left = x + 'px';
+    cursor.style.top  = y + 'px';
+  }
+  function hideCursor() { cursor.style.display = 'none'; }
+
+  /* ── Dot state helpers ── */
+  function dotActive(i) {
+    stageDots.forEach((d, idx) => {
+      d.classList.toggle('active', idx === i);
+      if (idx < i) d.classList.add('done');
+    });
+  }
+  function dotDone(i) {
+    stageDots[i].textContent = '✓';
+    stageDots[i].classList.add('done');
+    stageDots[i].classList.remove('active');
+  }
+
+  /* ── Initial state ── */
+  gsap.set(tablet,    { opacity:0 });
+  gsap.set(console_,  { opacity:0 });
+  gsap.set(pyavZoom,  { opacity:0 });
+  gsap.set(pyavAnno,  { opacity:0, x:30 });
+  gsap.set(curtain,   { opacity:0 });
+  contextChips.forEach(c => gsap.set(c, { opacity:0, y:8 }));
+  stageDots.forEach(d => gsap.set(d, { opacity:0 }));
+  renderStageCard(0);
+  setArcPct(0);
+
+  const tl = gsap.timeline();
+
+  /* ==============================================================
+     0.0 - 2.0 s  |  Tablet settles upright from -8deg (Scene 14 handoff)
+     ============================================================== */
+  tl.to(tablet, { opacity:1, duration:0.3, ease:'sine.out' }, 0.0);
+  /* rotateY -8deg -> 0 over 1.0s */
+  tl.to(tablet, {
+    rotateY:0,
+    duration:1.0, ease:ease2
+  }, 0.0);
+  /* Console panel fades in */
+  tl.to(console_, { opacity:1, duration:0.5, ease:'sine.out' }, 0.4);
+
+  /* Stage dots stagger in */
+  stageDots.forEach((d, i) => {
+    tl.to(d, { opacity:1, duration:0.3, ease:'sine.out' }, 0.6 + i * 0.1);
+  });
+  /* Context chips stagger in (M19) */
+  contextChips.forEach((c, i) => {
+    tl.to(c, { opacity:1, y:0, duration:0.3, ease:ease2 }, 0.9 + i * 0.08);
+  });
+
+  /* ==============================================================
+     2.0 - 9.0 s  |  Stage 1 -- Sustained vowel
+     ============================================================== */
+  /* 2.0: Stage 1 card slides in (M10) */
+  tl.fromTo(stageCardHost,
+    { opacity:0, y:18 },
+    { opacity:1, y:0, duration:0.45, ease:ease2 },
+  2.0);
+
+  /* 3.5: mic granted line + typing SFX */
+  tl.call(() => { revealLine('tl-01'); playType(); }, null, 3.5);
+
+  /* 4.0: finger cursor magnetic-snaps to Start button */
+  /* Start button is roughly at (tablet.left + 50%, record-area mid-bottom) */
+  /* In frame coords: tablet is centred at ~960px left, ~540px top;
+     button is ~580px below tablet top edge inside the 940px-tall chassis.
+     Approximated as frame (960, 740). */
+  tl.call(() => { moveCursor(960, 740); }, null, 4.0);
+
+  /* 4.5: Start click + typing SFX for MediaRecorder line */
+  tl.call(() => {
+    playClick(1.0);
+    revealLine('tl-02');
+    playType();
+    /* Mic pulse (M23): scale 1.0 <-> 1.05 every 0.6s */
+    gsap.to(micIcon, { scale:1.06, duration:0.3, yoyo:true, repeat:-1, ease:'sine.inOut' });
+    startWaveform(5.0);
+    /* Progress arc fills 0 -> 100% over 5.0 s */
+    gsap.to({}, {
+      duration:5.0,
+      onUpdate: function() { setArcPct(this.progress()); },
+      ease:'none'
+    });
+  }, null, 4.5);
+  tl.call(() => { hideCursor(); }, null, 4.55);
+
+  /* 9.0: Stage 1 ends -- blob line */
+  tl.call(() => {
+    revealLine('tl-03'); playType();
+    gsap.killTweensOf(micIcon); gsap.set(micIcon, { scale:1 });
+    stopWaveform();
+    setArcPct(0);
+  }, null, 9.0);
+
+  /* 9.0 - 16.5: POST, PyAV, queued lines + Stage 1 done state */
+  tl.call(() => { revealLine('tl-04'); playType(); }, null, 10.0);
+  tl.call(() => { revealLine('tl-05'); playType(); }, null, 11.0);
+  tl.call(() => { revealLine('tl-06'); playType(); }, null, 12.0);
+
+  /* Stage 1 dot morphs to checkmark */
+  tl.call(() => { dotDone(0); playClick(0.4); }, null, 14.0);
+
+  /* Stage 1 card slides up off-frame (M10 reverse) */
+  tl.to(stageCardHost, { opacity:0, y:-22, duration:0.35, ease:'power2.in' }, 14.2);
+
+  /* ==============================================================
+     16.5 - 18.5 s  |  M6 step-zoom: PyAV decode line highlight
+     ============================================================== */
+  tl.call(() => { playWhoosh(); }, null, 16.5);
+  /* Zoom-line expands */
+  tl.to(pyavZoom, { opacity:1, scaleY:1.0, duration:0.35, ease:ease1 }, 16.5);
+  tl.fromTo(pyavZoom, { scaleX:0.9 }, { scaleX:1.0, duration:0.35, ease:ease1 }, 16.5);
+  /* Annotation slides in */
+  tl.to(pyavAnno, { opacity:1, x:0, duration:0.45, ease:ease2 }, 16.8);
+
+  /* 18.5: Zoom out */
+  tl.call(() => { playWhoosh(); }, null, 18.5);
+  tl.to(pyavZoom, { opacity:0, duration:0.35, ease:'power2.in' }, 18.5);
+  tl.to(pyavAnno, { opacity:0, x:30, duration:0.35, ease:'power2.in' }, 18.5);
+
+  /* ==============================================================
+     20.0 - 27.0 s  |  Stage 2 -- DDK (puh-puh-puh)
+     ============================================================== */
+  tl.call(() => {
+    renderStageCard(1); dotActive(1);
+    gsap.fromTo(stageCardHost, { opacity:0, y:18 }, { opacity:1, y:0, duration:0.4, ease:ease2 });
+  }, null, 20.0);
+
+  tl.call(() => { moveCursor(960, 740); }, null, 20.8);
+  tl.call(() => {
+    playClick(1.0);
+    gsap.to(micIcon, { scale:1.06, duration:0.3, yoyo:true, repeat:-1, ease:'sine.inOut' });
+    startWaveform(5.0);
+    gsap.to({}, {
+      duration:5.0,
+      onUpdate: function() { setArcPct(this.progress()); },
+      ease:'none'
+    });
+  }, null, 21.5);
+  tl.call(() => { hideCursor(); }, null, 21.55);
+
+  tl.call(() => {
+    revealLine('tl-07'); playType();
+    gsap.killTweensOf(micIcon); gsap.set(micIcon, { scale:1 });
+    stopWaveform(); setArcPct(0);
+  }, null, 27.0);
+  tl.call(() => { revealLine('tl-08'); playType(); }, null, 27.5);
+  tl.call(() => { revealLine('tl-09'); playType(); }, null, 28.2);
+  tl.call(() => { dotDone(1); playClick(0.4); }, null, 28.8);
+  tl.to(stageCardHost, { opacity:0, y:-22, duration:0.35, ease:'power2.in' }, 29.0);
+
+  /* ==============================================================
+     34.0 - 34.0 s  |  Stage 3 -- Passage reading
+     (stage 3 runs 27 -> 34, mirroring stage 2's 7-s window)
+     ============================================================== */
+  tl.call(() => {
+    renderStageCard(2); dotActive(2);
+    gsap.fromTo(stageCardHost, { opacity:0, y:18 }, { opacity:1, y:0, duration:0.4, ease:ease2 });
+  }, null, 30.5);
+
+  tl.call(() => { moveCursor(960, 740); }, null, 31.2);
+  tl.call(() => {
+    playClick(1.0);
+    gsap.to(micIcon, { scale:1.06, duration:0.3, yoyo:true, repeat:-1, ease:'sine.inOut' });
+    startWaveform(5.0);
+    gsap.to({}, {
+      duration:5.0,
+      onUpdate: function() { setArcPct(this.progress()); },
+      ease:'none'
+    });
+  }, null, 31.8);
+  tl.call(() => { hideCursor(); }, null, 31.85);
+
+  tl.call(() => {
+    revealLine('tl-10'); playType();
+    gsap.killTweensOf(micIcon); gsap.set(micIcon, { scale:1 });
+    stopWaveform(); setArcPct(0);
+  }, null, 34.0);
+  tl.call(() => { revealLine('tl-11'); playType(); }, null, 34.5);
+  tl.call(() => { revealLine('tl-12'); playType(); }, null, 35.2);
+  tl.call(() => { dotDone(2); playClick(0.4); }, null, 35.8);
+  tl.to(stageCardHost, { opacity:0, y:-22, duration:0.35, ease:'power2.in' }, 36.2);
+
+  /* ==============================================================
+     37.0 - 41.0 s  |  Stage 4 -- Open prompt
+     ============================================================== */
+  tl.call(() => {
+    renderStageCard(3); dotActive(3);
+    gsap.fromTo(stageCardHost, { opacity:0, y:18 }, { opacity:1, y:0, duration:0.4, ease:ease2 });
+  }, null, 37.0);
+
+  tl.call(() => { moveCursor(960, 740); }, null, 37.8);
+  tl.call(() => {
+    playClick(1.0);
+    gsap.to(micIcon, { scale:1.06, duration:0.3, yoyo:true, repeat:-1, ease:'sine.inOut' });
+    startWaveform(5.0);
+    gsap.to({}, {
+      duration:5.0,
+      onUpdate: function() { setArcPct(this.progress()); },
+      ease:'none'
+    });
+  }, null, 38.4);
+  tl.call(() => { hideCursor(); }, null, 38.45);
+
+  /* 41.0: all 4 stages blob line */
+  tl.call(() => {
+    revealLine('tl-13'); playType();
+    gsap.killTweensOf(micIcon); gsap.set(micIcon, { scale:1 });
+    stopWaveform(); setArcPct(0);
+  }, null, 41.0);
+  tl.call(() => { revealLine('tl-14'); playType(); }, null, 41.3);
+  tl.call(() => { revealLine('tl-15'); playType(); }, null, 41.7);
+  tl.call(() => { dotDone(3); playClick(0.4); revealLine('tl-16'); }, null, 42.0);
+  tl.to(stageCardHost, { opacity:0, y:-22, duration:0.35, ease:'power2.in' }, 42.2);
+
+  /* ==============================================================
+     41.0 - 44.0 s  |  Context flag toggle -- Just woke up
+     ============================================================== */
+  /* Finger cursor snaps to chip -- chip is roughly at frame (680, 310)
+     (tablet left edge ~270px at frame scale, header ~110px, dots ~50px,
+      chip row ~50px, "Just woke up" is third chip at ~300+px from left) */
+  tl.call(() => { moveCursor(680, 315); }, null, 41.0);
+  tl.call(() => {
+    playClick(1.0);
+    chipJustWoke.textContent = 'Just woke up ☑';
+    chipJustWoke.classList.add('checked');
+    revealLine('tl-17'); playType();
+  }, null, 42.0);
+  tl.call(() => { hideCursor(); }, null, 42.1);
+
+  /* ==============================================================
+     44.0 - 50.0 s  |  Processing panel + feature extraction lines
+     ============================================================== */
+  tl.call(() => {
+    /* Collapse tablet UI to Processing panel */
+    recordArea.style.display = 'none';
+    procPanel.classList.add('visible');
+    /* Indeterminate spinner is pure CSS (animation:spin infinite in .spinner-wrap svg) */
+  }, null, 44.0);
+
+  tl.call(() => { revealLine('tl-18'); playType(); playClick(0.3); }, null, 44.5);
+  tl.call(() => { revealLine('tl-19'); playType(); playClick(0.3); }, null, 45.5);
+  tl.call(() => { revealLine('tl-20'); playType(); playClick(0.3); }, null, 46.5);
+  tl.call(() => { revealLine('tl-21'); playType(); playClick(0.3); }, null, 47.5);
+  tl.call(() => { revealLine('tl-22'); playType(); playClick(0.3); }, null, 48.5);
+
+  /* ==============================================================
+     50.0 - 55.0 s  |  M25 whip-pan exit to Scene 16
+     ============================================================== */
+  tl.call(() => { playWhoosh(); }, null, 50.0);
+  tl.to([tablet, console_],
+    { x:-2400, filter:'blur(12px)', opacity:0, duration:1.0, ease:'power3.in' },
+  50.0);
+
+  /* 51.0 - 55.0  hold on cream stage then curtain */
+  tl.to(curtain, { opacity:1, duration:0.35, ease:'power2.in' }, 54.6);
+
+  /* Scene total: 55.0 s */
+
+  /* ── Continuous tablet breathing (subtle, starts after settle) ── */
+  gsap.to(tablet, {
+    y:'+=5', duration:2.8, yoyo:true, repeat:-1, ease:'sine.inOut', delay:2.2
+  });
+
+})();
+</script>
+<script src="_nav.js" defer></script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "caredata-promo-technical",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "CareData 11-minute technical engineering film — Hyperframes + GSAP",
+  "scripts": {
+    "render": "node scripts/render-per-scene.mjs",
+    "render:scene": "node scripts/render-per-scene.mjs --scene",
+    "preview": "npx serve previews"
+  },
+  "devDependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0",
+    "playwright": "^1.60.0"
+  }
+}

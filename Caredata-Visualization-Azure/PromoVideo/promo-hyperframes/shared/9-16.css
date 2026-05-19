@@ -1,0 +1,192 @@
+/* =========================================================================
+   CareData Promo · 9:16 vertical cutdown reflow
+   -------------------------------------------------------------------------
+   Loaded by the vertical master composition (compositions/00-master-vertical.html).
+
+   Design intent
+   -------------
+   The horizontal scenes were authored against a 1920x1080 .frame-wrap. Each
+   scene's own fit() does Math.min(window.innerWidth/1920, window.innerHeight/1080),
+   which on a 1080x1920 portrait viewport collapses to width-fit (~0.5625) and
+   leaves ~1300px of empty vertical space below the frame.
+
+   Strategy
+   --------
+   1. WIDTH-FIT EVERY SCENE. Override .frame-wrap's intrinsic 1920x1080 to
+      1080x1920 and disable the per-scene transform set by fit() so the wrap
+      fills the portrait viewport directly. This lets internal flow/grid
+      layout reflow naturally to the narrower width.
+
+   2. STACK SIDE-BY-SIDE PANELS in the dashboard-heavy scenes (5/12 main-grid,
+      4 upload form, 7 benchmarking chart, 9 voice-link modal-grid). One column
+      reads better on portrait than two crammed columns at 0.56x.
+
+   3. TEXT-HEAVY SCENES (1/2/3/8/11/13/14/15/16) just inherit the new wrap size
+      and centre via existing absolute positioning (top:50%, left:50%, etc.).
+      Their absolute coords are mostly percentage-based so they re-centre cleanly.
+   ========================================================================= */
+
+
+/* -------------------------------------------------------------------------
+   GLOBAL FRAME OVERRIDE
+   Applies to every scene because every scene uses .frame-wrap as the host.
+   We force portrait dimensions and neutralise the inline transform that the
+   per-scene fit() function sets on resize.
+   ------------------------------------------------------------------------- */
+.frame-wrap{
+  width: 1080px !important;
+  height: 1920px !important;
+  transform: none !important;
+  transform-origin: 50% 50% !important;
+}
+
+/* The inner .stage element is `position:absolute; inset:0;` in every scene,
+   so it inherits the new portrait size automatically — nothing to do here. */
+
+
+/* =========================================================================
+   SCENE 4 · UPLOAD
+   The form is a column anyway, but the sidebar TOC sits beside the form via
+   a flex container. Stack TOC above form on portrait.
+   ========================================================================= */
+[data-composition-id="upload"] .frame-wrap > .stage{
+  /* nothing to reflow at the top level — the sub-blocks are absolutely
+     positioned. We just trust the absolute %-based coords to re-centre. */
+}
+
+
+/* =========================================================================
+   SCENE 5 · QI DASHBOARD
+   ------------------------------------------------------------------------
+   .body { display:flex } currently puts a 200px sidebar next to the main column.
+   On portrait we drop the sidebar (it's mostly chrome) and let .main fill 1080.
+   The 3-column .kpi-row, 2-column .charts-row and 4-column .qi-grid all need
+   to collapse to single column for legibility.
+   ========================================================================= */
+[data-composition-id="dashboard"] .body{
+  flex-direction: column !important;
+}
+[data-composition-id="dashboard"] .sidebar{
+  display: none !important;            /* sidebar is decorative chrome on portrait */
+}
+[data-composition-id="dashboard"] .main{
+  padding: 28px 36px 36px !important;
+}
+[data-composition-id="dashboard"] .h1-app{
+  font-size: 60px !important;
+}
+[data-composition-id="dashboard"] .sub-app{
+  font-size: 22px !important;
+  max-width: none !important;
+}
+[data-composition-id="dashboard"] .kpi-row{
+  grid-template-columns: 1fr 1fr 1fr !important;  /* keep 3 KPIs in a row, they're short */
+  gap: 16px !important;
+}
+[data-composition-id="dashboard"] .kpi-num{
+  font-size: 48px !important;
+}
+[data-composition-id="dashboard"] .charts-row{
+  grid-template-columns: 1fr !important;          /* stack the two charts */
+  gap: 18px !important;
+}
+[data-composition-id="dashboard"] .chart-svg{
+  height: 220px !important;                       /* taller charts now they're full-width */
+}
+[data-composition-id="dashboard"] .qi-grid{
+  grid-template-columns: 1fr 1fr !important;      /* 14 cards across 2 cols × 7 rows */
+  gap: 12px !important;
+}
+[data-composition-id="dashboard"] .qi-num{
+  font-size: 34px !important;
+}
+[data-composition-id="dashboard"] .app-card{
+  /* The original 82% × 82% card sits inside an 1080x1920 wrap, which is plenty
+     of vertical room. Pull the top up a bit and stretch the card taller so the
+     reflowed grid fits without scroll. */
+  top: 6% !important;
+  left: 4% !important;
+  width: 92% !important;
+  height: 88% !important;
+}
+
+
+/* =========================================================================
+   SCENE 7 · BENCHMARKING
+   The bar/percentile chart is wide. Force its container to 100% width and
+   let the SVG scale via preserveAspectRatio.
+   ========================================================================= */
+[data-composition-id="benchmarking"] .frame-wrap .chart-svg,
+[data-composition-id="benchmarking"] .frame-wrap svg.chart{
+  width: 100% !important;
+  height: auto !important;
+}
+
+
+/* =========================================================================
+   SCENE 9 · VOICE LINK
+   The modal-grid is `340px 1fr` (preview + QR side-by-side). Stack on portrait.
+   ========================================================================= */
+[data-composition-id="voice-link"] .modal-grid{
+  grid-template-columns: 1fr !important;
+  gap: 24px !important;
+}
+
+
+/* =========================================================================
+   SCENE 10 · RECORDING BATTERY
+   Cap the recording card width so it doesn't stretch awkwardly on 1080.
+   ========================================================================= */
+[data-composition-id="recording-battery"] .recording-card,
+[data-composition-id="recording-battery"] .battery-card{
+  max-width: 880px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+
+/* =========================================================================
+   SCENE 12 · NURSE DASHBOARD
+   Same .main-grid pattern as Scene 5: table + alerts feed side-by-side.
+   ========================================================================= */
+[data-composition-id="nurse-dashboard"] .main-grid{
+  grid-template-columns: 1fr !important;
+  gap: 18px !important;
+}
+[data-composition-id="nurse-dashboard"] .kpis{
+  grid-template-columns: 1fr 1fr !important;     /* 4 KPIs become 2x2 on portrait */
+  gap: 12px !important;
+}
+[data-composition-id="nurse-dashboard"] .app-card{
+  top: 6% !important;
+  left: 4% !important;
+  width: 92% !important;
+  height: 88% !important;
+}
+
+
+/* =========================================================================
+   SCENE 14 · AUDIT-READY PAYOFF
+   CTA row — if it uses a flex row, stack vertically.
+   ========================================================================= */
+[data-composition-id="audit-ready-payoff"] .cta-row{
+  flex-direction: column !important;
+  gap: 18px !important;
+  align-items: center !important;
+}
+
+
+/* =========================================================================
+   SCENE 16 · FINAL CARD
+   Brand mark + wordmark are siblings absolute-positioned. The horizontal
+   layout has the mark on the left and the wordmark to its right. On portrait
+   we want the mark stacked above the wordmark. Both elements are positioned
+   with top:50%/left:50% by GSAP, so we only need to make sure they don't
+   collide horizontally. We rely on the existing GSAP timeline; the centred
+   final state still reads on portrait because mark and text both end at
+   roughly the same x.
+   ========================================================================= */
+[data-composition-id="final-card"] .frame-wrap .mark{
+  /* Pull the mark up so the wordmark below it has breathing room. */
+  margin-top: -160px;
+}

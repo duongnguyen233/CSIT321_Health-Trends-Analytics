@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 2, Meet + Logo + Tagline pill (preview) | CareData promo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --cream:#F6F2EB;
+  --paper:#FBF8F2;
+  --ink-900:#1F2622;
+  --ink-700:#3D4743;
+  --ink-500:#6B7570;
+  --sage:#9FB4A0;
+  --sage-bright:#B8D1B5;
+  --sage-ink:#4B6A55;
+  --dusty-blue:#A6B6C4;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background:
+    radial-gradient(60vw 50vw at 50% 50%, rgba(159,180,160,0.06), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  color:var(--cream);
+  font-family:"Geist",ui-sans-serif,system-ui,sans-serif;
+  font-feature-settings:"ss01","cv11";
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.frame-wrap{
+  position:relative;
+  width:1920px; height:1080px;
+  /* transform-origin top-left so fit()'s scale(2) at 4K fills the canvas
+     from (0,0) → (3840,2160). Center origin shifts the scaled visual
+     off-canvas at 4K, leaving the right/bottom black. */
+  transform-origin:0 0;
+}
+.stage{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.12), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%, rgba(200,184,155,0.05), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  overflow:hidden;
+}
+
+.grain{
+  position:absolute; inset:0;
+  pointer-events:none;
+  opacity:0.05;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+.footer{
+  position:absolute; bottom:38px; left:60px;
+  font-family:"Geist",sans-serif;
+  font-weight:400;
+  font-size:11px;
+  letter-spacing:0.18em;
+  color:var(--cream);
+  opacity:0.45;
+}
+
+/* ===== Centred wrappers ===== */
+.meet-center, .logo-center{
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  z-index:10;
+}
+.meet-center{ z-index:11; }
+
+.meet-word{
+  font-family:"Instrument Serif", "EB Garamond", "Georgia", serif;
+  font-weight:400;
+  font-size:280px;
+  letter-spacing:-0.025em;
+  color:var(--cream);
+  white-space:nowrap;
+  line-height:1;
+  will-change:transform, opacity, filter;
+}
+
+.brand-stack{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:36px;
+  will-change:transform, opacity, filter;
+}
+
+.brandmark{
+  width:220px;
+  height:220px;
+  filter:drop-shadow(0 18px 36px rgba(0,0,0,0.35));
+}
+
+.wordmark{
+  font-family:"Geist",sans-serif;
+  font-weight:600;
+  font-size:96px;
+  letter-spacing:-0.02em;
+  color:var(--cream);
+  line-height:1;
+}
+
+/* ===== Sub-headline pill ===== */
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:14px;
+  padding:13px 26px;
+  border:1.5px solid rgba(159,180,160,0.55);
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(159,180,160,0.07), rgba(159,180,160,0.02));
+  white-space:nowrap;
+  font-family:"Geist",sans-serif;
+  font-weight:500;
+  font-size:28px;
+  letter-spacing:0.005em;
+  color:var(--cream);
+  box-shadow:
+    0 0 28px rgba(159,180,160,0.20),
+    0 0 60px rgba(159,180,160,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  overflow:hidden;
+  height:60px;
+}
+.pill-bullet{
+  width:10px; height:10px;
+  border-radius:50%;
+  background:var(--sage-bright);
+  flex-shrink:0;
+  box-shadow:0 0 10px rgba(184,209,181,0.65), 0 0 18px rgba(184,209,181,0.35);
+}
+.pill-word{
+  display:inline-block;
+  opacity:0;
+  flex-shrink:0;
+  white-space:nowrap;
+}
+
+/* spotlight glow that subtly intensifies when the logo lands */
+.spotlight{
+  position:absolute;
+  top:50%; left:50%;
+  width:900px; height:900px;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle, rgba(159,180,160,0.18) 0%, transparent 65%);
+  z-index:1;
+  pointer-events:none;
+  opacity:0;
+}
+
+.hud{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  background:rgba(15,15,17,0.85);
+  color:#EAE3D2; font-family:"Geist Mono", monospace; font-size:11px;
+  padding:8px 14px; border-radius:999px;
+  display:flex; gap:14px; align-items:center; z-index:100;
+  letter-spacing:0.06em;
+}
+.hud button{
+  appearance:none; border:1px solid #555; background:transparent; color:#EAE3D2;
+  font-family:inherit; font-size:11px; padding:3px 10px; border-radius:999px; cursor:pointer;
+  letter-spacing:0.06em;
+}
+.hud button:hover{ background:#222; }
+.hud .timer{ font-variant-numeric:tabular-nums; min-width:46px; }
+</style>
+</head>
+<body>
+
+<div class="frame-wrap" id="frame">
+  <div class="stage">
+    <div class="grain"></div>
+    <div class="footer">CSIT321&nbsp;CAPSTONE</div>
+
+    <div class="spotlight" id="spotlight"></div>
+
+    <div class="meet-center">
+      <div class="meet-word" id="meetWord">Meet</div>
+    </div>
+
+    <div class="logo-center">
+      <div class="brand-stack" id="logoWrap">
+        <svg class="brandmark" id="brandmark" viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="oklch(0.72 0.06 150)"/>
+              <stop offset="100%" stop-color="oklch(0.78 0.05 180)"/>
+            </linearGradient>
+          </defs>
+          <rect width="100" height="100" rx="22" fill="url(#brandGrad)"/>
+          <!-- EKG / heart-rate trace, drawn solid (no trim animation, logo arrives complete) -->
+          <path
+            d="M 22,55.6 L 32.08,55.6 L 37.68,44.4 L 45.52,64 L 53.36,33.2 L 61.2,55.6 L 78,55.6"
+            fill="none"
+            stroke="#FBF8F2"
+            stroke-width="4.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+        </svg>
+
+        <div class="wordmark">CareData</div>
+
+        <div class="pill" id="pill">
+          <span class="pill-bullet"></span>
+          <span class="pill-word">AI-powered</span>
+          <span class="pill-word">visualisation</span>
+          <span class="pill-word">engine</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hud">
+  <button id="replay">REPLAY</button>
+  <span class="timer" id="timer">0.00s</span>
+  <span style="opacity:.6">Scene 02 / Meet + Logo + Pill</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+function fit(){
+  const wrap = document.getElementById('frame');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  /* zoom not transform: scale — natively rasterise at projected resolution; prevents 4K pixel break on 3D-rotated descendants. See ~/.claude/skills/hyperframes-video/rendering.md */
+  wrap.style.zoom = s;
+}
+fit();
+window.addEventListener('resize', fit);
+
+let tl;
+let PILL_WIDTHS = [];
+let pillWords;
+
+function measurePillWidths(){
+  const pill = document.getElementById('pill');
+  pillWords = Array.from(pill.querySelectorAll('.pill-word'));
+  /* temporarily clear width constraint to measure natural sizes */
+  const savedWidth = pill.style.width;
+  pill.style.width = 'auto';
+  pillWords.forEach(w => { w.style.display = 'none'; });
+  const widths = [pill.scrollWidth];
+  for (let i = 0; i < pillWords.length; i++){
+    pillWords[i].style.display = 'inline-block';
+    widths.push(pill.scrollWidth);
+  }
+  /* reset to fully hidden state */
+  pillWords.forEach(w => { w.style.display = 'none'; });
+  pill.style.width = savedWidth;
+  return widths;
+}
+
+function build(){
+  /* Pre-measure pill widths once (must run after fonts loaded) */
+  PILL_WIDTHS = measurePillWidths();
+
+  /* Initial state */
+  gsap.set('#meetWord', { opacity: 0, scale: 0.06, x: 0, filter: 'blur(0px)', transformOrigin: '50% 50%' });
+  gsap.set('#logoWrap', { x: -2400, opacity: 0, filter: 'blur(8px)' });
+  gsap.set('#spotlight', { opacity: 0, scale: 0.7, transformOrigin: '50% 50%' });
+  gsap.set('#pill', { width: PILL_WIDTHS[0] });
+
+  tl = gsap.timeline({
+    paused: true,
+    onUpdate: () => {
+      document.getElementById('timer').textContent = tl.time().toFixed(2) + 's';
+    }
+  });
+
+  /* ============================================================
+     TOTAL 3.0s. Beat-locked at 120 BPM (0.5s per beat). 6 beats = 3.0s.
+     Re-paced 2026-05-09: Meet pause extended +0.25s (now 1 full beat),
+     all subsequent phases shifted +0.25s, Phase 4 changed from "fly toward
+     camera" (scale 4.6 zoom) to "fly away" (translate up + scale down +
+     fade) per user direction.
+        0.00 (b0)    "Meet" pops in (back.out 1.6, scale 0.06→1.0)
+        0.25 (b0.5)  Meet pop done, **pause 1 beat** (extended)
+        0.75 (b1.5)  Swap: "Meet" exits right + logo flies in from left
+        1.00 (b2)    Logo lands + settle bounce
+        1.25 (b2.5)  Settle done, brief held register
+        1.50 (b3)    "AI-powered" appears, pill grows
+        1.75 (b3.5)  "visualisation" appears, pill grows
+        2.00 (b4)    "engine" appears, pill grows
+        2.25 (b4.5)  Hold (brand stack visible)
+        2.50 (b5)    Hold (brand register continues)
+        2.70         Phase 4 quick ZOOM OUT (0.30s, scale 1.0→0.7, stays visible)
+        3.00 (b6)    end
+     ============================================================ */
+
+  /* reset DOM state on every replay */
+  tl.call(()=>{
+    pillWords.forEach(w => { w.style.display = 'none'; w.style.opacity = 0; });
+    document.getElementById('pill').style.width = PILL_WIDTHS[0] + 'px';
+  }, null, 0);
+
+  /* === Phase 1: 0.00 to 0.25  "Meet" pops in === */
+  tl.to('#meetWord', {
+    opacity: 1, scale: 1.0,
+    duration: 0.25,
+    ease: 'back.out(1.6)'
+  }, 0);
+
+  /* === PAUSE after Meet: 0.25 to 0.75 (1 beat — extended per user) === */
+
+  /* === Phase 2: 0.75 to 1.00  Swap, Meet exits right + logo flies in === */
+  tl.to('#meetWord', {
+    x: 2600, filter: 'blur(10px)', opacity: 0,
+    duration: 0.25, ease: 'power3.in'
+  }, 0.75);
+
+  tl.to('#logoWrap', {
+    x: 0, opacity: 1, filter: 'blur(0px)',
+    duration: 0.25, ease: 'power3.out'
+  }, 0.75);
+
+  /* Settle bounce — fully complete by 1.25 so the brief register hold
+     (1.25→1.50) has zero residual motion. */
+  tl.to('#logoWrap', {
+    scale: 1.025,
+    duration: 0.10,
+    ease: 'power2.out',
+    transformOrigin: '50% 50%'
+  }, 1.00);
+  tl.to('#logoWrap', {
+    scale: 1.0,
+    duration: 0.15,
+    ease: 'power2.inOut'
+  }, 1.10);
+
+  /* Spotlight blooms behind the logo. Tightened to 0.30s (was 0.40s) so
+     it lands by 1.25 instead of overrunning into the pill word reveals. */
+  tl.to('#spotlight', {
+    opacity: 1, scale: 1.0,
+    duration: 0.30,
+    ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 0.95);
+
+  /* === Phase 3: 1.50 onward  Pill expands word by word, every 0.25s. === */
+  const REVEAL_TIMES = [1.500, 1.750, 2.000];
+  REVEAL_TIMES.forEach((t, i) => {
+    /* show this word in DOM (display:inline-block so it occupies space) */
+    tl.call(() => {
+      pillWords[i].style.display = 'inline-block';
+      pillWords[i].style.opacity = 0;
+    }, null, t);
+
+    /* pill outline lengthens to the new content width, fast */
+    tl.to('#pill', {
+      width: PILL_WIDTHS[i + 1],
+      duration: 0.18,
+      ease: 'power2.out'
+    }, t);
+
+    /* word fades in just after pill begins growing */
+    tl.to(pillWords[i], {
+      opacity: 1,
+      duration: 0.14,
+      ease: 'power2.out'
+    }, t + 0.06);
+  });
+
+  /* Hold 2.20 → 2.50: pill word reveals all done by 2.20 (last word fade
+     ends at 2.20). 0.30s of clean held register before the exit. */
+
+  /* === Phase 4: 2.70 to 3.00 (last 0.30s)  Brand stack gets YANKED into
+     the distance — fast power4.in recede. Stops at scale 0.20 (small but
+     still readable as "CareData" sitting in the deep background), opacity
+     stays at 1.0. Final frame is NOT empty: viewer sees the small brand
+     mark + faint spotlight + dark gradient. Drama of a hard pull-back
+     without a black-screen tail. */
+  tl.to('#logoWrap', {
+    scale: 0.20,
+    duration: 0.30,
+    ease: 'power4.in',
+    transformOrigin: '50% 50%'
+  }, 2.700);
+
+  /* Spotlight gently shrinks + dims with the recede but doesn't vanish.
+     Kept at opacity 0.5 so the stage still feels lit at the final frame. */
+  tl.to('#spotlight', {
+    scale: 0.55,
+    opacity: 0.5,
+    duration: 0.30,
+    ease: 'power4.in'
+  }, 2.700);
+}
+
+function play(){
+  if (!tl) build();
+  tl.restart();
+  tl.play();
+}
+
+document.getElementById('replay').addEventListener('click', play);
+
+/* wait for fonts to load before measuring pill widths */
+// IFRAME-AWARE BOOTSTRAP — patched by shared/patch-scenes.mjs
+window.addEventListener('load', () => {
+  const start = () => { build(); if (window.parent === window) play(); };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+  } else {
+    start();
+  }
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === 'play'  && typeof play === 'function')                          play();
+  if (t === 'pause' && typeof tl   !== 'undefined' && tl)                    tl.pause();
+  if (t === 'reset' && typeof tl   !== 'undefined' && tl) { tl.seek(0); tl.pause(); }
+});
+</script>
+</body>
+</html>

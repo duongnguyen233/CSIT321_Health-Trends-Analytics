@@ -1,0 +1,1146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 11 - QI Dashboard (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --cream:#F6F2EB;
+  --paper:#FBF8F2;
+  --line-soft:#EAE3D2;
+  --line:#E1DBCC;
+  --ink-900:#1F2622;
+  --ink-700:#3D4743;
+  --ink-500:#6B7570;
+  --ink-300:#A4ABA4;
+  --sage:#9FB4A0;
+  --sage-bright:#B8D1B5;
+  --sage-ink:#4B6A55;
+  --sage-tint:#EEF1EC;
+  --clay:#C8B89B;
+  --clay-ink:#836B47;
+  --dusty-blue:#A6B6C4;
+  --status-good:#8AA791;
+  --status-bad:#B86F62;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background:#0E1211;
+  color:var(--cream);
+  font-family:"Geist",ui-sans-serif,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.frame-wrap{
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;     /* 4K canvas-fill */
+  perspective:2400px;
+  perspective-origin:50% 50%;
+}
+.stage{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.10), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%, rgba(200,184,155,0.05), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  overflow:hidden;
+}
+
+.grain{
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.05;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+.watermark-tr {
+  position:absolute; top:38px; right:60px;
+  font-size:11px; letter-spacing:0.18em; text-transform:uppercase;
+  color:var(--cream); opacity:0.45; z-index:60; pointer-events:none;
+}
+
+.footer{
+  position:absolute; bottom:38px; left:60px;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--cream); opacity:0.45;
+  z-index:60;
+}
+
+/* Floating caption above the screen */
+.float-caption{
+  position:absolute;
+  top:5%; left:50%;
+  transform:translateX(-50%);
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:48px;
+  letter-spacing:-0.02em;
+  color:var(--cream);
+  white-space:nowrap;
+  z-index:35;
+  opacity:0;
+  text-align:center;
+  line-height:1;
+}
+.float-caption .accent{ color:var(--sage-bright); font-style:italic; }
+
+/* ===== Entry portal -- "Dashboard" pill at viewport centre, cursor clicks it ===== */
+.entry-pill{
+  position:absolute;
+  top:50%; left:50%;
+  padding:18px 38px;
+  background:var(--ink-900);
+  color:var(--cream);
+  font-weight:600; font-size:30px; letter-spacing:-0.005em;
+  border-radius:999px;
+  z-index:30;
+  box-shadow:
+    0 0 0 1px rgba(184,209,181,0.20),
+    0 0 32px rgba(184,209,181,0.30),
+    0 0 80px rgba(184,209,181,0.16),
+    0 14px 40px rgba(0,0,0,0.40);
+  display:inline-flex; align-items:center; gap:14px;
+  opacity:0;
+}
+.entry-pill .dot{
+  width:10px; height:10px; border-radius:50%;
+  background:var(--sage-bright);
+  box-shadow:0 0 12px rgba(184,209,181,0.85);
+}
+
+/* Big sage ripple from pill centre when clicked -- brighter glow */
+.ripple{
+  position:absolute;
+  top:50%; left:50%;
+  width:240px; height:240px;
+  border-radius:50%;
+  background:radial-gradient(circle,
+    rgba(232,248,222,0.85) 0%,
+    rgba(184,209,181,0.60) 25%,
+    rgba(159,180,160,0.28) 55%,
+    transparent 75%);
+  box-shadow:
+    0 0 80px rgba(184,209,181,0.55),
+    0 0 160px rgba(184,209,181,0.30);
+  z-index:20;
+  pointer-events:none;
+  opacity:0;
+  filter:blur(1.5px);
+}
+
+/* ===== App card (full dashboard) ===== */
+.app-card{
+  position:absolute;
+  top:9%; left:9%;
+  width:82%; height:82%;
+  border-radius:18px;
+  overflow:hidden;
+  background:var(--cream);
+  box-shadow:
+    0 60px 120px rgba(0,0,0,0.55),
+    0 30px 60px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.04);
+  z-index:10;
+  opacity:0;
+  display:flex; flex-direction:column;
+  font-family:"Geist", sans-serif;
+  color:var(--ink-900);
+  transform-style:preserve-3d;
+  will-change:transform, opacity;
+}
+
+/* Top nav */
+.topnav{
+  height:54px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 28px;
+  background:var(--cream);
+  border-bottom:1px solid rgba(31,38,34,0.06);
+}
+.brand-mini{ display:flex; align-items:center; gap:10px; }
+.brand-mini-mark{
+  width:28px; height:28px;
+  background:linear-gradient(145deg, oklch(0.72 0.06 150) 0%, oklch(0.78 0.05 180) 100%);
+  border-radius:6px; position:relative; flex-shrink:0;
+}
+.brand-mini-mark svg{ position:absolute; inset:5px; }
+.brand-mini-text{ display:flex; flex-direction:column; line-height:1.05; }
+.brand-mini-text .nm{ font-weight:600; font-size:12px; color:var(--ink-900); letter-spacing:-0.01em;}
+.brand-mini-text .tg{ font-weight:400; font-size:8.5px; color:var(--ink-500); margin-top:2px; letter-spacing:0.02em;}
+
+.nav-items{
+  display:flex; align-items:center; gap:4px;
+  font-weight:500; font-size:11.5px;
+  color:var(--ink-700);
+}
+.nav-item{ padding:6px 12px; border-radius:999px; }
+.nav-item.active{ background:var(--ink-900); color:var(--cream); }
+
+.nav-user{
+  display:flex; align-items:center; gap:7px;
+  padding:4px 10px 4px 4px;
+  border:1px solid var(--line); border-radius:999px;
+  background:var(--paper);
+  font-size:11px;
+}
+.nav-user-avatar{
+  width:22px; height:22px; border-radius:50%;
+  background:var(--sage-tint); color:var(--sage-ink);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:600; font-size:10px;
+}
+
+/* Body -- sidebar + main */
+.body{
+  flex:1;
+  display:flex;
+  background:var(--cream);
+}
+.sidebar{
+  width:200px; flex-shrink:0;
+  padding:22px 16px;
+  border-right:1px solid rgba(31,38,34,0.04);
+}
+.sb-eyebrow{
+  font-size:9px; letter-spacing:0.16em; text-transform:uppercase;
+  color:var(--ink-500); font-weight:600;
+  padding:6px 10px 14px;
+}
+.sb-item{
+  display:flex; align-items:center; gap:9px;
+  padding:8px 10px;
+  border-radius:8px;
+  font-size:12px; font-weight:500;
+  color:var(--ink-700);
+  margin-bottom:2px;
+}
+.sb-item.active{
+  background:var(--sage-tint); color:var(--sage-ink);
+  border:1px solid rgba(159,180,160,0.45);
+}
+.sb-item svg{ width:13px; height:13px; flex-shrink:0; }
+.sb-item .chev{ margin-left:auto; opacity:0.5; }
+
+/* Main column */
+.main{
+  flex:1; min-width:0;
+  padding:24px 32px 28px;
+  overflow:hidden;
+}
+
+.eyebrow{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:3px 10px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--paper);
+  font-size:10px; font-weight:500;
+  color:var(--ink-500);
+  margin-bottom:8px;
+}
+
+.h1-app{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:36px;
+  line-height:1.04;
+  letter-spacing:-0.02em;
+  color:var(--ink-900);
+  margin-bottom:6px;
+}
+.sub-app{
+  font-size:13px; line-height:1.55; color:var(--ink-500);
+  max-width:540px; margin-bottom:14px;
+}
+
+/* Risk pill row */
+.risk-row{
+  display:flex; align-items:center; gap:10px;
+  padding:9px 14px;
+  background:rgba(184,209,181,0.10);
+  border:1px solid rgba(159,180,160,0.30);
+  border-radius:999px;
+  font-size:11px;
+  color:var(--ink-700);
+  margin-bottom:18px;
+  white-space:nowrap;
+  width:fit-content;
+}
+.risk-row .dot{
+  width:6px; height:6px; border-radius:50%; background:var(--sage-bright);
+  box-shadow:0 0 6px rgba(184,209,181,0.6);
+}
+.risk-row .label{ font-weight:500; }
+.risk-pills{ display:flex; gap:5px; }
+.risk-pill{
+  padding:2.5px 8px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:999px;
+  font-family:"Geist Mono", monospace;
+  font-size:10px;
+  color:var(--ink-700);
+  font-weight:500;
+}
+.risk-link{ font-size:10.5px; color:var(--sage-ink); font-weight:500; text-decoration:underline; }
+
+/* KPI row */
+.kpi-row{
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:14px;
+  margin-bottom:18px;
+}
+.kpi{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px 18px 16px;
+}
+.kpi-eye{
+  font-size:9px; letter-spacing:0.16em; text-transform:uppercase;
+  color:var(--ink-500); font-weight:600;
+  margin-bottom:8px;
+}
+.kpi-num{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:38px;
+  line-height:1;
+  color:var(--ink-900);
+  letter-spacing:-0.02em;
+}
+.kpi-num .small{
+  font-family:"Geist", sans-serif;
+  font-size:12px;
+  font-weight:400;
+  color:var(--ink-500);
+  margin-left:6px;
+  letter-spacing:0;
+}
+
+/* Charts row */
+.charts-h{
+  font-size:13px; color:var(--ink-700); font-weight:500;
+  margin-bottom:8px;
+}
+.charts-row{
+  display:grid; grid-template-columns:1fr 1fr; gap:14px;
+  margin-bottom:20px;
+}
+.chart-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px 16px 16px;
+}
+.chart-h{
+  font-size:11.5px; font-weight:600; color:var(--ink-900);
+  margin-bottom:1px;
+}
+.chart-sub{
+  font-size:10px; color:var(--ink-500); margin-bottom:10px;
+}
+.chart-svg{ width:100%; height:140px; }
+
+/* QI cards section */
+.qi-section-head{
+  display:flex; align-items:center; justify-content:space-between;
+  font-size:9.5px; letter-spacing:0.16em; text-transform:uppercase;
+  color:var(--ink-500); font-weight:600;
+  padding:0 0 10px;
+  border-top:1px solid var(--line);
+  padding-top:14px;
+  margin-bottom:12px;
+}
+.qi-meta{ display:flex; align-items:center; gap:10px; }
+.q-selector{
+  display:flex; align-items:center; gap:6px;
+  padding:4px 10px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  font-size:10.5px; color:var(--ink-700);
+  font-weight:500;
+  background:var(--paper);
+  letter-spacing:0;
+  text-transform:none;
+}
+.q-selector .arr{ opacity:0.4; cursor:pointer;}
+
+.qi-grid{
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;
+}
+.qi-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:11px 14px 12px;
+  position:relative;
+  opacity:0;
+  will-change:transform, opacity;
+}
+.qi-card.highlight{
+  border-color:rgba(184,209,181,0.7);
+  box-shadow:
+    0 0 0 3px rgba(184,209,181,0.18),
+    0 8px 22px rgba(159,180,160,0.20);
+}
+/* When the PI card flies forward at end of scene, it must sit ABOVE every other fragment
+   in the dashboard. Promote z-index + heavy shadow so it visually covers the rest. */
+.qi-card.flying{
+  z-index:50;
+  position:relative;
+  box-shadow:
+    0 0 0 1px rgba(184,209,181,0.50),
+    0 60px 120px rgba(0,0,0,0.30),
+    0 30px 60px rgba(0,0,0,0.18);
+}
+.qi-title{
+  font-size:11px; font-weight:600; color:var(--ink-900);
+  margin-bottom:6px;
+}
+.qi-num{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:26px;
+  line-height:1;
+  color:var(--ink-900);
+  letter-spacing:-0.02em;
+}
+.qi-rate-eye{
+  font-size:8.5px; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--ink-500); font-weight:600;
+  margin:3px 0 8px;
+}
+.qi-spark{
+  width:100%; height:22px;
+}
+.qi-foot{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:6px;
+  font-size:9.5px;
+}
+.qi-trend{
+  display:flex; align-items:center; gap:3px;
+  color:var(--ink-500);
+}
+.qi-trend.improving{ color:var(--sage-ink); }
+.qi-badge{
+  padding:2px 7px;
+  border-radius:999px;
+  font-weight:600;
+  letter-spacing:0.08em;
+  font-size:8.5px;
+}
+.qi-badge.ontrack{
+  background:var(--sage-tint);
+  color:var(--sage-ink);
+  border:1px solid rgba(159,180,160,0.4);
+}
+.qi-badge.monitor{
+  background:rgba(200,184,155,0.18);
+  color:var(--clay-ink);
+  border:1px solid rgba(200,184,155,0.5);
+}
+.qi-badge.over{
+  background:rgba(184,111,98,0.12);
+  color:var(--status-bad);
+  border:1px solid rgba(184,111,98,0.35);
+}
+
+/* Cursor */
+.cursor-svg{
+  position:absolute;
+  width:32px; height:32px;
+  z-index:30;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.45));
+  opacity:0;
+  will-change:transform, opacity;
+}
+
+/* Hud */
+.hud{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  background:rgba(15,15,17,0.85);
+  color:#EAE3D2; font-family:"Geist Mono", monospace; font-size:11px;
+  padding:8px 14px; border-radius:999px;
+  display:flex; gap:14px; align-items:center; z-index:100;
+  letter-spacing:0.06em;
+}
+.hud button{
+  appearance:none; border:1px solid #555; background:transparent; color:#EAE3D2;
+  font-family:inherit; font-size:11px; padding:3px 10px; border-radius:999px; cursor:pointer;
+}
+.hud button:hover{ background:#222; }
+.hud .timer{ font-variant-numeric:tabular-nums; min-width:46px; }
+</style>
+</head>
+<body>
+
+<div class="frame-wrap" id="frame">
+  <div class="stage">
+    <div class="grain"></div>
+    <div class="watermark-tr">Scene 11 / 18</div>
+    <div class="footer">CSIT321 CAPSTONE / TECHNICAL OVERVIEW</div>
+
+    <!-- Sage ripple (expands on click) -->
+    <div class="ripple" id="ripple"></div>
+
+    <!-- Entry portal: Dashboard pill at viewport centre -->
+    <div class="entry-pill" id="dashPill"><span class="dot"></span>Dashboard</div>
+
+    <!-- Floating caption -->
+    <div class="float-caption" id="floatCaption">QI Dashboard &mdash; <span class="accent">14 indicators, one view</span></div>
+
+    <div class="app-card" id="appCard">
+      <!-- Top nav -->
+      <div class="topnav">
+        <div class="brand-mini">
+          <span class="brand-mini-mark">
+            <svg viewBox="0 0 18 18"><path d="M0,11 L3,11 L5,7 L7.5,14 L10,3 L12.5,11 L18,11" fill="none" stroke="#FBF8F2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div class="brand-mini-text">
+            <span class="nm">CareData</span>
+            <span class="tg">Health Analytics Portal</span>
+          </div>
+        </div>
+        <div class="nav-items">
+          <span class="nav-item active">Dashboard</span>
+          <span class="nav-item">Data Entry</span>
+          <span class="nav-item">Voice Screening</span>
+          <span class="nav-item">Reports</span>
+          <span class="nav-item">Benchmarking</span>
+        </div>
+        <div class="nav-user">
+          <span class="nav-user-avatar">N</span>
+          <span>Nelly</span>
+        </div>
+      </div>
+
+      <div class="body">
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <div class="sb-eyebrow">Facility view</div>
+          <div class="sb-item active">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+            Overview
+          </div>
+          <div class="sb-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 13l4-5 3 3 5-7"/></svg>
+            Visualization
+            <svg class="chev" width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 4l4 4-4 4"/></svg>
+          </div>
+          <div class="sb-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 12l3-3 3 3 6-6"/></svg>
+            Trend Analysis
+          </div>
+          <div class="sb-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 2l6 4v4c0 4-3 6-6 6s-6-2-6-6V6l6-4z"/></svg>
+            Risk Overview
+          </div>
+        </div>
+
+        <!-- Main -->
+        <div class="main">
+          <div class="eyebrow" id="elEyebrow">Facility &middot; Q1 2026 (Mar)</div>
+          <h1 class="h1-app" id="elH1">Quality indicator dashboard</h1>
+          <p class="sub-app" id="elSub">14 AIHW categories at a glance, open any card to drill into the indicator.</p>
+
+          <!-- Risk row -->
+          <div class="risk-row" id="elRisk">
+            <span class="dot"></span>
+            <span class="label">15 resident(s) flagged across 2 or more categories this quarter</span>
+            <span class="risk-pills" id="riskPills">
+              <span class="risk-pill">R-001</span>
+              <span class="risk-pill">R-002</span>
+              <span class="risk-pill">R-004</span>
+              <span class="risk-pill">R-007</span>
+              <span class="risk-pill">R-008</span>
+              <span class="risk-pill">R-010</span>
+              <span class="risk-pill">R-011</span>
+              <span class="risk-pill">R-015</span>
+            </span>
+            <span class="risk-link">View risk overview &rarr;</span>
+          </div>
+
+          <!-- KPI row -->
+          <div class="kpi-row" id="elKpiRow">
+            <div class="kpi">
+              <div class="kpi-eye">Total residents</div>
+              <div class="kpi-num"><span data-counter="350" data-end="350">0</span><span class="small">this quarter</span></div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-eye">Categories at risk</div>
+              <div class="kpi-num"><span data-counter="3" data-end="3">0</span><span class="small">of 14 mid</span></div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-eye">Last submission</div>
+              <div class="kpi-num">Q1 2026 <span class="small">(Mar)</span></div>
+            </div>
+          </div>
+
+          <!-- Charts row -->
+          <div class="charts-h" id="elChartsH">Facility performance overview</div>
+          <div class="charts-row" id="elChartsRow">
+            <div class="chart-card">
+              <div class="chart-h">All category rates</div>
+              <div class="chart-sub">Latest prevalence/score across all 14 QI categories</div>
+              <svg class="chart-svg" viewBox="0 0 480 140" preserveAspectRatio="none" id="barChart">
+                <!-- Y-axis grid -->
+                <line x1="30" y1="20" x2="470" y2="20" stroke="#E1DBCC" stroke-width="0.6"/>
+                <line x1="30" y1="55" x2="470" y2="55" stroke="#E1DBCC" stroke-width="0.4"/>
+                <line x1="30" y1="90" x2="470" y2="90" stroke="#E1DBCC" stroke-width="0.4"/>
+                <line x1="30" y1="125" x2="470" y2="125" stroke="#E1DBCC" stroke-width="0.6"/>
+                <text x="20" y="22" font-family="Geist Mono" font-size="7" fill="#A4ABA4" text-anchor="end">100</text>
+                <text x="20" y="57" font-family="Geist Mono" font-size="7" fill="#A4ABA4" text-anchor="end">75</text>
+                <text x="20" y="92" font-family="Geist Mono" font-size="7" fill="#A4ABA4" text-anchor="end">50</text>
+                <text x="20" y="127" font-family="Geist Mono" font-size="7" fill="#A4ABA4" text-anchor="end">25</text>
+
+                <!-- 14 bars (PI, Falls, UWL, Med, ADL, IC, RP, Hosp, AH, CE, QoL, WF, EN, LO) -->
+                <g class="bars">
+                  <rect class="bar" x="35"  y="125" width="22" height="0" fill="#9FB4A0" data-h="9"/>
+                  <rect class="bar" x="62"  y="125" width="22" height="0" fill="#9FB4A0" data-h="6"/>
+                  <rect class="bar" x="89"  y="125" width="22" height="0" fill="#9FB4A0" data-h="5"/>
+                  <rect class="bar" x="116" y="125" width="22" height="0" fill="#C8B89B" data-h="14"/>
+                  <rect class="bar" x="143" y="125" width="22" height="0" fill="#9FB4A0" data-h="28"/>
+                  <rect class="bar" x="170" y="125" width="22" height="0" fill="#9FB4A0" data-h="3"/>
+                  <rect class="bar" x="197" y="125" width="22" height="0" fill="#C8B89B" data-h="16"/>
+                  <rect class="bar" x="224" y="125" width="22" height="0" fill="#9FB4A0" data-h="8"/>
+                  <rect class="bar" x="251" y="125" width="22" height="0" fill="#9FB4A0" data-h="40"/>
+                  <rect class="bar" x="278" y="125" width="22" height="0" fill="#9FB4A0" data-h="24"/>
+                  <rect class="bar" x="305" y="125" width="22" height="0" fill="#9FB4A0" data-h="20"/>
+                  <rect class="bar" x="332" y="125" width="22" height="0" fill="#B8D1B5" data-h="100"/>
+                  <rect class="bar" x="359" y="125" width="22" height="0" fill="#B8D1B5" data-h="92"/>
+                  <rect class="bar" x="386" y="125" width="22" height="0" fill="#9FB4A0" data-h="4"/>
+                </g>
+                <g font-family="Geist Mono" font-size="6" fill="#A4ABA4">
+                  <text x="46"  y="135" text-anchor="middle">PI</text>
+                  <text x="73"  y="135" text-anchor="middle">FA</text>
+                  <text x="100" y="135" text-anchor="middle">UW</text>
+                  <text x="127" y="135" text-anchor="middle">MD</text>
+                  <text x="154" y="135" text-anchor="middle">AD</text>
+                  <text x="181" y="135" text-anchor="middle">IC</text>
+                  <text x="208" y="135" text-anchor="middle">RP</text>
+                  <text x="235" y="135" text-anchor="middle">HO</text>
+                  <text x="262" y="135" text-anchor="middle">AH</text>
+                  <text x="289" y="135" text-anchor="middle">CE</text>
+                  <text x="316" y="135" text-anchor="middle">QL</text>
+                  <text x="343" y="135" text-anchor="middle">WF</text>
+                  <text x="370" y="135" text-anchor="middle">EN</text>
+                  <text x="397" y="135" text-anchor="middle">LO</text>
+                </g>
+              </svg>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-h">Key indicators, facility vs national</div>
+              <div class="chart-sub">Prevalence rates compared to AIHW national medians</div>
+              <svg class="chart-svg" viewBox="0 0 480 140" preserveAspectRatio="none" id="radarChart">
+                <!-- Radar axes (6 axes) -->
+                <g transform="translate(240,75)">
+                  <!-- Concentric polygons -->
+                  <polygon points="0,-58 50.2,-29 50.2,29 0,58 -50.2,29 -50.2,-29" fill="none" stroke="#E1DBCC" stroke-width="0.4"/>
+                  <polygon points="0,-39 33.7,-19.5 33.7,19.5 0,39 -33.7,19.5 -33.7,-19.5" fill="none" stroke="#E1DBCC" stroke-width="0.4"/>
+                  <polygon points="0,-19 16.4,-9.5 16.4,9.5 0,19 -16.4,9.5 -16.4,-9.5" fill="none" stroke="#E1DBCC" stroke-width="0.4"/>
+                  <!-- Axis lines -->
+                  <line x1="0" y1="0" x2="0" y2="-58" stroke="#E1DBCC" stroke-width="0.4"/>
+                  <line x1="0" y1="0" x2="50.2" y2="-29" stroke="#E1DBCC" stroke-width="0.4"/>
+                  <line x1="0" y1="0" x2="50.2" y2="29" stroke="#E1DBCC" stroke-width="0.4"/>
+                  <line x1="0" y1="0" x2="0" y2="58" stroke="#E1DBCC" stroke-width="0.4"/>
+                  <line x1="0" y1="0" x2="-50.2" y2="29" stroke="#E1DBCC" stroke-width="0.4"/>
+                  <line x1="0" y1="0" x2="-50.2" y2="-29" stroke="#E1DBCC" stroke-width="0.4"/>
+                  <!-- Labels -->
+                  <text x="0" y="-65" font-family="Geist Mono" font-size="6.5" fill="#6B7570" text-anchor="middle">Falls</text>
+                  <text x="56" y="-30" font-family="Geist Mono" font-size="6.5" fill="#6B7570">UWL</text>
+                  <text x="56" y="32" font-family="Geist Mono" font-size="6.5" fill="#6B7570">Meds</text>
+                  <text x="0" y="68" font-family="Geist Mono" font-size="6.5" fill="#6B7570" text-anchor="middle">ADL</text>
+                  <text x="-56" y="32" font-family="Geist Mono" font-size="6.5" fill="#6B7570" text-anchor="end">RP</text>
+                  <text x="-56" y="-30" font-family="Geist Mono" font-size="6.5" fill="#6B7570" text-anchor="end">Hosp</text>
+                  <!-- National median (clay) -->
+                  <polygon id="natShape" points="0,-39 33.7,-19.5 33.7,19.5 0,39 -33.7,19.5 -33.7,-19.5"
+                    fill="rgba(200,184,155,0.20)" stroke="#C8B89B" stroke-width="1.1" stroke-linejoin="round"
+                    style="stroke-dasharray:300; stroke-dashoffset:300;"/>
+                  <!-- Facility shape (sage) -->
+                  <polygon id="facShape" points="0,-12 18,-7 22,11 0,18 -16,9 -19,-11"
+                    fill="rgba(159,180,160,0.30)" stroke="#4B6A55" stroke-width="1.4" stroke-linejoin="round"
+                    style="stroke-dasharray:300; stroke-dashoffset:300;"/>
+                </g>
+                <!-- Legend -->
+                <g font-family="Geist" font-size="7" fill="#6B7570">
+                  <rect x="160" y="128" width="7" height="3" fill="#9FB4A0"/>
+                  <text x="171" y="131">Facility</text>
+                  <rect x="210" y="128" width="7" height="3" fill="#C8B89B"/>
+                  <text x="221" y="131">National</text>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <!-- QI cards section -->
+          <div class="qi-section-head">
+            <span>Quality indicators</span>
+            <div class="qi-meta">
+              <span style="text-transform:none; letter-spacing:0; font-weight:500; color:var(--ink-500); font-size:10px;">ACFI registered &middot; 350 residents</span>
+              <span class="q-selector">
+                <span class="arr">&#9666;</span>
+                Q1 2026 (Mar)
+                <span class="arr">&#9654;</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="qi-grid" id="qiGrid">
+            <!-- Row 1 -->
+            <div class="qi-card" id="qiPI">
+              <div class="qi-title">Pressure injuries</div>
+              <div class="qi-num">2.10<span style="font-family:Geist;font-size:18px;color:var(--ink-700);">%</span></div>
+              <div class="qi-rate-eye">Prevalence rate</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#9FB4A0" stroke-width="1.4" points="2,18 18,15 36,16 54,12 72,9 88,7 98,5"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend improving">&#8599; Improving</span>
+                <span class="qi-badge ontrack">ON TRACK</span>
+              </div>
+            </div>
+            <div class="qi-card">
+              <div class="qi-title">Falls &amp; major injury</div>
+              <div class="qi-num">1.40<span style="font-family:Geist;font-size:18px;color:var(--ink-700);">%</span></div>
+              <div class="qi-rate-eye">Prevalence rate</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#9FB4A0" stroke-width="1.4" points="2,12 18,14 36,11 54,13 72,10 88,8 98,9"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend improving">&#8599; Improving</span>
+                <span class="qi-badge ontrack">ON TRACK</span>
+              </div>
+            </div>
+            <div class="qi-card">
+              <div class="qi-title">Unplanned weight loss</div>
+              <div class="qi-num">3.40<span style="font-family:Geist;font-size:18px;color:var(--ink-700);">%</span></div>
+              <div class="qi-rate-eye">Prevalence rate</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#9FB4A0" stroke-width="1.4" points="2,15 18,16 36,13 54,12 72,11 88,10 98,9"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend improving">&#8599; Improving</span>
+                <span class="qi-badge ontrack">ON TRACK</span>
+              </div>
+            </div>
+            <div class="qi-card">
+              <div class="qi-title">Medications</div>
+              <div class="qi-num">11.40<span style="font-family:Geist;font-size:18px;color:var(--ink-700);">%</span></div>
+              <div class="qi-rate-eye">Prevalence rate</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#C8B89B" stroke-width="1.4" points="2,8 18,10 36,11 54,12 72,9 88,11 98,10"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend">&#8594; Holding</span>
+                <span class="qi-badge monitor">MONITOR</span>
+              </div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="qi-card">
+              <div class="qi-title">Activities of daily living</div>
+              <div class="qi-num">22.00<span style="font-family:Geist;font-size:18px;color:var(--ink-700);">%</span></div>
+              <div class="qi-rate-eye">Prevalence rate</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#C8B89B" stroke-width="1.4" points="2,7 18,8 36,9 54,8 72,7 88,9 98,8"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend">&#8594; Stable</span>
+                <span class="qi-badge monitor">MONITOR</span>
+              </div>
+            </div>
+            <div class="qi-card">
+              <div class="qi-title">Incontinence care</div>
+              <div class="qi-num">2.65<span style="font-family:Geist;font-size:18px;color:var(--ink-700);">%</span></div>
+              <div class="qi-rate-eye">Prevalence rate</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#9FB4A0" stroke-width="1.4" points="2,16 18,15 36,12 54,10 72,8 88,7 98,6"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend improving">&#8599; Improving</span>
+                <span class="qi-badge ontrack">ON TRACK</span>
+              </div>
+            </div>
+            <div class="qi-card">
+              <div class="qi-title">Restrictive practices</div>
+              <div class="qi-num">12.90<span style="font-family:Geist;font-size:18px;color:var(--ink-700);">%</span></div>
+              <div class="qi-rate-eye">Prevalence rate</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#B86F62" stroke-width="1.4" points="2,15 18,12 36,10 54,9 72,7 88,6 98,4"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend" style="color:var(--status-bad);">&#8599; Increasing</span>
+                <span class="qi-badge over">OVER THRESHOLD</span>
+              </div>
+            </div>
+            <div class="qi-card">
+              <div class="qi-title">Hospitalisation</div>
+              <div class="qi-num">6.30<span style="font-family:Geist;font-size:18px;color:var(--ink-700);">%</span></div>
+              <div class="qi-rate-eye">Prevalence rate</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#9FB4A0" stroke-width="1.4" points="2,11 18,13 36,12 54,10 72,11 88,9 98,8"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend improving">&#8599; Improving</span>
+                <span class="qi-badge ontrack">ON TRACK</span>
+              </div>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="qi-card">
+              <div class="qi-title">Allied health</div>
+              <div class="qi-num">32.40<span style="font-family:Geist;font-size:18px;color:var(--ink-700);">%</span></div>
+              <div class="qi-rate-eye">Prevalence rate</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#9FB4A0" stroke-width="1.4" points="2,9 18,8 36,7 54,8 72,6 88,5 98,4"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend improving">&#8599; Improving</span>
+                <span class="qi-badge ontrack">ON TRACK</span>
+              </div>
+            </div>
+            <div class="qi-card">
+              <div class="qi-title">Consumer experience</div>
+              <div class="qi-num">19.30</div>
+              <div class="qi-rate-eye">Score</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#9FB4A0" stroke-width="1.4" points="2,14 18,12 36,10 54,8 72,7 88,6 98,5"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend improving">&#8599; Improving</span>
+                <span class="qi-badge ontrack">ON TRACK</span>
+              </div>
+            </div>
+            <div class="qi-card">
+              <div class="qi-title">Quality of life</div>
+              <div class="qi-num">16.50</div>
+              <div class="qi-rate-eye">Score</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#9FB4A0" stroke-width="1.4" points="2,12 18,11 36,9 54,8 72,8 88,7 98,6"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend improving">&#8599; Improving</span>
+                <span class="qi-badge ontrack">ON TRACK</span>
+              </div>
+            </div>
+            <div class="qi-card">
+              <div class="qi-title">Workforce</div>
+              <div class="qi-num">100.00<span style="font-family:Geist;font-size:18px;color:var(--ink-700);">%</span></div>
+              <div class="qi-rate-eye">Coverage</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#9FB4A0" stroke-width="1.4" points="2,8 18,7 36,6 54,5 72,4 88,3 98,2"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend improving">&#8594; Stable</span>
+                <span class="qi-badge ontrack">ON TRACK</span>
+              </div>
+            </div>
+
+            <!-- Row 4 -->
+            <div class="qi-card">
+              <div class="qi-title">Enrolled nursing</div>
+              <div class="qi-num">91.00<span style="font-family:Geist;font-size:18px;color:var(--ink-700);">%</span></div>
+              <div class="qi-rate-eye">Coverage</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#9FB4A0" stroke-width="1.4" points="2,11 18,9 36,8 54,7 72,5 88,4 98,3"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend improving">&#8599; Improving</span>
+                <span class="qi-badge ontrack">ON TRACK</span>
+              </div>
+            </div>
+            <div class="qi-card">
+              <div class="qi-title">Lifestyle officer</div>
+              <div class="qi-num">3.40<span style="font-family:Geist;font-size:18px;color:var(--ink-700);">%</span></div>
+              <div class="qi-rate-eye">Prevalence rate</div>
+              <svg class="qi-spark" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline class="spark" fill="none" stroke="#9FB4A0" stroke-width="1.4" points="2,14 18,13 36,11 54,10 72,9 88,8 98,7"/></svg>
+              <div class="qi-foot">
+                <span class="qi-trend improving">&#8599; Improving</span>
+                <span class="qi-badge ontrack">ON TRACK</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cursor: Bootstrap Icons `hand-index-thumb-fill` (MIT). -->
+    <svg class="cursor-svg" id="cursor" viewBox="0 0 16 16" fill="#fff" stroke="#1F2622" stroke-width="0.5" stroke-linejoin="round" data-icon="bi-hand-index-thumb-fill">
+      <path d="M8.5 1.75v2.716l.047-.002c.312-.012.742-.016 1.051.046.28.056.543.18.738.288.273.152.456.385.56.642l.132-.012c.312-.024.794-.038 1.158.108.37.148.689.487.88.716q.113.137.195.248h.582a2 2 0 0 1 1.99 2.199l-.272 2.715a3.5 3.5 0 0 1-.444 1.389l-1.395 2.441A1.5 1.5 0 0 1 12.42 16H6.118a1.5 1.5 0 0 1-1.342-.83l-1.215-2.43L1.07 8.589a1.517 1.517 0 0 1 2.373-1.852L5 8.293V1.75a1.75 1.75 0 0 1 3.5 0"/>
+    </svg>
+
+    <audio src="../audio/mouse_click.mp3" data-start="0.83" data-duration="0.13" data-volume="1.0" preload="auto"></audio>
+    <audio src="../audio/mouse_click.mp3" data-start="6.13" data-duration="0.13" data-volume="1.0" preload="auto"></audio>
+  </div>
+</div>
+
+<div class="hud">
+  <button id="replay">REPLAY</button>
+  <span class="timer" id="timer">0.00s</span>
+  <span style="opacity:.6">Scene 11 / QI Dashboard</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+function fit(){
+  const wrap = document.getElementById('frame');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  /* zoom not transform: scale -- natively rasterise at projected resolution; prevents 4K pixel break on 3D-rotated descendants. See ~/.claude/skills/hyperframes-video/rendering.md */
+  wrap.style.zoom = s;
+}
+fit();
+window.addEventListener('resize', fit);
+
+let tl;
+
+function build(){
+  const cards = Array.from(document.querySelectorAll('.qi-card'));
+  const bars = Array.from(document.querySelectorAll('#barChart .bar'));
+  const sparks = Array.from(document.querySelectorAll('.qi-spark .spark'));
+  const riskPills = Array.from(document.querySelectorAll('#riskPills .risk-pill'));
+
+  /* Initial state */
+  /* Entry portal pill -- at viewport centre, scaled small to pop in */
+  gsap.set('#dashPill', {
+    opacity: 0,
+    xPercent: -50, yPercent: -50,
+    scale: 0.6
+  });
+  gsap.set('#ripple', {
+    xPercent: -50, yPercent: -50,
+    scale: 0, opacity: 0
+  });
+
+  /* App card starts off-screen LEFT, tilted left (rotationY -8 degrees), at scroll-top */
+  gsap.set('#appCard', {
+    opacity: 0,
+    transformPerspective: 2400,
+    transformOrigin: '50% 50%',
+    x: -1900,
+    rotationY: -8,
+    rotationX: 0
+  });
+  /* Inner main scrolled to top initially */
+  gsap.set('.main', { y: 0 });
+
+  gsap.set('#floatCaption', { opacity: 0 });
+  gsap.set('#elEyebrow', { opacity: 0, y: 10 });
+  gsap.set('#elH1', { opacity: 0, y: 16 });
+  gsap.set('#elSub', { opacity: 0, y: 12 });
+  gsap.set('#elRisk', { opacity: 0, y: 10, scale: 0.96 });
+  gsap.set(riskPills, { opacity: 0, scale: 0.6 });
+  gsap.set('#elKpiRow .kpi', { opacity: 0, y: 18 });
+  gsap.set('#elChartsH', { opacity: 0, y: 8 });
+  gsap.set('#elChartsRow .chart-card', { opacity: 0, y: 18 });
+  gsap.set(bars, { attr: { y: 125, height: 0 } });
+  gsap.set('#natShape', { strokeDashoffset: 300 });
+  gsap.set('#facShape', { strokeDashoffset: 300, fillOpacity: 0 });
+  gsap.set(cards, { opacity: 0, y: 18 });
+  gsap.set('#cursor', { opacity: 0, x: 2300, y: 540 });
+
+  /* prepare spark dash */
+  sparks.forEach(s => {
+    const len = s.getTotalLength ? s.getTotalLength() : 200;
+    s.style.strokeDasharray = len;
+    s.style.strokeDashoffset = len;
+    s.dataset.len = len;
+  });
+
+  /* counter helpers */
+  const counters = Array.from(document.querySelectorAll('[data-counter]'));
+  counters.forEach(c => { c.textContent = '0'; });
+
+  tl = gsap.timeline({
+    paused: true,
+    onUpdate: () => {
+      document.getElementById('timer').textContent = tl.time().toFixed(2) + 's';
+    }
+  });
+
+  /* ============================================================
+     TOTAL ~7.4s (entrance durations scaled up 30% for calmer feel)
+        0.000-0.30   "Dashboard" pill pops in at viewport centre
+        0.30-0.75   Cursor enters from off-right, glides to pill
+        0.75-0.85   Cursor click pulse
+        0.85-1.30   Sage RIPPLE expands wide from pill centre, pill fades
+        1.10-1.73   App card slides in from LEFT, tilted LEFT (rotationY -8 degrees)
+                    Only UPPER part of dashboard visible
+        1.73-3.64   Upper content reveals (header, KPI, charts, bars, radar)
+        2.80-3.40   TILT TRANSITION: rotationY -8 degrees to +8 degrees + scroll down
+                    LOWER QI grid comes into view
+        3.40-4.80   14 quality-indicator cards cascade + sparklines draw
+        4.90-5.45   Cursor returns, glides to PI card
+        5.45-5.95   HOVER -- PI card highlights + grows, screen UNTILTS to straight
+        5.95-6.10   Cursor click pulse
+        6.15-7.40   Calm fade-out instead of fly-past
+     ============================================================ */
+
+  /* === Phase A (0.00-0.85): Entry portal -- pill, cursor, click === */
+
+  /* Dashboard pill pops in at centre */
+  tl.to('#dashPill', {
+    opacity: 1, scale: 1.0,
+    duration: 0.30, ease: 'back.out(1.5)'
+  }, 0);
+
+  /* Cursor enters from off-right, glides to pill. */
+  tl.to('#cursor', { opacity: 1, duration: 0.10 }, 0.30);
+  tl.to('#cursor', {
+    x: 970, y: 510,
+    duration: 0.42, ease: 'cubic-bezier(.45,.10,.50,.90)'
+  }, 0.30);
+
+  /* Cursor click pulse */
+  tl.to('#cursor', { scale: 0.85, duration: 0.10, ease: 'power2.in' }, 0.75);
+  tl.to('#cursor', { scale: 1.0, duration: 0.16, ease: 'power2.out' }, 0.85);
+
+  /* === Phase B (0.85-1.30): Sage ripple BIG + pill cross-fades === */
+  tl.to('#ripple', {
+    opacity: 1, scale: 9,
+    duration: 0.45, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 0.85);
+  tl.to('#ripple', { opacity: 0, duration: 0.20, ease: 'power2.in' }, 1.20);
+  tl.to('#dashPill', { opacity: 0, duration: 0.20, ease: 'power2.in' }, 0.92);
+
+  /* Cursor exits up-left as the dashboard arrives */
+  tl.to('#cursor', { opacity: 0, duration: 0.20 }, 1.10);
+
+  /* === Phase C (1.10-1.73): Dashboard slides in from LEFT, tilted LEFT (30% longer = 0.65s) === */
+  tl.to('#appCard', {
+    opacity: 1, x: 0,
+    duration: 0.65, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 1.10);
+
+  /* Float caption fades in with the app card */
+  tl.to('#floatCaption', { opacity: 1, duration: 0.52, ease: 'power2.out' }, 1.20);
+
+  /* === Phase D (1.73-3.64): UPPER part reveals (30% longer durations) === */
+  tl.to('#elEyebrow', { opacity: 1, y: 0, duration: 0.39, ease: 'power2.out' }, 1.73);
+  tl.to('#elH1', { opacity: 1, y: 0, duration: 0.47, ease: 'power3.out' }, 1.79);
+  tl.to('#elSub', { opacity: 1, y: 0, duration: 0.39, ease: 'power2.out' }, 1.89);
+
+  tl.to('#elRisk', { opacity: 1, y: 0, scale: 1, duration: 0.39, ease: 'back.out(1.4)' }, 2.03);
+  tl.to(riskPills, { opacity: 1, scale: 1, duration: 0.26, stagger: 0.03, ease: 'back.out(1.6)' }, 2.17);
+
+  tl.to('#elKpiRow .kpi', {
+    opacity: 1, y: 0,
+    duration: 0.44, stagger: 0.06, ease: 'power3.out'
+  }, 2.18);
+
+  /* Counter roll-up */
+  counters.forEach((c) => {
+    const end = parseFloat(c.dataset.end);
+    const obj = { v: 0 };
+    tl.to(obj, {
+      v: end,
+      duration: 0.78, ease: 'power2.out',
+      onUpdate: () => { c.textContent = Math.round(obj.v); }
+    }, 2.31);
+  });
+
+  tl.to('#elChartsH', { opacity: 1, y: 0, duration: 0.29, ease: 'power2.out' }, 2.43);
+  tl.to('#elChartsRow .chart-card', {
+    opacity: 1, y: 0,
+    duration: 0.42, stagger: 0.08, ease: 'power3.out'
+  }, 2.51);
+
+  /* Bars rise */
+  bars.forEach((b, i) => {
+    const h = parseFloat(b.dataset.h);
+    tl.to(b, {
+      attr: { y: 125 - h, height: h },
+      duration: 0.52, ease: 'cubic-bezier(.22,.85,.30,1)'
+    }, 2.58 + i * 0.025);
+  });
+
+  /* Radar */
+  tl.to('#natShape', { strokeDashoffset: 0, duration: 0.52, ease: 'power2.out' }, 2.68);
+  tl.to('#facShape', { strokeDashoffset: 0, duration: 0.52, ease: 'power2.out' }, 2.78);
+  tl.to('#facShape', { fillOpacity: 1, duration: 0.31, ease: 'power2.out' }, 2.93);
+
+  /* === Phase E (2.80-3.40): TILT TRANSITION -- left to right + scroll down === */
+  /* App rotates from -8 degrees to +8 degrees, simultaneously inner main scrolls down. */
+  tl.to('#appCard', {
+    rotationY: 8,
+    duration: 0.60, ease: 'cubic-bezier(.45,.10,.50,.90)'
+  }, 2.80);
+  tl.to('.main', {
+    y: -380,
+    duration: 0.60, ease: 'cubic-bezier(.45,.10,.50,.90)'
+  }, 2.80);
+
+  /* === Phase F (3.40-4.80): LOWER part reveals -- 14 QI cards cascade === */
+  tl.to(cards, {
+    opacity: 1, y: 0,
+    duration: 0.32, stagger: 0.05, ease: 'power3.out'
+  }, 3.40);
+
+  /* Sparklines draw on each card */
+  sparks.forEach((s, i) => {
+    tl.to(s, {
+      strokeDashoffset: 0,
+      duration: 0.45, ease: 'power2.out'
+    }, 3.80 + i * 0.04);
+  });
+
+  /* === Phase G (4.90-5.50): Cursor returns, glides to the Pressure injuries card === */
+  const piTarget = { x: 0, y: 0 };
+  tl.call(() => {
+    const r = document.getElementById('qiPI').getBoundingClientRect();
+    const wrap = document.getElementById('frame').getBoundingClientRect();
+    const ws = wrap.width / 1920;
+    piTarget.x = (r.left + r.width / 2 - wrap.left) / ws;
+    piTarget.y = (r.top + r.height / 2 - wrap.top) / ws;
+  }, null, 4.88);
+
+  gsap.set('#cursor', { x: 2300, y: 540, scale: 1, filter: 'blur(0px)' });
+  tl.to('#cursor', { opacity: 1, duration: 0.10 }, 4.90);
+  tl.to('#cursor', {
+    x: () => piTarget.x + 32,
+    y: () => piTarget.y + 38,
+    duration: 0.55, ease: 'cubic-bezier(.45,.10,.50,.90)'
+  }, 4.90);
+
+  /* === Phase H (5.55-6.05): HOVER -- PI card highlights + grows, screen UNTILTS === */
+  tl.call(() => {
+    document.getElementById('qiPI').classList.add('highlight');
+  }, null, 5.55);
+  tl.to('#qiPI', {
+    scale: 1.06, y: -6,
+    duration: 0.36, ease: 'back.out(1.4)',
+    transformOrigin: '50% 50%'
+  }, 5.55);
+  tl.to('#appCard', {
+    rotationY: 0,
+    duration: 0.50, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 5.55);
+
+  /* === Phase I (6.05-6.20): Cursor click pulse === */
+  tl.to('#cursor', { scale: 0.85, duration: 0.10, ease: 'power2.in' }, 6.05);
+  tl.to('#cursor', { scale: 1.0, duration: 0.16, ease: 'power2.out' }, 6.15);
+
+  /* === Phase J (6.15-7.40): Calm fade-out instead of fly-past === */
+  tl.to('#appCard', { opacity: 0, duration: 0.70, ease: 'power1.in' }, 6.15);
+  tl.to('#floatCaption', { opacity: 0, duration: 0.50, ease: 'power1.in' }, 6.15);
+  tl.to('#cursor', { opacity: 0, duration: 0.30 }, 6.30);
+}
+
+function play(){
+  if (!tl) build();
+  tl.restart();
+  tl.play();
+}
+
+document.getElementById('replay').addEventListener('click', play);
+
+// IFRAME-AWARE BOOTSTRAP -- patched by shared/patch-scenes.mjs
+window.addEventListener('load', () => {
+  const start = () => { build(); if (window.parent === window) play(); };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+  } else {
+    start();
+  }
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === 'play'  && typeof play === 'function')                          play();
+  if (t === 'pause' && typeof tl   !== 'undefined' && tl)                    tl.pause();
+  if (t === 'reset' && typeof tl   !== 'undefined' && tl) { tl.seek(0); tl.pause(); }
+});
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

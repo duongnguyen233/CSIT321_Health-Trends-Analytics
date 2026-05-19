@@ -1,0 +1,74 @@
+# Source: app/services/assessment_db.py
+# Fallback/get_client/upsert pattern — in-memory dict + Azure Table Storage
+
+_in_memory: dict[str, dict[str, dict]] = {}  # partition_key -> {resident_id -> row}
+
+
+def _get_table():
+    conn = getattr(settings, "AZURE_STORAGE_CONNECTION_STRING", None) or os.environ.get("AZURE_STORAGE_CONNECTION_STRING")
+    if not conn:
+        return None
+    try:
+        from azure.data.tables import TableServiceClient
+        client = TableServiceClient.from_connection_string(conn)
+        try:
+            client.create_table(TABLE_NAME)
+        except Exception as e:
+            if "TableAlreadyExists" not in str(e) and "409" not in str(e):
+                raise
+        return client.get_table_client(TABLE_NAME)
+    except Exception as e:
+        logger.warning("Azure %s not available: %s", TABLE_NAME, e)
+        return None
+
+
+def put_assessments(sub: str, assessment_date: str, rows: list[dict], upload_id: str) -> int:
+    """Batch upsert resident assessment rows for a single date. Returns count stored."""
+    pk = _make_partition_key(sub, assessment_date)
+    now = datetime.now(timezone.utc).isoformat()
+    table = _get_table()
+
+    entities = []
+    for row in rows:
+        resident_id = row.get("Resident_ID") or row.get("resident_id") or ""
+        if not resident_id:
+            continue
+        entity = {
+            "PartitionKey": pk,
+            "RowKey": resident_id,
+            "user_sub": sub,
+            "assessment_date": assessment_date,
+            "resident_id": resident_id,
+            "upload_id": upload_id,
+            "stored_at": now,
+        }
+        for col in CLINICAL_COLUMNS:
+            val = _parse_value(col, row.get(col))
+            if val is not None:
+                entity[col] = val
+        entities.append(entity)
+
+    if table:
+        try:
+            # Azure batch operations: max 100 per batch, same partition
+            from azure.data.tables import TransactionOperation
+            batch_size = 100
+            for i in range(0, len(entities), batch_size):
+                batch = entities[i:i + batch_size]
+                operations = [(TransactionOperation.UPSERT, e) for e in batch]
+                table.submit_transaction(operations)
+            logger.info("put_assessments: stored %d rows for %s date=%s", len(entities), sub[:8], assessment_date)
+            return len(entities)
+        except Exception as e:
+            logger.warning("put_assessments Azure error: %s", e)
+            raise
+
+    # In-memory fallback
+    if pk not in _in_memory:
+        _in_memory[pk] = {}
+    for e in entities:
+        _in_memory[pk][e["RowKey"]] = e
+    logger.info("put_assessments (in-memory): stored %d rows for date=%s", len(entities), assessment_date)
+    return len(entities)
+
+# end excerpt

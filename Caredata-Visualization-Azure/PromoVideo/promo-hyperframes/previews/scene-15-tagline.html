@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 15, Tagline (preview) | CareData promo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --cream:#F6F2EB;
+  --paper:#FBF8F2;
+  --line:#E1DBCC;
+  --ink-900:#1F2622;
+  --ink-700:#3D4743;
+  --ink-500:#6B7570;
+  --ink-300:#A4ABA4;
+  --sage:#9FB4A0;
+  --sage-bright:#B8D1B5;
+  --sage-ink:#4B6A55;
+  --sage-tint:#EEF1EC;
+  --status-good:#8AA791;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background:#FFFFFF;
+  color:var(--ink-900);
+  font-family:"Geist",ui-sans-serif,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.frame-wrap{
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;     /* 4K canvas-fill */
+}
+.stage{
+  position:absolute; inset:0;
+  background:#FFFFFF;        /* underlying white shows once orb has wiped */
+  overflow:hidden;
+}
+
+/* Dark bg layer (carry-over from Scene 14). Sits above the white bg.
+   Fades out as the orb expands to wipe the frame. */
+.dark-bg{
+  position:absolute; inset:0;
+  z-index:2;
+  background:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.10), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%, rgba(200,184,155,0.05), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  will-change:opacity;
+}
+
+/* The "Audit-ready" caption from Scene 14, briefly visible at t=0 then fades */
+.s14-cap{
+  position:absolute;
+  top:32%; left:50%; transform:translateX(-50%);
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:96px;
+  letter-spacing:-0.025em;
+  color:var(--cream);
+  z-index:8;
+  opacity:0;
+  will-change:opacity, transform;
+}
+
+/* The tick orb — same size + position as Scene 14's. Expands outward to wipe
+   the dark bg with sage → white. */
+.orb-wipe{
+  position:absolute;
+  top:50%; left:50%;
+  width:168px; height:168px;
+  margin-left:-84px; margin-top:-84px;
+  border-radius:50%;
+  z-index:10;
+  background:#8AA791;        /* status-good sage */
+  border:4px solid var(--sage-bright);
+  box-shadow:
+    0 0 80px rgba(184,209,181,0.55),
+    inset 0 0 32px rgba(184,209,181,0.22);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0;
+  transform:scale(0.4);
+  will-change:transform, opacity, background-color, border-color;
+}
+.orb-wipe svg{ width:78px; height:78px; }
+.orb-wipe svg .tick{
+  fill:none;
+  stroke:var(--cream);
+  stroke-width:5.5;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+/* === Tagline blocks === */
+.tagline{
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%, -50%);
+  text-align:center;
+  z-index:30;
+  opacity:0;
+  will-change:opacity, transform;
+  white-space:nowrap;
+}
+.tagline .line{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:128px;
+  line-height:0.94;
+  letter-spacing:-0.028em;
+  color:var(--ink-900);
+}
+.tagline .line.italic{
+  font-style:italic;
+  /* Letters get individually colour-flipped to sage-ink (M15) */
+}
+.tagline .line .ltr{
+  display:inline-block;
+  color:var(--ink-900);
+  will-change:color, transform;
+}
+
+/* Closer (smaller, two-line) */
+.tagline.t2 .line{
+  font-size:104px;
+}
+
+/* Hud */
+.hud{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  background:rgba(15,15,17,0.85);
+  color:#EAE3D2; font-family:"Geist Mono", monospace; font-size:11px;
+  padding:8px 14px; border-radius:999px;
+  display:flex; gap:14px; align-items:center; z-index:100;
+  letter-spacing:0.06em;
+}
+.hud button{
+  appearance:none; border:1px solid #555; background:transparent; color:#EAE3D2;
+  font-family:inherit; font-size:11px; padding:3px 10px; border-radius:999px; cursor:pointer;
+}
+.hud button:hover{ background:#222; }
+.hud .timer{ font-variant-numeric:tabular-nums; min-width:46px; }
+
+.footer{
+  position:absolute; bottom:38px; left:60px;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60;
+}
+</style>
+</head>
+<body>
+
+<div class="frame-wrap" id="frame">
+  <div class="stage">
+    <!-- Carry-over from Scene 14: blank white canvas. Scene 14 now ends with the
+         orb burst + white wash, so Scene 15 starts on white. The previous
+         dark-bg / s14Cap / orbWipe handoff is gone. -->
+    <div class="footer" style="color:#A4ABA4">CSIT321&nbsp;CAPSTONE</div>
+
+    <!-- Tagline 1 — three-line callback to Scene 3 hero -->
+    <div class="tagline t1" id="tagline1">
+      <div class="line">Quiet clarity for</div>
+      <div class="line italic" data-flip="1">aged-care</div>
+      <div class="line">quality data.</div>
+    </div>
+
+    <!-- Tagline 2 — closer -->
+    <div class="tagline t2" id="tagline2">
+      <div class="line">File with confidence.</div>
+      <div class="line italic" data-flip="2">Every quarter, every day.</div>
+    </div>
+  </div>
+</div>
+
+<div class="hud">
+  <button id="replay">REPLAY</button>
+  <span class="timer" id="timer">0.00s</span>
+  <span style="opacity:.6">Scene 15 / Tagline</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+function fit(){
+  const wrap = document.getElementById('frame');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  /* zoom not transform: scale — natively rasterise at projected resolution; prevents 4K pixel break on 3D-rotated descendants. See ~/.claude/skills/hyperframes-video/rendering.md */
+  wrap.style.zoom = s;
+}
+fit();
+window.addEventListener('resize', fit);
+
+/* Wrap each character of [data-flip] elements in a span so we can animate
+   per-letter colour for the M15 flip. Run once. */
+function splitLetters(el){
+  const txt = el.textContent;
+  el.textContent = '';
+  [...txt].forEach(ch => {
+    const s = document.createElement('span');
+    s.className = 'ltr';
+    s.textContent = ch === ' ' ? ' ' : ch;
+    el.appendChild(s);
+  });
+}
+document.querySelectorAll('[data-flip]').forEach(splitLetters);
+
+let tl;
+
+function build(){
+  /* Initial state — final frame of Scene 14 (blank white canvas; orb burst +
+     wash already happened in Scene 14). xPercent/yPercent: -50 keeps the
+     taglines centred even after GSAP overrides the CSS transform. */
+  gsap.set('#tagline1', { xPercent: -50, yPercent: -50, opacity: 0, y: 18, scale: 0.99 });
+  gsap.set('#tagline2', { xPercent: -50, yPercent: -50, opacity: 0, y: 18, scale: 0.99 });
+
+  /* Reset all letters to ink-900 (the un-flipped state) */
+  document.querySelectorAll('.ltr').forEach(el => {
+    el.style.color = '';
+  });
+
+  tl = gsap.timeline({
+    paused: true,
+    onUpdate: () => {
+      document.getElementById('timer').textContent = tl.time().toFixed(2) + 's';
+    }
+  });
+
+  /* ============================================================
+     TOTAL ~3.50s — beat-locked at 120 BPM
+     TRANSITION FROM SCENE 14:
+        b0  0.00      Carry-over: dark bg, "Audit-ready.", sage tick orb
+        b0+ 0.10      Orb pulses BIG (scale 1.0 → 1.35) — final affirmation
+        b1  0.30      Orb bursts: scale 1.35 → 32, colour sage → pure white,
+                      filling the entire frame in white. The dark bg fades
+                      out behind it. The "Audit-ready." caption fades up + out.
+                      The tick fades inside the orb.
+        b1+ 0.85      Stage now stark white. Tagline 1 emerges.
+     SCENE BODY (orb burst + white wash moved to Scene 14):
+        b0  0.00      Tagline 1 emerges from the white canvas
+        b1  0.55      M15 letter-flip on "aged-care": ink-900 → sage-ink
+        b2  1.15      M12 swap up — tagline 1 fades up + out
+        b2+ 1.35      Tagline 2 "File with confidence." emerges
+        b3+ 1.80      M15 letter-flip on the italic phrase
+        b4  2.25–2.65 Hold
+     ============================================================ */
+
+  /* === Phase A (b0): Tagline 1 emerges from the white === */
+  tl.to('#tagline1', {
+    opacity: 1, y: 0, scale: 1.0,
+    duration: 0.50, ease: 'cubic-bezier(.16,.85,.30,1)'
+  }, 0.00);
+
+  /* === Phase B (b1): M15 letter-flip on "aged-care" — sage-ink stagger === */
+  const flip1 = document.querySelectorAll('[data-flip="1"] .ltr');
+  tl.to(flip1, {
+    color: '#4B6A55',
+    duration: 0.05,
+    stagger: 0.045,
+    ease: 'none'
+  }, 0.55);
+
+  /* === Phase C (b2): M12 swap up — tagline 1 out === */
+  tl.to('#tagline1', {
+    opacity: 0, y: -40,
+    duration: 0.40, ease: 'power3.in'
+  }, 1.15);
+
+  /* === Phase D (b2+): Tagline 2 emerges === */
+  tl.to('#tagline2', {
+    opacity: 1, y: 0, scale: 1.0,
+    duration: 0.50, ease: 'cubic-bezier(.16,.85,.30,1)'
+  }, 1.35);
+
+  /* === Phase E (b3+): M15 letter-flip on "Every quarter, every day." ===
+     Stagger tightened from 0.030 → 0.020 so the flip ends ~2.33s, leaving
+     ~0.32s of clean hold before the scene ends at 2.65s. */
+  const flip2 = document.querySelectorAll('[data-flip="2"] .ltr');
+  tl.to(flip2, {
+    color: '#4B6A55',
+    duration: 0.05,
+    stagger: 0.020,
+    ease: 'none'
+  }, 1.80);
+
+  /* === Phase F: Hold for read === */
+}
+
+function play(){
+  if (!tl) build();
+  tl.restart();
+  tl.play();
+}
+
+document.getElementById('replay').addEventListener('click', play);
+
+// IFRAME-AWARE BOOTSTRAP — patched by shared/patch-scenes.mjs
+window.addEventListener('load', () => {
+  const start = () => { build(); if (window.parent === window) play(); };
+  const waitForGsap = (cb) => {
+    if (typeof gsap !== 'undefined') return cb();
+    setTimeout(() => waitForGsap(cb), 30);
+  };
+  const ready = () => waitForGsap(start);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(ready);
+  } else {
+    ready();
+  }
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === 'play'  && typeof play === 'function')                          play();
+  if (t === 'pause' && typeof tl   !== 'undefined' && tl)                    tl.pause();
+  if (t === 'reset' && typeof tl   !== 'undefined' && tl) { tl.seek(0); tl.pause(); }
+});
+</script>
+</body>
+</html>

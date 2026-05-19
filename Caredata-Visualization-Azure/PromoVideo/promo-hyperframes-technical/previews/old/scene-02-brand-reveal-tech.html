@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 02 - Brand Reveal Tech (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+}
+
+body {
+  background: var(--paper);
+  display:flex; align-items:center; justify-content:center;
+}
+
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+  background: var(--paper);
+}
+
+/* ===== Stage: light cream paper, matches Scene 1 ===== */
+.stage {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(60vw 50vw at 50% 35%, rgba(159,180,160,0.07), transparent 70%),
+    radial-gradient(50vw 50vw at 8% 100%, rgba(200,184,155,0.06), transparent 65%),
+    radial-gradient(45vw 45vw at 100% 0%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* paper grain */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.35;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+/* ===== Watermarks ===== */
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist",sans-serif; font-weight:500;
+  font-size:11px; letter-spacing:0.20em;
+  color:var(--ink-500); opacity:0.55; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+
+/* ===== "Built with" pop-in ===== */
+#meet {
+  position:absolute;
+  left:50%; top:50%;
+  font-family:"Instrument Serif",serif;
+  font-weight:400;
+  font-size:240px;
+  color:var(--ink-900);
+  letter-spacing:-0.02em;
+  opacity:0;
+  white-space:nowrap;
+  z-index:35;
+  will-change:transform, opacity, filter;
+}
+
+/* ===== Logo lockup ===== */
+#lockup {
+  position:absolute;
+  left:50%; top:50%;
+  display:flex; flex-direction:column; align-items:center; gap:20px;
+  opacity:0;
+  z-index:30;
+  will-change:transform, opacity, filter;
+}
+
+.lockup-row {
+  display:flex; align-items:center; gap:28px;
+}
+
+.brand-mark {
+  width:96px; height:96px;
+  border-radius:18px;
+  background:linear-gradient(145deg, oklch(0.72 0.06 150) 0%, oklch(0.78 0.05 180) 100%);
+  position:relative;
+  flex-shrink:0;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.5) inset,
+    0 6px 14px rgba(60,55,40,0.10),
+    0 1px 3px rgba(60,55,40,0.06);
+}
+.brand-mark .ekg {
+  position:absolute; inset:14px;
+  background:var(--paper);
+  clip-path:polygon(0 60%, 18% 60%, 28% 40%, 42% 75%, 56% 20%, 70% 60%, 100% 60%, 100% 65%, 68% 65%, 56% 30%, 42% 82%, 28% 50%, 18% 65%, 0 65%);
+}
+
+.wordmark {
+  font-family:"Geist",sans-serif;
+  font-weight:600;
+  font-size:96px;
+  color:var(--ink-900);
+  letter-spacing:-0.015em;
+  line-height:1;
+}
+
+/* ===== Pill (light theme, sage-tint fill, no outer glow) ===== */
+#pill {
+  display:inline-flex; align-items:center;
+  gap:14px;
+  padding:12px 22px;
+  border-radius:999px;
+  border:1.5px solid var(--sage);
+  background:rgba(159,180,160,0.10);
+  font-family:"Geist",sans-serif;
+  font-weight:500;
+  font-size:28px;
+  color:var(--ink-900);
+  white-space:nowrap;
+  overflow:hidden;
+  /* width is set dynamically after preMeasurePill */
+}
+#pill .pill-bullet {
+  width:10px; height:10px; border-radius:50%;
+  background:var(--sage);
+  flex-shrink:0;
+  /* no box-shadow / no glow per QA gate */
+}
+#pill .chip,
+#pill .chip-sep {
+  display:none; /* revealed by JS, paired with width tween */
+  opacity:0;
+  white-space:nowrap;
+}
+#pill .chip-sep {
+  color:var(--sage-ink);
+  opacity:0.55;
+  font-weight:500;
+}
+
+/* ===== Caption block ===== */
+#caption-block {
+  position:absolute;
+  left:50%; top:calc(50% + 170px);
+  text-align:center;
+  opacity:0;
+  z-index:28;
+  white-space:nowrap;
+}
+#caption-block .line-1 {
+  font-family:"Geist",sans-serif;
+  font-weight:500;
+  font-size:28px;
+  color:var(--ink-900);
+  letter-spacing:0.005em;
+}
+#caption-block .line-2 {
+  margin-top:10px;
+  font-family:"Geist",sans-serif;
+  font-weight:400;
+  font-size:22px;
+  color:var(--ink-500);
+  letter-spacing:0.005em;
+}
+
+/* ===== Curtain (matches Scene 1 handoff convention) ===== */
+#curtain {
+  position:absolute; inset:0;
+  background:#0E1211; opacity:0;
+  pointer-events:none; z-index:100;
+}
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE · GROUP W08 / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO · CARE-DATA · 02 / 12</div>
+
+  <!-- "Built with" pop-in word -->
+  <h1 id="meet">Built with</h1>
+
+  <!-- Logo lockup: brand mark + wordmark stacked above pill -->
+  <div id="lockup">
+    <div class="lockup-row">
+      <div class="brand-mark"><div class="ekg"></div></div>
+      <span class="wordmark">CareData</span>
+    </div>
+
+    <div id="pill">
+      <span class="pill-bullet"></span>
+      <span class="chip"     data-key="fastapi">FastAPI</span>
+      <span class="chip-sep" data-key="sep1">·</span>
+      <span class="chip"     data-key="react">React + Vite</span>
+      <span class="chip-sep" data-key="sep2">·</span>
+      <span class="chip"     data-key="azure">Azure Tables</span>
+      <span class="chip-sep" data-key="sep3">·</span>
+      <span class="chip"     data-key="azureblob">Azure Blob</span>
+    </div>
+  </div>
+
+  <!-- Two-line caption beneath the lockup -->
+  <div id="caption-block">
+    <div class="line-1">One repository. Two stacks. Four integrations.</div>
+    <div class="line-2">Built end-to-end by Group W08 · CSIT321, University of Wollongong.</div>
+  </div>
+
+  <!-- Curtain for clean handoff -->
+  <div id="curtain"></div>
+
+  <!-- SFX: only the three real audio files -->
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3" preload="auto"></audio>
+  <audio id="sfx-thud"   src="../audio/whoosh.mp3"      preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function() {
+  await document.fonts.ready;
+
+  /* fit to viewport via zoom (Iron Rule: zoom not transform:scale) */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((vw - fw) / 2) + 'px';
+    frame.style.top  = ((vh - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* refs */
+  const meet     = document.getElementById('meet');
+  const lockup   = document.getElementById('lockup');
+  const pill     = document.getElementById('pill');
+  const caption  = document.getElementById('caption-block');
+  const curtain  = document.getElementById('curtain');
+  const sfxWhoosh= document.getElementById('sfx-whoosh');
+  const sfxClick = document.getElementById('sfx-click');
+  const sfxThud  = document.getElementById('sfx-thud');
+
+  /* ========= Pre-measure pill widths =========
+   * widths[0] = baseline (bullet only)
+   * widths[i] = pill width after revealing the i-th .chip/.chip-sep child in DOM order
+   */
+  async function preMeasurePill(pillEl) {
+    await document.fonts.ready;
+    const chips = [...pillEl.querySelectorAll('.chip, .chip-sep')];
+    const original = chips.map(c => c.style.display);
+    // hide all, capture baseline
+    chips.forEach(c => { c.style.display = 'none'; c.style.opacity = '0'; });
+    // make sure pill width is content-driven for measurement
+    const savedWidth = pillEl.style.width;
+    pillEl.style.width = 'auto';
+    const widths = [pillEl.scrollWidth];
+    for (let i = 0; i < chips.length; i++) {
+      chips[i].style.display = 'inline-block';
+      widths.push(pillEl.scrollWidth);
+    }
+    // restore
+    chips.forEach((c, i) => { c.style.display = original[i] || 'none'; c.style.opacity = '0'; });
+    pillEl.style.width = savedWidth;
+    return widths;
+  }
+
+  const pillWidths = await preMeasurePill(pill);
+  // Lock the pill to its baseline so it has a visible outline before chips animate in
+  pill.style.width = pillWidths[0] + 'px';
+
+  /* helpers */
+  function playSfx(el, vol = 1.0) {
+    try { el.volume = vol; el.currentTime = 0; el.play(); } catch (_) {}
+  }
+
+  /* Reveal a chip + its trailing separator (if any), growing the pill width first
+   * by `lead` seconds, then fading the chip in.
+   *
+   * chipIdx:    index of the chip element in the .chip/.chip-sep DOM order
+   *             (0=fastapi, 2=react, 4=azure, 6=openai)
+   * hasSep:     whether to also reveal the separator at chipIdx+1
+   * at:         timeline position (s)
+   * targetIdx:  pillWidths[] index to grow to (chipIdx+1 if no sep, chipIdx+2 if sep)
+   */
+  function revealChip(tl, chipEls, sepEls, chipIdx, hasSep, at, targetIdx) {
+    const chip = chipEls[chipIdx / 2];
+    const sep  = hasSep ? sepEls[chipIdx / 2] : null;
+    const targetW = pillWidths[targetIdx];
+    const lead = 0.06;
+
+    // pill width grows first
+    tl.to(pill, { width: targetW, duration: 0.18, ease: 'power2.out' }, at);
+    // mouse_click fires on chip land
+    tl.call(() => playSfx(sfxClick, 1.0), null, at);
+    // chip becomes inline-block, opacity 0 -> 1 with a 60 ms lead
+    tl.call(() => { chip.style.display = 'inline-block'; }, null, at + lead);
+    tl.to(chip, { opacity: 1, duration: 0.14, ease: 'sine.out' }, at + lead);
+    // separator (if any) appears right alongside the chip
+    if (sep) {
+      tl.call(() => { sep.style.display = 'inline-block'; }, null, at + lead);
+      tl.to(sep, { opacity: 0.55, duration: 0.12, ease: 'sine.out' }, at + lead);
+    }
+  }
+
+  const chipEls = [...pill.querySelectorAll('.chip')];
+  const sepEls  = [...pill.querySelectorAll('.chip-sep')];
+
+  /* ========= Initial state ========= */
+  gsap.set(meet,    { opacity: 0, scale: 0.06, xPercent: -50, yPercent: -50, filter: 'blur(0px)' });
+  gsap.set(lockup,  { opacity: 0, xPercent: -50, yPercent: -50, x: -2400, scale: 1.0, filter: 'blur(8px)' });
+  gsap.set(caption, { opacity: 0, xPercent: -50, y: 0 });
+  gsap.set(curtain, { opacity: 0 });
+
+  const tl = gsap.timeline();
+
+  /* ========= 0.000 -> 0.250  "Built with" pops in ========= */
+  tl.to(meet, {
+    opacity: 1,
+    scale: 1.0,
+    duration: 0.25,
+    ease: 'back.out(1.6)'
+  }, 0.00);
+
+  /* 0.250 -> 0.600  hold "Built with" (0.35 s breath) */
+
+  /* ========= 0.600  the swap =========
+   * "Built with" zips right + motion blur + fade
+   * Lockup arrives from left + motion blur clears + fade in
+   */
+  tl.to(meet, {
+    x: '+=2600',
+    opacity: 0,
+    filter: 'blur(10px)',
+    duration: 0.25,
+    ease: 'power3.in'
+  }, 0.60);
+
+  tl.to(lockup, {
+    x: 0,
+    opacity: 1,
+    filter: 'blur(0px)',
+    duration: 0.25,
+    ease: 'power3.out'
+  }, 0.60);
+
+  // whoosh fires 120 ms before the swap to compensate for audio hardware latency
+  tl.call(() => playSfx(sfxWhoosh, 1.0), null, 0.48);
+
+  /* ========= 0.850  settle bounce + thud (delayed lower-volume whoosh) ========= */
+  tl.to(lockup, {
+    keyframes: [
+      { scale: 1.025, duration: 0.14, ease: 'sine.out' },
+      { scale: 1.000, duration: 0.14, ease: 'back.out(1.4)' }
+    ]
+  }, 0.85);
+  tl.call(() => playSfx(sfxThud, 0.4), null, 0.85);
+
+  /* ========= 1.000 -> 1.600  pill chips reveal in sequence =========
+   * chip pairs:
+   *   FastAPI  (chipIdx 0)        -> targetIdx 1  (no sep yet)
+   *   sep1     (chipIdx 1)        ... revealed alongside React via hasSep=true on FastAPI
+   * Actual pattern from script:
+   *   1.000  FastAPI lands      -> widths[1]
+   *   1.150  sep1 + React       -> widths[3]
+   *   1.300  sep2 + Azure       -> widths[5]
+   *   1.450  sep3 + Azure Blob  -> widths[7]
+   */
+  // FastAPI alone first (no leading separator)
+  revealChip(tl, chipEls, sepEls, /*chipIdx*/ 0, /*hasSep*/ false, 1.000, /*targetIdx*/ 1);
+
+  // For subsequent chips, reveal the *preceding* separator together with the chip
+  // by widening to widths[3], widths[5], widths[7]
+  function revealChipWithLeadingSep(tl, chipIdx, sepBeforeIdx, at, targetIdx) {
+    const chip = chipEls[chipIdx];
+    const sep  = sepEls[sepBeforeIdx];
+    const targetW = pillWidths[targetIdx];
+    const lead = 0.06;
+
+    tl.to(pill, { width: targetW, duration: 0.18, ease: 'power2.out' }, at);
+    tl.call(() => playSfx(sfxClick, 1.0), null, at);
+
+    // separator appears with the chip (one beat read, not two)
+    tl.call(() => { sep.style.display = 'inline-block'; },  null, at + lead);
+    tl.to(sep, { opacity: 0.55, duration: 0.12, ease: 'sine.out' }, at + lead);
+
+    tl.call(() => { chip.style.display = 'inline-block'; }, null, at + lead);
+    tl.to(chip, { opacity: 1, duration: 0.14, ease: 'sine.out' }, at + lead);
+  }
+
+  // 1.150  sep1 + React + Vite -> widths[3]
+  revealChipWithLeadingSep(tl, /*chip*/ 1, /*sep*/ 0, 1.150, 3);
+  // 1.300  sep2 + Azure Tables -> widths[5]
+  revealChipWithLeadingSep(tl, /*chip*/ 2, /*sep*/ 1, 1.300, 5);
+  // 1.450  sep3 + OpenAI       -> widths[7]
+  revealChipWithLeadingSep(tl, /*chip*/ 3, /*sep*/ 2, 1.450, 7);
+
+  /* ========= 1.600 -> 3.800  HOLD lockup completely still =========
+   * No breathing, no parallax. Brand registers as a finished thing.
+   */
+
+  /* ========= 1.800 -> 2.150  caption block fades in ========= */
+  tl.to(caption, { opacity: 1, duration: 0.35, ease: 'sine.out' }, 1.80);
+
+  /* ========= 3.800 -> 4.800  M25 whip-pan out + caption fade out ========= */
+  tl.to(caption, { opacity: 0, duration: 0.35, ease: 'sine.out' }, 3.80);
+
+  // M25 whip-pan: lockup translateX 0 -> -2400, motion blur 8 px, opacity -> 0 over 1.0 s
+  tl.to(lockup, {
+    x: -2400,
+    opacity: 0,
+    filter: 'blur(8px)',
+    duration: 1.00,
+    ease: 'power3.in'
+  }, 3.80);
+
+  // whoosh fires for the M25 transition
+  tl.call(() => playSfx(sfxWhoosh, 1.0), null, 3.68);
+
+  /* ========= 4.600 -> 4.800  curtain crash for clean handoff ========= */
+  tl.to(curtain, { opacity: 1, duration: 0.20, ease: 'power2.in' }, 4.60);
+
+  /* scene ends at 4.8 s */
+})();
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

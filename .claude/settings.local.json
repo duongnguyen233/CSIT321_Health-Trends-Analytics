@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(hyperframes-video)",
+      "Skill(hyperframes-video:*)"
+    ]
+  }
+}

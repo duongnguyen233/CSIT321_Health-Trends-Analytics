@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>CareData Promo · Master Playthrough</title>
+<link rel="stylesheet" href="shared/tokens.css">
+<link rel="stylesheet" href="shared/master.css">
+</head>
+<body data-state="idle">
+
+<!-- 1920×1080 stage holding all 16 scene iframes -->
+<div class="film" id="film">
+  <!-- Scene iframes are appended here by master.js -->
+
+  <!-- Idle title card shown before play -->
+  <div class="idle" id="idle">
+    <div class="mark"></div>
+    <div class="word"><em>CareData</em></div>
+    <div class="meta">CSIT321 Capstone · 80-second promo · 16 scenes</div>
+    <button class="play-cta" id="idlePlay">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3 L13 8 L5 13 Z"/></svg>
+      Play promo
+    </button>
+  </div>
+</div>
+
+<!-- Audio dropped — every sound asset / cue was broken; in-browser playthrough is silent. -->
+
+<!-- Brand watermark (top-right) -->
+<div class="brand-watermark">
+  <span class="mark"></span>
+  CareData
+</div>
+
+<!-- Scene caption (top-left) -->
+<div class="scene-cap" id="sceneCap">
+  <span class="num" id="capNum">Scene 01 of 16</span>
+  <span class="name" id="capName">Hook</span>
+</div>
+
+<!-- Bottom transport HUD -->
+<div class="hud" id="hud">
+  <button class="btn" id="playBtn" title="Play / Pause (Space)">
+    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3 L13 8 L5 13 Z"/></svg>
+  </button>
+  <button class="btn" id="restartBtn" title="Restart (R)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 8a6 6 0 1 0 1.76-4.24"/>
+      <path d="M2 2v3.5h3.5"/>
+    </svg>
+  </button>
+
+  <span class="scene-chip">
+    <span class="num" id="sceneChipNum">01</span>
+    <span id="sceneChipName">Hook</span>
+  </span>
+
+  <div class="scrubber" id="scrubber">
+    <div class="scrubber-fill" id="scrubberFill"></div>
+  </div>
+
+  <span class="timer">
+    <span class="now" id="timeNow">0:00.00</span>
+    <span> / </span>
+    <span id="timeTotal">1:21.18</span>
+  </span>
+</div>
+
+<script src="shared/master.js"></script>
+</body>
+</html>

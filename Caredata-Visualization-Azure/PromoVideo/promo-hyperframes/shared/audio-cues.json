@@ -1,0 +1,34 @@
+{
+  "_comment": "Audio cue map for the CareData promo. One music bed under 22 SFX events. Times are absolute master-clock seconds. Consumed by shared/audio-mix.mjs which uses ffmpeg-static to layer everything onto a single master-mix.mp3 normalised to -16 LUFS.",
+  "musicBed": {
+    "src": "shared/audio/music-bed.mp3",
+    "startSec": 0.00,
+    "fadeInSec": 0.30,
+    "fadeOutSec": 0.80,
+    "gainDb": -6
+  },
+  "cues": [
+    { "atSec":  0.00, "src": "shared/audio/sfx/01-keyboard-tick.mp3",     "scene":  1, "label": "typing-pulse-loop",       "gainDb": -16 },
+    { "atSec":  0.95, "src": "shared/audio/sfx/02-paper-rustle.mp3",      "scene":  1, "label": "fragment-cascade-A",      "gainDb": -10 },
+    { "atSec":  1.10, "src": "shared/audio/sfx/02-paper-rustle.mp3",      "scene":  1, "label": "fragment-cascade-B",      "gainDb": -11 },
+    { "atSec":  2.70, "src": "shared/audio/sfx/03-soft-whoosh.mp3",       "scene":  1, "label": "phase-E-fly-into-face",   "gainDb":  -8 },
+    { "atSec":  3.00, "src": "shared/audio/sfx/05-brand-thud.mp3",        "scene":  2, "label": "logo-lock",               "gainDb":  -7 },
+    { "atSec":  3.40, "src": "shared/audio/sfx/06-chime-tail.mp3",        "scene":  2, "label": "pill-bloom",              "gainDb": -12 },
+    { "atSec":  9.00, "src": "shared/audio/sfx/07-click-pop.mp3",         "scene":  4, "label": "drag-drop",               "gainDb": -10 },
+    { "atSec": 11.20, "src": "shared/audio/sfx/08-button-thunk.mp3",      "scene":  4, "label": "save-and-continue",       "gainDb": -10 },
+    { "atSec": 22.10, "src": "shared/audio/sfx/09-soft-chime-tap.mp3",    "scene":  6, "label": "PI-drilldown-snap",       "gainDb": -12 },
+    { "atSec": 30.30, "src": "shared/audio/sfx/04-shard-tumble.mp3",      "scene":  8, "label": "act-break-shards",        "gainDb":  -7 },
+    { "atSec": 35.30, "src": "shared/audio/sfx/13-voice-bleep.mp3",       "scene":  9, "label": "voice-setup-modal",       "gainDb": -12 },
+    { "atSec": 41.30, "src": "shared/audio/sfx/13-voice-bleep.mp3",       "scene": 10, "label": "recording-start",         "gainDb": -10 },
+    { "atSec": 51.95, "src": "shared/audio/sfx/14-alert-tick.mp3",        "scene": 11, "label": "score-resolves",          "gainDb":  -9 },
+    { "atSec": 52.50, "src": "shared/audio/sfx/12-status-dot-ping.mp3",   "scene": 11, "label": "watch-pulse-on",          "gainDb": -13 },
+    { "atSec": 62.55, "src": "shared/audio/sfx/05-brand-thud.mp3",        "scene": 13, "label": "stamp-1-FHIR",            "gainDb":  -7 },
+    { "atSec": 64.05, "src": "shared/audio/sfx/05-brand-thud.mp3",        "scene": 13, "label": "stamp-2-Privacy",         "gainDb":  -7 },
+    { "atSec": 65.55, "src": "shared/audio/sfx/05-brand-thud.mp3",        "scene": 13, "label": "stamp-3-GPMS",            "gainDb":  -7 },
+    { "atSec": 67.05, "src": "shared/audio/sfx/11-page-curl-rustle.mp3",  "scene": 14, "label": "page-curl",               "gainDb":  -8 },
+    { "atSec": 69.55, "src": "shared/audio/sfx/10-iridescent-shimmer.mp3","scene": 14, "label": "M13-sweep",               "gainDb": -10 },
+    { "atSec": 70.85, "src": "shared/audio/sfx/06-chime-tail.mp3",        "scene": 14, "label": "ring-draw",               "gainDb": -10 },
+    { "atSec": 76.18, "src": "shared/audio/sfx/05-brand-thud.mp3",        "scene": 16, "label": "logo-final-lock",         "gainDb":  -6 },
+    { "atSec": 78.18, "src": "shared/audio/sfx/15-soft-tail.mp3",         "scene": 16, "label": "audio-resolve",           "gainDb": -14 }
+  ]
+}

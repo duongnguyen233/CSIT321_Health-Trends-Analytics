@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 04 - Target Market + Advantages (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+:root {
+  --paper:      #FBF8F2;
+  --paper-warm: #F6F2EB;
+  --paper-edge: #ECE7DC;
+  --ink-900:    #1F2622;
+  --ink-700:    #3D4743;
+  --ink-500:    #6B7570;
+  --ink-300:    #A4ABA4;
+  --sage:       #9FB4A0;
+  --sage-ink:   #4B6A55;
+  --sage-tint:  #EEF1EC;
+  --clay:       #C8B89B;
+  --clay-ink:   #836B47;
+  --dusty-blue: #A6B6C4;
+  --win-bg:     #FFFFFF;
+  --win-chrome: #F2EEE4;
+  --win-border: #E2DCCC;
+}
+
+body {
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.frame-wrap {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: 0 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--paper);
+}
+
+/* Stage: light cream paper */
+.stage {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60vw 50vw at 50% 35%, rgba(159,180,160,0.09), transparent 70%),
+    radial-gradient(50vw 50vw at 8% 100%, rgba(200,184,155,0.06), transparent 65%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* Paper grain */
+.grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size: 420px 420px;
+}
+
+/* Watermarks */
+.watermark-bl {
+  position: absolute;
+  bottom: 36px;
+  left: 64px;
+  font-family: "Geist Mono", monospace;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.20em;
+  color: var(--ink-500);
+  opacity: 0.55;
+  z-index: 60;
+  pointer-events: none;
+}
+.watermark-tr {
+  position: absolute;
+  top: 42px;
+  right: 64px;
+  font-family: "Geist Mono", monospace;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--ink-500);
+  opacity: 0.55;
+  z-index: 60;
+  pointer-events: none;
+}
+
+/* ===== Section header ===== */
+#section-head {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  opacity: 0;
+  white-space: nowrap;
+}
+.eyebrow-chip {
+  font-family: "Geist Mono", monospace;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  color: var(--sage-ink);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.section-h2 {
+  font-family: "Instrument Serif", serif;
+  font-size: 56px;
+  font-weight: 400;
+  color: var(--ink-900);
+  line-height: 1.1;
+}
+
+/* ===== User cards row ===== */
+#user-cards {
+  position: absolute;
+  top: 165px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+}
+
+.user-card {
+  width: 520px;
+  height: 190px;
+  background: var(--win-bg);
+  border: 1px solid var(--win-border);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(31,38,34,0.08), 0 1px 4px rgba(31,38,34,0.04);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px 24px 24px 44px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+/* Left accent bar via border-left */
+#card-don    { border-left: 4px solid var(--sage); }
+#card-qm     { border-left: 4px solid var(--dusty-blue); }
+#card-auditor{ border-left: 4px solid var(--clay); }
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--sage-tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Geist", sans-serif;
+  font-weight: 600;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+.card-icon.don-icon    { background: var(--sage-tint); color: var(--sage-ink); }
+.card-icon.qm-icon     { background: #EAF0F5; color: #5B7A8E; }
+.card-icon.auditor-icon{ background: #F5EFE6; color: var(--clay-ink); }
+
+.card-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.card-title {
+  font-family: "Geist", sans-serif;
+  font-weight: 600;
+  font-size: 24px;
+  color: var(--ink-900);
+  line-height: 1.1;
+}
+.role-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--sage-tint);
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--sage-ink);
+  width: fit-content;
+}
+.role-tag.qm-tag      { background: #EAF0F5; color: #5B7A8E; }
+.role-tag.auditor-tag { background: #F5EFE6; color: var(--clay-ink); }
+
+.card-desc {
+  font-family: "Geist", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink-500);
+  line-height: 1.55;
+}
+
+/* Resident card row */
+#resident-row {
+  position: absolute;
+  top: 390px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+}
+
+.resident-card {
+  width: 620px;
+  height: 170px;
+  background: var(--win-bg);
+  border: 1px solid var(--win-border);
+  border-left: 4px solid var(--dusty-blue);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(31,38,34,0.08), 0 1px 4px rgba(31,38,34,0.04);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px 24px 24px 44px;
+  overflow: hidden;
+}
+
+.card-icon.res-icon { background: rgba(166,182,196,0.20); color: #5B7A8E; }
+.role-tag.res-tag { background: rgba(166,182,196,0.18); color: #5B7A8E; }
+
+/* ===== Advantage pills row ===== */
+#advantage-pills {
+  position: absolute;
+  top: 594px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+}
+
+.adv-pill {
+  width: 540px;
+  height: 86px;
+  background: var(--sage-tint);
+  border: 1px solid rgba(75,106,85,0.25);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 18px;
+  opacity: 0;
+}
+
+.pill-bullet {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--sage-ink);
+  flex-shrink: 0;
+}
+
+.pill-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pill-title {
+  font-family: "Geist", sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  color: var(--sage-ink);
+  line-height: 1.1;
+}
+.pill-sub {
+  font-family: "Geist", sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  color: var(--ink-500);
+  line-height: 1.3;
+}
+
+/* ===== Bottom tagline ===== */
+#bottom-tag {
+  position: absolute;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "Geist", sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  color: var(--ink-500);
+  white-space: nowrap;
+  opacity: 0;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE · GROUP W08 / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO · CARE-DATA · 04 / 18</div>
+
+  <!-- ===== Section header ===== -->
+  <div id="section-head">
+    <div class="eyebrow-chip">WHO CAREDATA SERVES</div>
+    <div class="section-h2">Three users. One platform.</div>
+  </div>
+
+  <!-- ===== User cards ===== -->
+  <div id="user-cards">
+
+    <!-- Card 1: Director of Nursing -->
+    <div class="user-card" id="card-don">
+      <div class="card-top">
+        <div class="card-icon don-icon">D</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Director of Nursing</div>
+          <div class="role-tag">DON</div>
+        </div>
+      </div>
+      <div class="card-desc">Oversees quarterly QI submissions and compliance reporting for the facility.</div>
+    </div>
+
+    <!-- Card 2: Quality Manager -->
+    <div class="user-card" id="card-qm">
+      <div class="card-top">
+        <div class="card-icon qm-icon">Q</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Quality Manager</div>
+          <div class="role-tag qm-tag">QM</div>
+        </div>
+      </div>
+      <div class="card-desc">Monitors indicator trends and prepares data for board-level review.</div>
+    </div>
+
+    <!-- Card 3: ACQSC Auditor -->
+    <div class="user-card" id="card-auditor">
+      <div class="card-top">
+        <div class="card-icon auditor-icon">A</div>
+        <div class="card-title-wrap">
+          <div class="card-title">ACQSC Auditor</div>
+          <div class="role-tag auditor-tag">AUDITOR</div>
+        </div>
+      </div>
+      <div class="card-desc">Validates facility performance against national QI benchmarks and standards.</div>
+    </div>
+
+  </div>
+
+  <!-- ===== Resident card ===== -->
+  <div id="resident-row">
+    <div class="resident-card">
+      <div class="card-top">
+        <div class="card-icon res-icon">R</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Aged Care Residents</div>
+          <div class="role-tag res-tag">VOICE BIOMARKER</div>
+        </div>
+      </div>
+      <div class="card-desc">Participate in daily voice check-ins via unique recording links. No app or device required — works in any mobile browser.</div>
+    </div>
+  </div>
+
+  <!-- ===== Advantage pills ===== -->
+  <div id="advantage-pills">
+
+    <div class="adv-pill" id="pill-dash">
+      <div class="pill-bullet"></div>
+      <div class="pill-content">
+        <div class="pill-title">Dashboard Analytics</div>
+        <div class="pill-sub">14 AIHW QI categories, trend-over-trend</div>
+      </div>
+    </div>
+
+    <div class="adv-pill" id="pill-upload">
+      <div class="pill-bullet"></div>
+      <div class="pill-content">
+        <div class="pill-title">CSV Upload</div>
+        <div class="pill-sub">Validate and persist in one step</div>
+      </div>
+    </div>
+
+    <div class="adv-pill" id="pill-report">
+      <div class="pill-bullet"></div>
+      <div class="pill-content">
+        <div class="pill-title">Government-Format Reports</div>
+        <div class="pill-sub">Audit-ready GPMS PDF output</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== Bottom tagline ===== -->
+  <div id="bottom-tag">
+    Designed for the people the regulations are written to protect.
+  </div>
+
+  <!-- SFX -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3" preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function() {
+  await document.fonts.ready;
+
+  /* ===== Fit: zoom not transform:scale; transform-origin:0 0 ===== */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((vw - fw) / 2) + 'px';
+    frame.style.top  = ((vh - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* ===== Element refs ===== */
+  const sectionHead = document.getElementById('section-head');
+  const cardDon     = document.getElementById('card-don');
+  const cardQm      = document.getElementById('card-qm');
+  const cardAuditor = document.getElementById('card-auditor');
+  const residentRow = document.getElementById('resident-row');
+  const pillDash    = document.getElementById('pill-dash');
+  const pillUpload  = document.getElementById('pill-upload');
+  const pillReport  = document.getElementById('pill-report');
+  const bottomTag   = document.getElementById('bottom-tag');
+
+  const sfxType   = document.getElementById('sfx-type');
+  const sfxWhoosh = document.getElementById('sfx-whoosh');
+  const sfxClick  = document.getElementById('sfx-click');
+
+  /* ===== SFX helper ===== */
+  function playSfx(el, vol) {
+    try { el.volume = (vol !== undefined ? vol : 1.0); el.currentTime = 0; el.play(); } catch (_) {}
+  }
+
+  /* ===== Easing presets ===== */
+  const easeSettle = 'cubic-bezier(0.16,0.85,0.30,1)';
+
+  /* ===== Initial state: everything hidden ===== */
+  gsap.set(sectionHead, { opacity: 0 });
+  gsap.set([cardDon, cardQm, cardAuditor], { opacity: 0, y: 30 });
+  gsap.set(residentRow, { opacity: 0, y: 30 });
+  gsap.set([pillDash, pillUpload, pillReport], { opacity: 0, scale: 0.92 });
+  gsap.set(bottomTag, { opacity: 0 });
+
+  /* ===== Timeline (30s, 120 BPM = 0.5s per beat) ===== */
+  const tl = gsap.timeline();
+
+  /* 0.5s: section header fades in (0.4s easeSettle) */
+  tl.to(sectionHead, {
+    opacity: 1,
+    duration: 0.4,
+    ease: easeSettle
+  }, 0.5);
+
+  /* 1.0s: card-don slides in from left + whoosh */
+  tl.call(() => playSfx(sfxWhoosh, 0.55), null, 1.0);
+  tl.to(cardDon, {
+    opacity: 1,
+    y: 0,
+    x: 0,
+    duration: 0.45,
+    ease: easeSettle
+  }, 1.0);
+
+  /* 1.5s: card-qm slides in + whoosh */
+  tl.call(() => playSfx(sfxWhoosh, 0.50), null, 1.5);
+  tl.to(cardQm, {
+    opacity: 1,
+    y: 0,
+    x: 0,
+    duration: 0.45,
+    ease: easeSettle
+  }, 1.5);
+
+  /* 2.0s: card-auditor slides in + whoosh */
+  tl.call(() => playSfx(sfxWhoosh, 0.45), null, 2.0);
+  tl.to(cardAuditor, {
+    opacity: 1,
+    y: 0,
+    x: 0,
+    duration: 0.45,
+    ease: easeSettle
+  }, 2.0);
+
+  /* 2.8s: resident card slides in + whoosh */
+  tl.call(() => playSfx(sfxWhoosh, 0.40), null, 2.8);
+  tl.to(residentRow, {
+    opacity: 1,
+    y: 0,
+    duration: 0.45,
+    ease: easeSettle
+  }, 2.8);
+
+  /* 4.0s: pill-dash pops in (scale 0.92->1, back.out(1.4)) + click */
+  tl.call(() => playSfx(sfxClick, 0.55), null, 4.0);
+  tl.to(pillDash, {
+    opacity: 1,
+    scale: 1,
+    duration: 0.35,
+    ease: 'back.out(1.4)'
+  }, 4.0);
+
+  /* 5.0s: pill-upload pops in + click */
+  tl.call(() => playSfx(sfxClick, 0.50), null, 5.0);
+  tl.to(pillUpload, {
+    opacity: 1,
+    scale: 1,
+    duration: 0.35,
+    ease: 'back.out(1.4)'
+  }, 5.0);
+
+  /* 6.0s: pill-report pops in + click */
+  tl.call(() => playSfx(sfxClick, 0.45), null, 6.0);
+  tl.to(pillReport, {
+    opacity: 1,
+    scale: 1,
+    duration: 0.35,
+    ease: 'back.out(1.4)'
+  }, 6.0);
+
+  /* 7.5s: bottom tagline fades in (0.4s) */
+  tl.to(bottomTag, {
+    opacity: 1,
+    duration: 0.4,
+    ease: easeSettle
+  }, 7.5);
+
+  /* 7.5–30.0s: hold — scene ends */
+
+})();
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

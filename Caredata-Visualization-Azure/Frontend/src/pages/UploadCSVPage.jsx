@@ -593,18 +593,24 @@ export default function UploadCSVPage() {
 
   const sidebar = (
     <aside
-      className="shrink-0 w-60 p-3 self-start sticky top-24"
+      className="shrink-0 w-60 self-start sticky top-24"
       style={{
         background: "var(--bg-white)",
         border: "1px solid var(--line)",
         borderRadius: "var(--r-lg)",
+        padding: "16px 12px",
       }}
     >
       <p
-        className="text-[11px] uppercase px-3 pt-1 pb-2"
-        style={{ color: "var(--ink-500)", fontWeight: 600, letterSpacing: "0.08em" }}
+        className="uppercase mb-3 px-3"
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: "0.08em",
+          color: "var(--ink-500)",
+        }}
       >
-        Data Entry
+        Data entry
       </p>
       <ul className="space-y-0.5">
         {SIDEBAR_ITEMS.map(item => {
@@ -1437,7 +1443,7 @@ export default function UploadCSVPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-cream)" }}>
       <Navbar />
-      <main className="flex-grow flex gap-6 px-4 sm:px-8 mt-24 pb-12 pt-8 max-w-7xl mx-auto w-full items-start">
+      <main className="flex flex-grow pt-24 pb-12 px-4 sm:px-8 max-w-[1440px] mx-auto gap-6 w-full items-start">
         {sidebar}
         {activeTab === "upload" && uploadTab}
         {activeTab === "manual" && manualEntryTab}

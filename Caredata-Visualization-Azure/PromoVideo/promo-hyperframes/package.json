@@ -1,0 +1,22 @@
+{
+  "name": "caredata-promo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preview": "hyperframes preview",
+    "render": "hyperframes render . -o output/master-1920x1080.mp4 -f 30 -q standard",
+    "render:vertical": "hyperframes render . -o output/master-1080x1920.mp4 -f 30 -q standard",
+    "audio:mix": "node shared/audio-mix.mjs",
+    "verify": "node scripts/verify-render.mjs"
+  },
+  "devDependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0",
+    "hyperframes": "^0.5.3"
+  },
+  "dependencies": {
+    "bootstrap-icons": "^1.13.1",
+    "lucide-static": "^1.14.0"
+  }
+}

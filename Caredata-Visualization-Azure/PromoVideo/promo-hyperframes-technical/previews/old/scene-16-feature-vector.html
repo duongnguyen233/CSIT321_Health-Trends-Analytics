@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 16 - 108-d Feature Vector + Nightly CPD Loop (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+
+  --win-bg:       #FFFFFF;
+  --win-chrome:   #F2EEE4;
+  --win-border:   #E2DCCC;
+  --code-comment: #8E948D;
+  --code-keyword: #4B6A55;
+  --code-fn:      #3D4743;
+  --code-string:  #836B47;
+  --code-punct:   #6B7570;
+  --code-good:    #6F8E76;
+}
+
+body {
+  background: var(--paper);
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* frame-wrap: Iron Rule -- transform-origin:0 0, zoom for fit */
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+  background: var(--paper);
+}
+
+/* === Stage: light cream paper with sage/clay warmth === */
+.stage {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 20% 25%, rgba(159,180,160,0.10), transparent 55%),
+    radial-gradient(circle at 78% 72%, rgba(159,180,160,0.08), transparent 60%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* paper grain */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.35;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+/* === Watermarks === */
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.20em;
+  color:var(--ink-500); opacity:0.55; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+
+/* === Scene title === */
+#scene-title {
+  position:absolute; top:60px; left:50%;
+  transform:translateX(-50%);
+  font-family:"Instrument Serif",serif;
+  font-weight:400; font-size:56px;
+  color:var(--ink-900);
+  letter-spacing:-0.01em;
+  white-space:nowrap;
+  opacity:0;
+  z-index:30;
+}
+#scene-title .sage { color:var(--sage-ink); font-style:italic; }
+
+/* === 108-d stacked bar === */
+#stacked-bar-wrap {
+  position:absolute; top:168px; left:80px; width:1760px;
+  z-index:20;
+}
+#stacked-bar-label {
+  font-family:"Geist Mono",monospace; font-size:13px; font-weight:600;
+  letter-spacing:0.22em; color:var(--ink-500);
+  margin-bottom:10px; opacity:0;
+}
+#stacked-bar {
+  width:100%; height:92px;
+  border:1px solid rgba(159,180,160,0.22);
+  border-radius:10px;
+  overflow:hidden;
+  display:flex;
+}
+
+/* Stacked bar segments -- widths set by flex proportional to real counts */
+/* eGeMAPS: 88/108 = 81.48%, Praat: 9/108 = 8.33%, Ling: 9/108 = 8.33%, DDK: 2/108 = 1.85% */
+.seg {
+  display:flex; align-items:center; justify-content:center;
+  opacity:0;
+  /* clip-path drives the wipe-in animation */
+  clip-path: inset(0 100% 0 0);
+  transition: none;
+}
+.seg[data-key="egemaps"] {
+  flex:88;
+  background: linear-gradient(90deg, #4B6A55 0%, #9FB4A0 100%);
+  color: #FBF8F2;
+  font-family:"Geist",sans-serif; font-weight:600; font-size:22px;
+  letter-spacing:0.01em;
+}
+.seg[data-key="praat"] {
+  flex:9;
+  background: #9FB4A0;
+  color: #1F2622;
+  font-family:"Geist",sans-serif; font-weight:600; font-size:17px;
+}
+.seg[data-key="linguistic"] {
+  flex:9;
+  background: #C8B89B;
+  color: #1F2622;
+  font-family:"Geist",sans-serif; font-weight:600; font-size:17px;
+}
+.seg[data-key="ddk"] {
+  flex:2;
+  background: #A6B6C4;
+  color: #1F2622;
+  font-family:"Geist",sans-serif; font-weight:600; font-size:13px;
+  padding:0 4px; text-align:center;
+}
+
+/* === Per-segment description rows === */
+#descriptions {
+  position:absolute; top:302px; left:80px; width:1760px;
+  z-index:20;
+}
+.desc {
+  display:flex; align-items:baseline;
+  opacity:0; transform:translateY(8px);
+  margin-bottom:8px;
+  font-family:"Geist",sans-serif; font-size:18px;
+  color:var(--ink-500); line-height:1.55;
+}
+.desc strong {
+  font-weight:600; margin-right:10px; white-space:nowrap;
+  flex-shrink:0;
+}
+.desc[data-key="egemaps"] strong { color:var(--sage-ink); }
+.desc[data-key="praat"]    strong { color:var(--sage-ink); }
+.desc[data-key="linguistic"] strong { color:var(--clay-ink); }
+.desc[data-key="ddk"]      strong { color:var(--ink-700); }
+
+/* === Code pane (light IDE, left side below descriptions) === */
+#code-pane {
+  position:absolute; top:518px; left:80px;
+  width:940px; height:420px;
+  background:var(--win-bg);
+  border:1px solid var(--win-border);
+  border-radius:8px;
+  overflow:hidden;
+  opacity:0;
+  box-shadow:
+    0 1px 0 #FFFFFF inset,
+    0 12px 28px rgba(60,55,40,0.10),
+    0 2px 6px rgba(60,55,40,0.06);
+  z-index:20;
+}
+.pane-chrome {
+  display:flex; align-items:center;
+  height:32px;
+  background:var(--win-chrome);
+  border-bottom:1px solid var(--win-border);
+  padding:0 14px;
+  font-family:"Geist Mono",monospace;
+  font-size:11px; font-weight:500;
+  letter-spacing:0.04em;
+  color:var(--ink-500);
+}
+.pane-chrome .lights {
+  display:inline-flex; gap:6px; margin-right:14px;
+}
+.pane-chrome .lights span {
+  width:10px; height:10px; border-radius:50%;
+  background:#D9D3C4;
+  border:1px solid rgba(0,0,0,0.04);
+}
+.pane-chrome .lights span:first-child  { background:#D8B0A4; }
+.pane-chrome .lights span:nth-child(2) { background:#D9CDA4; }
+.pane-chrome .lights span:nth-child(3) { background:#B0C5B2; }
+.pane-body {
+  padding:18px 22px 16px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:14px; line-height:1.60;
+  color:var(--ink-900);
+  overflow:hidden; height:calc(100% - 32px);
+}
+.pane-body .cm  { color:var(--code-comment); font-style:italic; }
+.pane-body .kw  { color:var(--code-keyword); font-weight:600; }
+.pane-body .fn  { color:var(--code-fn); font-weight:600; }
+.pane-body .st  { color:var(--code-string); }
+.pane-body .pn  { color:var(--code-punct); }
+.pane-body .ok  { color:var(--code-good); }
+.pane-body .hi  { background:rgba(75,106,85,0.10); border-radius:2px; padding:0 2px; }
+
+/* assert line gets its own id for the M6 zoom */
+#assert-line { display:block; }
+#assert-annotation {
+  position:absolute; top:878px; left:80px;
+  width:940px; opacity:0; z-index:25;
+  font-family:"Geist",sans-serif; font-style:italic;
+  font-size:18px; color:var(--ink-500); line-height:1.5;
+}
+
+/* === CPD timeline (dark sub-panel, right side) === */
+#cpd-timeline {
+  position:absolute; top:518px; right:60px;
+  width:820px; height:420px;
+  padding:26px 30px;
+  opacity:0;
+  background:rgba(14,18,17,0.96);
+  border:1px solid #3D4743;
+  border-radius:12px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:15px; color:#F6F2EB; line-height:1.65;
+  z-index:20;
+  overflow:hidden;
+}
+#cpd-timeline .cpd-header {
+  font-family:"Geist",sans-serif; font-weight:500; font-size:17px;
+  color:#9FB4A0; margin-bottom:16px;
+  display:flex; align-items:center; gap:10px;
+}
+#cpd-timeline .cpd-header .clock-chip {
+  font-family:"Geist Mono",monospace; font-size:13px;
+  color:#A4ABA4; letter-spacing:0.08em;
+}
+.cpd-step { opacity:0; transform:translateX(10px); }
+.cpd-step + .cpd-step { margin-top:4px; }
+.cpd-timing-note {
+  margin-top:18px;
+  font-family:"Geist",sans-serif; font-size:13px;
+  color:#A4ABA4; font-style:italic;
+}
+
+/* CPD trace dot */
+#cpd-trace {
+  position:absolute;
+  width:10px; height:10px; border-radius:50%;
+  background:#9FB4A0; box-shadow:0 0 12px rgba(159,180,160,0.85);
+  opacity:0; z-index:40;
+  pointer-events:none;
+}
+
+/* Nurse-dashboard hint (materialises bottom-right as trace fires off) */
+#nurse-hint {
+  position:absolute; bottom:54px; right:60px;
+  width:220px; height:130px;
+  border:1px solid rgba(159,180,160,0.28);
+  border-radius:6px;
+  background: linear-gradient(135deg, #F6F2EB 0%, #EEF1EC 100%);
+  opacity:0;
+  z-index:15;
+  overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  font-family:"Geist",sans-serif; font-size:11px;
+  color:var(--sage-ink); text-align:center; line-height:1.4;
+  font-weight:500; letter-spacing:0.04em;
+}
+
+/* === Bottom caption === */
+#cpd-caption {
+  position:absolute; bottom:48px; left:50%;
+  transform:translateX(-50%);
+  opacity:0; z-index:30;
+  text-align:center;
+  font-family:"Geist",sans-serif; font-weight:500;
+  font-size:30px; color:var(--ink-900);
+  white-space:nowrap;
+}
+#cpd-caption .sage-flip { color:var(--sage-ink); }
+
+/* === Curtain (clean cut to next scene) === */
+#curtain {
+  position:absolute; inset:0;
+  background:#0E1211; opacity:0;
+  pointer-events:none; z-index:100;
+}
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <!-- Watermarks -->
+  <div class="watermark-bl">CSIT321 CAPSTONE / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO · CARE-DATA · 16 / 12</div>
+
+  <!-- Scene headline -->
+  <h2 id="scene-title">One vector. <span class="sage">108 dimensions.</span></h2>
+
+  <!-- Stacked bar: 88/9/9/2 = 108, widths proportional via flex -->
+  <div id="stacked-bar-wrap">
+    <div id="stacked-bar-label">108-d VOICE FEATURE VECTOR</div>
+    <div id="stacked-bar">
+      <div class="seg" data-key="egemaps">eGeMAPS 88</div>
+      <div class="seg" data-key="praat">Praat 9</div>
+      <div class="seg" data-key="linguistic">Ling 9</div>
+      <div class="seg" data-key="ddk">DDK&#8202;2</div>
+    </div>
+  </div>
+
+  <!-- Per-segment descriptions -->
+  <div id="descriptions">
+    <div class="desc" data-key="egemaps">
+      <strong>eGeMAPS (88):</strong>
+      Geneva Minimalistic Acoustic Parameter Set: loudness, alpha-ratio, MFCC 1-4, F0 semitones, jitter, shimmer, HNR, formants F1-F3, spectral flux, prosodic rate/duration features.
+    </div>
+    <div class="desc" data-key="praat">
+      <strong>Praat (9):</strong>
+      jitter_local, jitter_rap, jitter_ppq5, shimmer_local, shimmer_apq3, shimmer_apq5, hnr_mean, cpp, mpt
+    </div>
+    <div class="desc" data-key="linguistic">
+      <strong>Linguistic (9):</strong>
+      speech_rate_wpm, articulation_rate_wpm, pause_ratio, n_pauses, mean_pause_s, n_filled_pauses, ttr, idea_density, n_words
+    </div>
+    <div class="desc" data-key="ddk">
+      <strong>DDK (2):</strong>
+      ddk_rate_per_s, ddk_isi_cv
+    </div>
+  </div>
+
+  <!-- Code pane: app/services/voice_score_vector.py -->
+  <div id="code-pane">
+    <div class="pane-chrome">
+      <span class="lights"><span></span><span></span><span></span></span>
+      app/services/voice_score_vector.py
+    </div>
+    <div class="pane-body" id="code-body"><span class="cm"># Feature ordering is stable across recordings; missing values become 0.</span>
+<span class="kw">FEATURE_NAMES</span><span class="pn">: tuple[str, ...] = (</span>
+    <span class="fn">_prefix</span><span class="pn">(</span><span class="st">"egemaps"</span><span class="pn">, EGEMAPS_ALL)</span>       <span class="cm"># 88 eGeMAPS functionals</span>
+    <span class="pn">+</span> <span class="fn">_prefix</span><span class="pn">(</span><span class="st">"praat"</span><span class="pn">, PRAAT_KEYS)</span>         <span class="cm"># 9 Praat features</span>
+    <span class="pn">+</span> <span class="fn">_prefix</span><span class="pn">(</span><span class="st">"linguistic"</span><span class="pn">, LINGUISTIC_KEYS)</span>  <span class="cm"># 9 linguistic features</span>
+    <span class="pn">+</span> <span class="fn">_prefix</span><span class="pn">(</span><span class="st">"ddk"</span><span class="pn">, DDK_KEYS)</span>             <span class="cm"># 2 DDK features (rate, ISI CV)</span>
+<span class="pn">)</span>
+<span id="assert-line"><span class="kw">assert</span> <span class="fn">len</span><span class="pn">(FEATURE_NAMES) ==</span> <span class="ok hi">108</span><span class="pn">,</span> <span class="st">f"unexpected: {<!-- -->len(FEATURE_NAMES)}"</span></span>
+
+<span class="kw">def</span> <span class="fn">build_full_vector</span><span class="pn">(features:</span> <span class="fn">Mapping</span><span class="pn">) -&gt; np.ndarray:</span>
+    <span class="st">"""Project a voice_processor_v2.extract_all output into a 108-d vector."""</span>
+    vec <span class="pn">=</span> np.<span class="fn">zeros</span><span class="pn">(</span><span class="fn">len</span><span class="pn">(FEATURE_NAMES),</span> dtype<span class="pn">=</span>np.float32<span class="pn">)</span>
+    <span class="kw">for</span> i<span class="pn">,</span> prefixed <span class="kw">in</span> <span class="fn">enumerate</span><span class="pn">(FEATURE_NAMES):</span>
+        prefix<span class="pn">,</span> key <span class="pn">=</span> prefixed.<span class="fn">split</span><span class="pn">(</span><span class="st">"."</span><span class="pn">,</span> <span class="ok">1</span><span class="pn">)</span>
+        vec<span class="pn">[i] =</span> <span class="fn">_get_nested</span><span class="pn">(features, prefix, key)</span>
+    <span class="kw">return</span> vec
+</div>
+  </div>
+
+  <!-- M6 zoom annotation (fades in at 25.0 s) -->
+  <div id="assert-annotation">
+    If a future contributor adds a feature without rebudgeting the 108, this fires at import time.
+  </div>
+
+  <!-- CPD timeline: dark sub-panel, 1px ink-700 border, nightly at 02:00 ACST -->
+  <div id="cpd-timeline">
+    <div class="cpd-header">
+      nightly CPD loop
+      <span class="clock-chip">every 24h at 02:00 ACST</span>
+    </div>
+    <div class="cpd-step" data-key="load">
+      &#9500;&#9472;&#9472; load last 14 days from voicescores (resident, vec_108)
+    </div>
+    <div class="cpd-step" data-key="pelt">
+      &#9500;&#9472;&#9472; per-resident ruptures.Pelt(model='rbf') on each of 5 dimensions
+    </div>
+    <div class="cpd-step" data-key="predict">
+      &#9500;&#9472;&#9472; algo.predict(pen=3.5)  <span style="color:#A4ABA4;font-size:12px;"># min 7 recordings per dimension</span>
+    </div>
+    <div class="cpd-step" data-key="emit">
+      &#9492;&#9472;&#9472; upsert voicealerts row (watch | review)
+    </div>
+    <div class="cpd-timing-note">
+      ~6 s per resident, 60 residents, ~6 minutes total. Runs as a background job.
+    </div>
+  </div>
+
+  <!-- Trace dot for CPD run animation -->
+  <div id="cpd-trace"></div>
+
+  <!-- Nurse dashboard hint (bottom-right, materialises when trace fires off) -->
+  <div id="nurse-hint">Voice alert<br>surfaced to<br>nurse dashboard</div>
+
+  <!-- Bottom caption: M15 ink-900 -> sage-ink on "Daily is the loop." -->
+  <div id="cpd-caption">
+    <span id="caption-part1"></span><em id="caption-part2" class="sage-flip"></em>
+  </div>
+
+  <!-- Curtain -->
+  <div id="curtain"></div>
+
+  <!-- SFX: only these three files per Iron Rules -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3" preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function () {
+  await document.fonts.ready;
+
+  /* Iron Rule: zoom not transform:scale, transform-origin:0 0 */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((window.innerWidth  - fw) / 2) + 'px';
+    frame.style.top  = ((window.innerHeight - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* --- SFX helpers --- */
+  const sfxType   = document.getElementById('sfx-type');
+  const sfxWhoosh = document.getElementById('sfx-whoosh');
+  const sfxClick  = document.getElementById('sfx-click');
+
+  function playType(vol)   { try { sfxType.currentTime   = 0; sfxType.volume   = vol ?? 1;   sfxType.play(); }   catch (_) {} }
+  function playWhoosh(vol) { try { sfxWhoosh.currentTime = 0; sfxWhoosh.volume = vol ?? 1;   sfxWhoosh.play(); } catch (_) {} }
+  function playClick(vol)  {
+    /* re-trigger: clone the audio element so overlapping low-gain clicks don't cancel each other */
+    try {
+      const c = sfxClick.cloneNode();
+      c.volume = vol ?? 0.35;
+      c.play();
+    } catch (_) {}
+  }
+
+  /* --- Element refs --- */
+  const title       = document.getElementById('scene-title');
+  const barLabel    = document.getElementById('stacked-bar-label');
+  const segs        = [...document.querySelectorAll('.seg')];
+  const descs       = [...document.querySelectorAll('.desc')];
+  const codePaneEl  = document.getElementById('code-pane');
+  const assertAnno  = document.getElementById('assert-annotation');
+  const cpdTimeline = document.getElementById('cpd-timeline');
+  const cpdSteps    = [...document.querySelectorAll('.cpd-step')];
+  const cpdTrace    = document.getElementById('cpd-trace');
+  const nurseHint   = document.getElementById('nurse-hint');
+  const caption     = document.getElementById('cpd-caption');
+  const cap1        = document.getElementById('caption-part1');
+  const cap2        = document.getElementById('caption-part2');
+  const curtain     = document.getElementById('curtain');
+
+  /* --- Initial GSAP states --- */
+  gsap.set(title,       { opacity: 0, y: 14 });
+  gsap.set(barLabel,    { opacity: 0 });
+  segs.forEach(s  => gsap.set(s,  { opacity: 0, clipPath: 'inset(0 100% 0 0)' }));
+  descs.forEach(d => gsap.set(d,  { opacity: 0, y: 8 }));
+  gsap.set(codePaneEl,  { opacity: 0, y: 40 });
+  gsap.set(assertAnno,  { opacity: 0 });
+  gsap.set(cpdTimeline, { opacity: 0, x: 40 });
+  cpdSteps.forEach(s => gsap.set(s, { opacity: 0, x: 10 }));
+  gsap.set(cpdTrace,    { opacity: 0 });
+  gsap.set(nurseHint,   { opacity: 0 });
+  gsap.set(caption,     { opacity: 0 });
+  gsap.set(curtain,     { opacity: 0 });
+
+  const ease1 = 'cubic-bezier(0.16,0.85,0.30,1)';
+  const ease2 = 'cubic-bezier(0.22,0.85,0.30,1)';
+
+  const tl = gsap.timeline();
+
+  /* ------------------------------------------------------------------ */
+  /* 0.0 - 2.0  Headline types in (Instrument Serif, 56px)              */
+  /* ------------------------------------------------------------------ */
+  tl.call(() => playType(1.0), null, 0.0);
+  tl.to(title, { opacity: 1, y: 0, duration: 0.55, ease: ease1 }, 0.0);
+  tl.to(barLabel, { opacity: 1, duration: 0.40, ease: 'sine.out' }, 0.90);
+
+  /* ------------------------------------------------------------------ */
+  /* 2.0 - 10.0  Stacked bar draws segment by segment (M22 wipe)        */
+  /*             Order: eGeMAPS (b4), Praat (b9), Linguistic (b13), DDK */
+  /*             Each: 2.0 s wipe, 0.5 s gap. Clicks at 2.5/4.5/6.5/8.5*/
+  /* ------------------------------------------------------------------ */
+  const segKeys   = ['egemaps', 'praat', 'linguistic', 'ddk'];
+  const segStarts = [2.0, 4.0, 6.0, 8.0];
+  const clickTs   = [2.5, 4.5, 6.5, 8.5];
+
+  segKeys.forEach((key, i) => {
+    const el = segs.find(s => s.dataset.key === key);
+    tl.to(el, {
+      opacity: 1,
+      clipPath: 'inset(0 0% 0 0)',
+      duration: 1.8,
+      ease: 'power2.inOut'
+    }, segStarts[i]);
+    tl.call(() => playClick(0.30), null, clickTs[i]);
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* 10.0 - 15.0  Per-segment descriptions reveal (M19 stagger)          */
+  /* ------------------------------------------------------------------ */
+  tl.call(() => playType(0.85), null, 10.5);
+  const descKeys   = ['egemaps', 'praat', 'linguistic', 'ddk'];
+  const descStarts = [10.0, 11.2, 12.4, 13.6];
+  descKeys.forEach((key, i) => {
+    const el = descs.find(d => d.dataset.key === key);
+    tl.to(el, { opacity: 1, y: 0, duration: 0.40, ease: 'sine.out' }, descStarts[i]);
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* 15.0 - 25.0  Code pane slides in (M11), code reveals               */
+  /* ------------------------------------------------------------------ */
+  tl.call(() => playWhoosh(1.0), null, 15.0);
+  tl.to(codePaneEl, { opacity: 1, y: 0, duration: 0.50, ease: ease2 }, 15.0);
+  tl.call(() => playType(0.75), null, 15.5);
+
+  /* ------------------------------------------------------------------ */
+  /* 25.0 - 30.0  M6 step-zoom on assert line                           */
+  /* ------------------------------------------------------------------ */
+  tl.call(() => playWhoosh(1.0), null, 25.0);
+  tl.to(codePaneEl, {
+    scale: 1.38,
+    transformOrigin: '0px 200px',
+    duration: 0.45,
+    ease: ease2
+  }, 25.0);
+  tl.to(assertAnno, { opacity: 1, duration: 0.40, ease: 'sine.out' }, 25.30);
+
+  /* zoom back out at 30.0 */
+  tl.call(() => playWhoosh(0.90), null, 30.0);
+  tl.to(codePaneEl, {
+    scale: 1.0,
+    transformOrigin: '0px 200px',
+    duration: 0.45,
+    ease: ease2
+  }, 30.0);
+  tl.to(assertAnno, { opacity: 0, duration: 0.30, ease: 'sine.in' }, 30.0);
+
+  /* ------------------------------------------------------------------ */
+  /* 30.0 - 38.0  CPD timeline slides in from right (M11)               */
+  /*              4 steps reveal sequentially, 1.5 s each               */
+  /* ------------------------------------------------------------------ */
+  tl.call(() => playWhoosh(1.0), null, 30.0);
+  tl.to(cpdTimeline, { opacity: 1, x: 0, duration: 0.50, ease: ease2 }, 30.10);
+
+  /* 02:00 ACST clock-tick beat at 30.5 */
+  tl.call(() => playClick(0.25), null, 30.5);
+
+  /* CPD steps: 32.0 burst then stagger */
+  tl.call(() => playType(0.70), null, 32.0);
+  const stepStarts = [32.0, 33.5, 35.0, 36.5];
+  cpdSteps.forEach((el, i) => {
+    tl.to(el, { opacity: 1, x: 0, duration: 0.45, ease: ease2 }, stepStarts[i]);
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* 38.0 - 43.0  CPD trace dot rides the 4 steps                       */
+  /*              Waypoints inside the CPD timeline panel                */
+  /* ------------------------------------------------------------------ */
+
+  /* CPD timeline panel sits at right:60px -> left edge = 1920-60-820 = 1040px  */
+  /* step positions (approximate y relative to page, accounting for panel top 518) */
+  const cpdPanelLeft = 1040; /* 1920 - 60 - 820 */
+  const cpdPanelTop  = 518;
+  const stepYOffsets = [78, 102, 125, 150]; /* px from panel top per step header + padding */
+  const dotSize = 10;
+
+  /* Start position: left of first step */
+  gsap.set(cpdTrace, {
+    left: cpdPanelLeft + 28,
+    top:  cpdPanelTop + stepYOffsets[0] - dotSize / 2,
+    opacity: 0
+  });
+
+  tl.to(cpdTrace, { opacity: 1, duration: 0.25, ease: 'sine.out' }, 38.0);
+  tl.call(() => playClick(0.22), null, 38.0);
+
+  stepYOffsets.forEach((yOff, i) => {
+    const t = 38.0 + i * 1.25;
+    tl.to(cpdTrace, {
+      left: cpdPanelLeft + 28,
+      top: cpdPanelTop + yOff - dotSize / 2,
+      duration: 0.60, ease: ease2
+    }, t);
+    if (i > 0) tl.call(() => playClick(0.22), null, t);
+  });
+
+  /* After last step, trace fires off right edge + nurse hint materialises */
+  tl.to(cpdTrace, {
+    left: 1920 - 60 + 20,
+    top:  cpdPanelTop + stepYOffsets[3] - dotSize / 2 + 80,
+    duration: 0.80, ease: 'power3.in'
+  }, 41.80);
+  tl.to(cpdTrace, { opacity: 0, duration: 0.20, ease: 'sine.in' }, 42.40);
+  tl.to(nurseHint, { opacity: 0.30, duration: 0.60, ease: 'sine.out' }, 42.00);
+
+  /* ------------------------------------------------------------------ */
+  /* 43.0 - 47.0  Bottom caption types in (Geist 500, 30px)             */
+  /*              M15 colour flip on "Daily is the loop."               */
+  /* ------------------------------------------------------------------ */
+  tl.call(() => playType(1.0), null, 43.0);
+  tl.to(caption, { opacity: 1, duration: 0.30, ease: 'sine.out' }, 43.0);
+
+  /* Chunk-type caption part 1 then part 2 with colour already set */
+  const capText1 = 'Quarterly is necessary. ';
+  const capText2 = 'Daily is the loop.';
+
+  function chunkText(text) {
+    const chunks = []; let i = 0, phase = 0;
+    while (i < text.length) {
+      const n = phase === 2 ? 3 : 1;
+      chunks.push(text.slice(i, Math.min(i + n, text.length)));
+      i += n; phase = (phase + 1) % 3;
+    }
+    return chunks;
+  }
+
+  const chunks1 = chunkText(capText1);
+  const chunks2 = chunkText(capText2);
+  const tickMs  = 55;
+
+  chunks1.forEach((c, i) => {
+    tl.call(() => { cap1.textContent += c; }, null, 43.05 + i * tickMs / 1000);
+  });
+  const t2Start = 43.05 + chunks1.length * tickMs / 1000 + 0.08;
+  chunks2.forEach((c, i) => {
+    tl.call(() => { cap2.textContent += c; }, null, t2Start + i * tickMs / 1000);
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* 47.0 - 50.0  M25 whip-pan exit: all elements translate x -2400     */
+  /* ------------------------------------------------------------------ */
+  tl.call(() => playWhoosh(1.0), null, 47.0);
+
+  const exitEls = [title, document.getElementById('stacked-bar-wrap'),
+    document.getElementById('descriptions'), codePaneEl, assertAnno,
+    cpdTimeline, cpdTrace, nurseHint, caption];
+
+  tl.to(exitEls, {
+    x: -2400,
+    filter: 'blur(12px)',
+    duration: 1.0,
+    ease: 'power3.in'
+  }, 47.0);
+
+  /* 50.0: curtain crash */
+  tl.to(curtain, { opacity: 1, duration: 0.15, ease: 'power2.in' }, 49.85);
+
+  /* scene ends ~50.0s */
+})();
+</script>
+<script src="_nav.js" defer></script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

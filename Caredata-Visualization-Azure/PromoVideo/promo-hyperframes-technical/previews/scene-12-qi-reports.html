@@ -1,0 +1,858 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 12 - Demo: QI Reports (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+  --win-bg:       #FFFFFF;
+  --win-chrome:   #F2EEE4;
+  --win-border:   #E2DCCC;
+}
+
+body {
+  background: var(--paper);
+  display:flex; align-items:center; justify-content:center;
+}
+
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+  background: var(--paper);
+}
+
+/* ===== Stage ===== */
+.stage {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(60vw 50vw at 50% 35%, rgba(159,180,160,0.09), transparent 70%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* ===== Grain ===== */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.35;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+/* ===== Watermarks ===== */
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.20em;
+  color:var(--ink-500); opacity:0.55; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+
+/* ===== Top nav ===== */
+#top-nav {
+  position:absolute; top:0; left:0; right:0; height:56px;
+  background:var(--win-bg);
+  border-bottom:1px solid var(--win-border);
+  display:flex; align-items:center;
+  padding:0 28px;
+  gap:0;
+  z-index:30;
+}
+
+.nav-brand {
+  display:flex; align-items:center; gap:10px;
+  margin-right:32px;
+  flex-shrink:0;
+}
+.nav-ekg {
+  width:36px; height:36px;
+  border-radius:7px;
+  background:linear-gradient(145deg, oklch(0.72 0.06 150) 0%, oklch(0.78 0.05 180) 100%);
+  position:relative;
+  flex-shrink:0;
+}
+.nav-ekg::after {
+  content:"";
+  position:absolute; inset:6px;
+  background:var(--paper);
+  clip-path:polygon(0 60%, 18% 60%, 28% 40%, 42% 75%, 56% 20%, 70% 60%,
+                    100% 60%, 100% 65%, 68% 65%, 56% 30%, 42% 82%, 28% 50%,
+                    18% 65%, 0 65%);
+}
+.nav-wordmark {
+  font-family:"Geist",sans-serif;
+  font-weight:600; font-size:18px;
+  color:var(--ink-900);
+}
+.nav-items {
+  display:flex; align-items:center; gap:0;
+  flex:1;
+}
+.nav-item {
+  padding:0 18px;
+  height:56px;
+  display:inline-flex; align-items:center;
+  font-family:"Geist",sans-serif;
+  font-size:14px; font-weight:500;
+  color:var(--ink-500);
+  cursor:default;
+  border-bottom:2px solid transparent;
+  white-space:nowrap;
+}
+.nav-item.active {
+  color:var(--sage-ink);
+  border-bottom-color:var(--sage-ink);
+}
+.nav-quarter {
+  margin-left:auto;
+  font-family:"Geist Mono",monospace;
+  font-size:12px;
+  color:var(--sage-ink);
+  background:var(--sage-tint);
+  border:1px solid var(--sage);
+  border-radius:999px;
+  padding:5px 14px;
+  flex-shrink:0;
+}
+
+/* ===== Page header ===== */
+#page-head {
+  position:absolute; top:72px; left:280px; right:0; height:72px;
+  display:flex; align-items:center;
+  padding:0 32px;
+  z-index:20;
+}
+.page-head-left {
+  flex:1;
+}
+.page-head-title {
+  font-family:"Geist",sans-serif;
+  font-weight:600; font-size:28px;
+  color:var(--ink-900);
+  line-height:1;
+}
+.page-head-sub {
+  font-family:"Geist",sans-serif;
+  font-weight:400; font-size:14px;
+  color:var(--ink-500);
+  margin-top:4px;
+}
+.btn-export {
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:"Geist",sans-serif;
+  font-weight:600; font-size:14px;
+  color:#FFFFFF;
+  background:var(--sage);
+  border:none; border-radius:8px;
+  padding:10px 20px;
+  cursor:default;
+  flex-shrink:0;
+}
+.btn-export-icon {
+  width:16px; height:16px;
+  flex-shrink:0;
+}
+
+/* ===== Left sidebar ===== */
+#sidebar {
+  position:absolute; top:56px; left:0; width:260px; bottom:0;
+  background:var(--win-bg);
+  border-right:1px solid var(--win-border);
+  z-index:20;
+}
+.sidebar-header {
+  font-family:"Geist Mono",monospace;
+  font-size:11px; font-weight:500;
+  letter-spacing:0.18em;
+  color:var(--sage-ink);
+  padding:20px 20px 12px;
+}
+.sidebar-item {
+  display:flex; align-items:center; gap:10px;
+  height:44px; padding:0 20px;
+  font-family:"Geist",sans-serif;
+  font-size:14px; font-weight:400;
+  color:var(--ink-700);
+  border-left:3px solid transparent;
+  cursor:default;
+}
+.sidebar-item.active {
+  border-left-color:var(--sage-ink);
+  background:var(--sage-tint);
+  color:var(--sage-ink);
+}
+.sidebar-dot {
+  width:8px; height:8px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+.sidebar-dot.sage { background:var(--sage); }
+.sidebar-dot.clay { background:var(--clay); }
+
+/* ===== Main content area ===== */
+#main-content {
+  position:absolute; top:56px; left:260px; right:0; bottom:0;
+  background:var(--paper);
+}
+
+/* ===== Trend panel ===== */
+#trend-panel {
+  position:absolute; top:16px; left:24px; right:24px; height:280px;
+  background:var(--win-bg);
+  border:1px solid var(--win-border);
+  border-radius:12px;
+  padding:24px;
+  z-index:10;
+}
+.panel-header {
+  display:flex; align-items:baseline; gap:12px;
+  margin-bottom:16px;
+}
+.panel-title {
+  font-family:"Geist",sans-serif;
+  font-weight:600; font-size:16px;
+  color:var(--ink-900);
+}
+.panel-sub {
+  font-family:"Geist",sans-serif;
+  font-weight:400; font-size:12px;
+  color:var(--ink-500);
+}
+
+/* ===== Radar panel ===== */
+#radar-panel {
+  position:absolute; top:312px; left:24px; width:480px; height:340px;
+  background:var(--win-bg);
+  border:1px solid var(--win-border);
+  border-radius:12px;
+  padding:24px;
+  z-index:10;
+}
+
+/* ===== Indicator table ===== */
+#ind-table {
+  position:absolute; top:312px; left:528px; right:24px; bottom:16px;
+  background:var(--win-bg);
+  border:1px solid var(--win-border);
+  border-radius:12px;
+  padding:24px;
+  z-index:10;
+  overflow:hidden;
+}
+.table-header-row {
+  display:grid;
+  grid-template-columns: 1fr 100px 160px 80px;
+  gap:0;
+  padding:0 0 10px;
+  border-bottom:1px solid var(--win-border);
+}
+.th {
+  font-family:"Geist Mono",monospace;
+  font-size:11px; font-weight:500;
+  letter-spacing:0.10em;
+  color:var(--ink-500);
+  text-transform:uppercase;
+}
+.table-body {
+  margin-top:4px;
+}
+.table-row {
+  display:grid;
+  grid-template-columns: 1fr 100px 160px 80px;
+  gap:0;
+  height:38px;
+  align-items:center;
+  border-radius:4px;
+  padding:0 4px;
+}
+.table-row:nth-child(even) {
+  background:#FAFAF8;
+}
+.td {
+  font-family:"Geist",sans-serif;
+  font-size:14px; font-weight:400;
+  color:var(--ink-700);
+}
+.td.name {
+  font-weight:500;
+  color:var(--ink-900);
+}
+.td.mono {
+  font-family:"Geist Mono",monospace;
+  font-size:13px;
+}
+.td.delta-good {
+  font-family:"Geist Mono",monospace;
+  font-size:12px;
+  color:var(--sage-ink);
+}
+.td.delta-bad {
+  font-family:"Geist Mono",monospace;
+  font-size:12px;
+  color:var(--clay-ink);
+}
+.status-cell {
+  display:flex; align-items:center; gap:6px;
+}
+.status-dot {
+  width:8px; height:8px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+.status-dot.good { background:var(--sage-ink); }
+.status-dot.warn { background:var(--clay-ink); }
+.status-label {
+  font-family:"Geist Mono",monospace;
+  font-size:12px;
+}
+.status-label.good { color:var(--sage-ink); }
+.status-label.warn { color:var(--clay-ink); }
+
+/* ===== PDF export toast ===== */
+#pdf-flash {
+  position:absolute;
+  right:40px; top:136px;
+  display:flex; align-items:center; gap:10px;
+  padding:12px 18px;
+  background:var(--win-bg);
+  border:1.5px solid var(--sage-tint);
+  border-radius:8px;
+  box-shadow:0 8px 24px rgba(31,38,34,0.12);
+  font-family:"Geist",sans-serif;
+  font-weight:500; font-size:14px;
+  color:var(--ink-900);
+  z-index:50;
+  white-space:nowrap;
+}
+.pdf-flash-icon {
+  width:16px; height:16px;
+  border-radius:50%;
+  background:var(--sage);
+  flex-shrink:0;
+}
+
+/* ===== Cursor ===== */
+#cursor {
+  position:absolute;
+  width:18px; height:22px;
+  pointer-events:none;
+  z-index:50;
+  left:-80px; top:-80px;
+}
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE &middot; GROUP W08 / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO &middot; CARE-DATA &middot; 12 / 18</div>
+
+  <!-- ===== Top nav ===== -->
+  <nav id="top-nav">
+    <div class="nav-brand">
+      <div class="nav-ekg"></div>
+      <span class="nav-wordmark">CareData</span>
+    </div>
+    <div class="nav-items">
+      <span class="nav-item">Dashboard</span>
+      <span class="nav-item">Data Entry</span>
+      <span class="nav-item active">QI Reports</span>
+      <span class="nav-item">Benchmarking</span>
+      <span class="nav-item">Voice Screening</span>
+      <span class="nav-item">Settings</span>
+    </div>
+    <div class="nav-quarter">Q1 2026</div>
+  </nav>
+
+  <!-- ===== Left sidebar ===== -->
+  <aside id="sidebar">
+    <div class="sidebar-header">INDICATORS</div>
+    <div class="sidebar-item active">
+      <span class="sidebar-dot sage"></span>Pressure Injuries
+    </div>
+    <div class="sidebar-item">
+      <span class="sidebar-dot sage"></span>Restrictive Practices
+    </div>
+    <div class="sidebar-item">
+      <span class="sidebar-dot sage"></span>Unplanned Weight Loss
+    </div>
+    <div class="sidebar-item">
+      <span class="sidebar-dot sage"></span>Falls &amp; Major Injury
+    </div>
+    <div class="sidebar-item">
+      <span class="sidebar-dot clay"></span>Medications
+    </div>
+    <div class="sidebar-item">
+      <span class="sidebar-dot sage"></span>ADL &mdash; Barthel
+    </div>
+    <div class="sidebar-item">
+      <span class="sidebar-dot sage"></span>Incontinence Care
+    </div>
+    <div class="sidebar-item">
+      <span class="sidebar-dot sage"></span>Hospitalisation
+    </div>
+  </aside>
+
+  <!-- ===== Page header ===== -->
+  <div id="page-head">
+    <div class="page-head-left">
+      <div class="page-head-title">QI Reports</div>
+      <div class="page-head-sub">Bayside Aged Care &middot; Q1 2026</div>
+    </div>
+    <button class="btn-export" id="btn-export">
+      <svg class="btn-export-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Export PDF
+    </button>
+  </div>
+
+  <!-- ===== Main content ===== -->
+  <div id="main-content">
+
+    <!-- Trend panel -->
+    <div id="trend-panel">
+      <div class="panel-header">
+        <span class="panel-title">Pressure Injury Prevalence &mdash; Trend</span>
+        <span class="panel-sub">8 quarters</span>
+      </div>
+
+      <!-- Trend SVG chart -->
+      <svg id="trend-chart-svg" viewBox="0 0 1100 200" width="100%" height="196"
+           xmlns="http://www.w3.org/2000/svg" style="display:block; overflow:visible;">
+
+        <!-- Grid lines -->
+        <line x1="0" y1="0"   x2="1100" y2="0"   stroke="#ECE7DC" stroke-width="0.8"/>
+        <line x1="0" y1="45"  x2="1100" y2="45"  stroke="#ECE7DC" stroke-width="0.8"/>
+        <line x1="0" y1="90"  x2="1100" y2="90"  stroke="#ECE7DC" stroke-width="0.8"/>
+        <line x1="0" y1="135" x2="1100" y2="135" stroke="#ECE7DC" stroke-width="0.8"/>
+        <line x1="0" y1="180" x2="1100" y2="180" stroke="#ECE7DC" stroke-width="0.8"/>
+
+        <!-- Vertical guide lines -->
+        <line x1="0"    y1="0" x2="0"    y2="180" stroke="#ECE7DC" stroke-width="0.5"/>
+        <line x1="157"  y1="0" x2="157"  y2="180" stroke="#ECE7DC" stroke-width="0.5"/>
+        <line x1="314"  y1="0" x2="314"  y2="180" stroke="#ECE7DC" stroke-width="0.5"/>
+        <line x1="471"  y1="0" x2="471"  y2="180" stroke="#ECE7DC" stroke-width="0.5"/>
+        <line x1="629"  y1="0" x2="629"  y2="180" stroke="#ECE7DC" stroke-width="0.5"/>
+        <line x1="786"  y1="0" x2="786"  y2="180" stroke="#ECE7DC" stroke-width="0.5"/>
+        <line x1="943"  y1="0" x2="943"  y2="180" stroke="#ECE7DC" stroke-width="0.5"/>
+        <line x1="1100" y1="0" x2="1100" y2="180" stroke="#ECE7DC" stroke-width="0.5"/>
+
+        <!-- National median dashed line at 10.2% -> y = 180-(10.2/12)*180 = 27 -->
+        <line x1="0" y1="27" x2="1100" y2="27"
+              stroke="#C8B89B" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="1108" y="31" font-family="Geist Mono,monospace" font-size="11"
+              fill="#836B47">National 10.2%</text>
+
+        <!-- Area fill below the trend line (will be clipped/revealed with line) -->
+        <defs>
+          <linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#4B6A55" stop-opacity="0.13"/>
+            <stop offset="100%" stop-color="#4B6A55" stop-opacity="0.01"/>
+          </linearGradient>
+          <clipPath id="area-clip">
+            <polygon id="area-clip-poly"
+              points="0,200 0,42 157,48 314,67.5 471,73.5 629,85.5 786,102 943,123 1100,148.5 1100,200"/>
+          </clipPath>
+        </defs>
+        <rect x="0" y="0" width="1100" height="200"
+              fill="url(#area-grad)" clip-path="url(#area-clip)" id="trend-area" opacity="0"/>
+
+        <!-- Trend line: 8 points, drawn via dashoffset -->
+        <!-- Points: (0,42),(157,48),(314,67.5),(471,73.5),(629,85.5),(786,102),(943,123),(1100,148.5) -->
+        <polyline id="trend-line"
+          points="0,42 157,48 314,67.5 471,73.5 629,85.5 786,102 943,123 1100,148.5"
+          stroke="#4B6A55" stroke-width="3" fill="none"
+          stroke-linecap="round" stroke-linejoin="round"
+          pathLength="1000" stroke-dasharray="1000" stroke-dashoffset="1000"/>
+
+        <!-- Data point circles (appear after line draws) -->
+        <circle id="pt0" cx="0"    cy="42"   r="5" fill="#4B6A55" opacity="0"/>
+        <circle id="pt1" cx="157"  cy="48"   r="5" fill="#4B6A55" opacity="0"/>
+        <circle id="pt2" cx="314"  cy="67.5" r="5" fill="#4B6A55" opacity="0"/>
+        <circle id="pt3" cx="471"  cy="73.5" r="5" fill="#4B6A55" opacity="0"/>
+        <circle id="pt4" cx="629"  cy="85.5" r="5" fill="#4B6A55" opacity="0"/>
+        <circle id="pt5" cx="786"  cy="102"  r="5" fill="#4B6A55" opacity="0"/>
+        <circle id="pt6" cx="943"  cy="123"  r="5" fill="#4B6A55" opacity="0"/>
+
+        <!-- Final point highlight (Q1'26 = 2.1%) -->
+        <circle id="pt7"       cx="1100" cy="148.5" r="5"  fill="#4B6A55" opacity="0"/>
+        <circle id="pt7-outer" cx="1100" cy="148.5" r="9"  fill="none" stroke="#4B6A55" stroke-width="2" opacity="0"/>
+        <!-- Annotation chip for final point -->
+        <g id="pt7-label" opacity="0">
+          <rect x="1048" y="124" width="52" height="20" rx="4"
+                fill="#4B6A55"/>
+          <text x="1074" y="138" font-family="Geist Mono,monospace" font-size="11"
+                fill="white" text-anchor="middle" font-weight="500">2.1%</text>
+        </g>
+
+        <!-- X-axis labels -->
+        <g id="x-axis-labels" font-family="Geist Mono,monospace" font-size="11" fill="#A4ABA4" opacity="0">
+          <text x="0"    y="196" text-anchor="middle">Q2'24</text>
+          <text x="157"  y="196" text-anchor="middle">Q3'24</text>
+          <text x="314"  y="196" text-anchor="middle">Q4'24</text>
+          <text x="471"  y="196" text-anchor="middle">Q1'25</text>
+          <text x="629"  y="196" text-anchor="middle">Q2'25</text>
+          <text x="786"  y="196" text-anchor="middle">Q3'25</text>
+          <text x="943"  y="196" text-anchor="middle">Q4'25</text>
+          <text x="1100" y="196" text-anchor="middle">Q1'26</text>
+        </g>
+
+        <!-- Y-axis label -->
+        <text id="y-axis-label" x="-60" y="90" font-family="Geist,sans-serif" font-size="11"
+              fill="#A4ABA4" text-anchor="middle" writing-mode="vertical-rl"
+              transform="rotate(-90,-60,90)" opacity="0">prevalence %</text>
+      </svg>
+    </div>
+
+    <!-- ADL Radar panel -->
+    <div id="radar-panel">
+      <div class="panel-header">
+        <span class="panel-title">ADL Barthel Domains &mdash; Q1 2026</span>
+      </div>
+
+      <!-- Radar SVG: center 190,130, radius 100 -->
+      <svg id="radar-svg" viewBox="0 0 380 270" width="432" height="270"
+           xmlns="http://www.w3.org/2000/svg" style="display:block; overflow:visible; margin-top:-8px;">
+
+        <!-- Grid circles at 20%, 40%, 60%, 80%, 100% radii -->
+        <!-- 10 axes, so we draw 5 concentric 10-sided polygons as "grid" -->
+        <!-- For simplicity, use circles -->
+        <circle cx="190" cy="130" r="20"  fill="none" stroke="#ECE7DC" stroke-width="0.8"/>
+        <circle cx="190" cy="130" r="40"  fill="none" stroke="#ECE7DC" stroke-width="0.8"/>
+        <circle cx="190" cy="130" r="60"  fill="none" stroke="#ECE7DC" stroke-width="0.8"/>
+        <circle cx="190" cy="130" r="80"  fill="none" stroke="#ECE7DC" stroke-width="0.8"/>
+        <circle cx="190" cy="130" r="100" fill="none" stroke="#ECE7DC" stroke-width="1.0"/>
+
+        <!-- Axis spokes (10 axes, 36° apart, starting at -90°) -->
+        <!-- Axis endpoints at radius 100 -->
+        <!-- 0: -90°  (190, 30) Bowels -->
+        <!-- 1: -54°  (190+100*cos(-54°), 130+100*sin(-54°)) = (190+58.8, 130-80.9) = (248.8, 49.1) Bladder -->
+        <!-- 2: -18°  (190+100*cos(-18°), 130+100*sin(-18°)) = (190+95.1, 130-30.9) = (285.1, 99.1) Grooming -->
+        <!-- 3: +18°  (190+95.1, 130+30.9) = (285.1, 160.9) Toilet -->
+        <!-- 4: +54°  (190+58.8, 130+80.9) = (248.8, 210.9) Feeding -->
+        <!-- 5: +90°  (190, 130+100) = (190, 230) Transfer -->
+        <!-- 6: +126° (190+100*cos(126°), 130+100*sin(126°)) = (190-58.8, 130+80.9) = (131.2, 210.9) Mobility -->
+        <!-- 7: +162° (190+100*cos(162°), 130+100*sin(162°)) = (190-95.1, 130+30.9) = (94.9, 160.9) Dressing -->
+        <!-- 8: +198° (190+100*cos(198°), 130+100*sin(198°)) = (190-95.1, 130-30.9) = (94.9, 99.1) Stairs -->
+        <!-- 9: +234° (190+100*cos(234°), 130+100*sin(234°)) = (190-58.8, 130-80.9) = (131.2, 49.1) Bathing -->
+        <line x1="190" y1="130" x2="190"   y2="30"    stroke="#ECE7DC" stroke-width="0.8"/>
+        <line x1="190" y1="130" x2="248.8" y2="49.1"  stroke="#ECE7DC" stroke-width="0.8"/>
+        <line x1="190" y1="130" x2="285.1" y2="99.1"  stroke="#ECE7DC" stroke-width="0.8"/>
+        <line x1="190" y1="130" x2="285.1" y2="160.9" stroke="#ECE7DC" stroke-width="0.8"/>
+        <line x1="190" y1="130" x2="248.8" y2="210.9" stroke="#ECE7DC" stroke-width="0.8"/>
+        <line x1="190" y1="130" x2="190"   y2="230"   stroke="#ECE7DC" stroke-width="0.8"/>
+        <line x1="190" y1="130" x2="131.2" y2="210.9" stroke="#ECE7DC" stroke-width="0.8"/>
+        <line x1="190" y1="130" x2="94.9"  y2="160.9" stroke="#ECE7DC" stroke-width="0.8"/>
+        <line x1="190" y1="130" x2="94.9"  y2="99.1"  stroke="#ECE7DC" stroke-width="0.8"/>
+        <line x1="190" y1="130" x2="131.2" y2="49.1"  stroke="#ECE7DC" stroke-width="0.8"/>
+
+        <!-- Radar polygon (scores/100 * 100 radius from center) -->
+        <!-- Scores: [85,78,92,75,88,71,68,82,55,80] -->
+        <!-- 0 Bowels  85: (190, 130-85)=(190,45) -->
+        <!-- 1 Bladder 78: (190+78*0.5878, 130-78*0.809)=(235.8,67.0) -->
+        <!-- 2 Groomin 92: (190+92*0.9511, 130-92*0.309)=(277.5,101.6) -->
+        <!-- 3 Toilet  75: (190+75*0.9511, 130+75*0.309)=(261.3,153.2) -->
+        <!-- 4 Feeding 88: (190+88*0.5878, 130+88*0.809)=(241.7,201.2) -->
+        <!-- 5 Transf  71: (190+0, 130+71)=(190,201) -->
+        <!-- 6 Mobil   68: (190-68*0.5878, 130+68*0.809)=(150.0,185.0) -->
+        <!-- 7 Dressi  82: (190-82*0.9511, 130+82*0.309)=(112.0,155.3) -->
+        <!-- 8 Stairs  55: (190-55*0.9511, 130-55*0.309)=(137.7,113.0) -->
+        <!-- 9 Bathin  80: (190-80*0.5878, 130-80*0.809)=(143.0,65.3) -->
+        <polygon id="radar-poly"
+          points="190,45 235.8,67 277.5,101.6 261.3,153.2 241.7,201.2 190,201 150,185 112,155.3 137.7,113 143,65.3"
+          fill="rgba(75,106,85,0.18)" stroke="#4B6A55" stroke-width="2"
+          stroke-linejoin="round"
+          transform-origin="190 130"/>
+
+        <!-- Axis labels -->
+        <text x="190"   y="22"    font-family="Geist,sans-serif" font-size="10" fill="#6B7570" text-anchor="middle">Bowels</text>
+        <text x="254"   y="42"    font-family="Geist,sans-serif" font-size="10" fill="#6B7570" text-anchor="start">Bladder</text>
+        <text x="290"   y="96"    font-family="Geist,sans-serif" font-size="10" fill="#6B7570" text-anchor="start">Grooming</text>
+        <text x="290"   y="166"   font-family="Geist,sans-serif" font-size="10" fill="#6B7570" text-anchor="start">Toilet</text>
+        <text x="252"   y="222"   font-family="Geist,sans-serif" font-size="10" fill="#6B7570" text-anchor="start">Feeding</text>
+        <text x="190"   y="245"   font-family="Geist,sans-serif" font-size="10" fill="#6B7570" text-anchor="middle">Transfer</text>
+        <text x="125"   y="222"   font-family="Geist,sans-serif" font-size="10" fill="#6B7570" text-anchor="end">Mobility</text>
+        <text x="86"    y="166"   font-family="Geist,sans-serif" font-size="10" fill="#6B7570" text-anchor="end">Dressing</text>
+        <text x="86"    y="96"    font-family="Geist,sans-serif" font-size="10" fill="#6B7570" text-anchor="end">Stairs</text>
+        <text x="124"   y="42"    font-family="Geist,sans-serif" font-size="10" fill="#6B7570" text-anchor="end">Bathing</text>
+      </svg>
+    </div>
+
+    <!-- Indicator summary table -->
+    <div id="ind-table">
+      <div class="panel-title" style="margin-bottom:14px;">Indicator Summary</div>
+      <div class="table-header-row">
+        <span class="th">Indicator</span>
+        <span class="th">Q1 2026</span>
+        <span class="th">vs National</span>
+        <span class="th">Status</span>
+      </div>
+      <div class="table-body" id="table-body">
+        <div class="table-row" id="row-0">
+          <span class="td name">PI_01 Pressure Injuries</span>
+          <span class="td mono">2.1%</span>
+          <span class="td delta-good">-8.1pp below</span>
+          <span class="td"><div class="status-cell"><div class="status-dot good"></div><span class="status-label good">Good</span></div></span>
+        </div>
+        <div class="table-row" id="row-1">
+          <span class="td name">FALL_01 Falls</span>
+          <span class="td mono">3.2%</span>
+          <span class="td delta-good">-2.1pp below</span>
+          <span class="td"><div class="status-cell"><div class="status-dot good"></div><span class="status-label good">Good</span></div></span>
+        </div>
+        <div class="table-row" id="row-2">
+          <span class="td name">MED_POLY Polypharmacy</span>
+          <span class="td mono">38.0%</span>
+          <span class="td delta-bad">+18.2pp above</span>
+          <span class="td"><div class="status-cell"><div class="status-dot warn"></div><span class="status-label warn">Flag</span></div></span>
+        </div>
+        <div class="table-row" id="row-3">
+          <span class="td name">MED_AP Antipsychotic</span>
+          <span class="td mono">8.2%</span>
+          <span class="td delta-bad">+3.8pp above</span>
+          <span class="td"><div class="status-cell"><div class="status-dot warn"></div><span class="status-label warn">Flag</span></div></span>
+        </div>
+        <div class="table-row" id="row-4">
+          <span class="td name">UWL_SIG Weight Loss</span>
+          <span class="td mono">1.8%</span>
+          <span class="td delta-good">-3.2pp below</span>
+          <span class="td"><div class="status-cell"><div class="status-dot good"></div><span class="status-label good">Good</span></div></span>
+        </div>
+        <div class="table-row" id="row-5">
+          <span class="td name">AH_REC Allied Health gap</span>
+          <span class="td mono">22.0%</span>
+          <span class="td" style="color:var(--ink-300); font-family:'Geist Mono',monospace; font-size:12px;">&mdash;</span>
+          <span class="td"><div class="status-cell"><div class="status-dot warn"></div><span class="status-label warn">Flag</span></div></span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+
+  <!-- PDF export toast -->
+  <div id="pdf-flash">
+    <div class="pdf-flash-icon"></div>
+    <span id="pdf-flash-text">Exporting Q1 2026 report...</span>
+  </div>
+
+  <!-- Cursor arrow -->
+  <div id="cursor">
+    <svg width="18" height="22" viewBox="0 0 18 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 2L16 10.5L9.5 11.5L7 19.5L2 2Z" fill="var(--ink-900)" stroke="var(--paper)" stroke-width="1.5"/>
+    </svg>
+  </div>
+
+  <!-- SFX -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3" preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function () {
+  await document.fonts.ready;
+
+  /* ===== Iron Rule: zoom not transform:scale; transform-origin:0 0 ===== */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((window.innerWidth  - 1920 * s) / 2) + 'px';
+    frame.style.top  = ((window.innerHeight - 1080 * s) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* ===== SFX helper ===== */
+  function playSfx(el, vol) {
+    try { el.currentTime = 0; el.volume = (vol !== undefined ? vol : 1.0); el.play(); } catch (_) {}
+  }
+
+  /* ===== Easing presets ===== */
+  const easeSettle = 'cubic-bezier(0.16,0.85,0.30,1)';
+  const easeSine   = 'sine.out';
+
+  /* ===== Element refs ===== */
+  const sfxType   = document.getElementById('sfx-type');
+  const sfxWhoosh = document.getElementById('sfx-whoosh');
+  const sfxClick  = document.getElementById('sfx-click');
+
+  const topNav    = document.getElementById('top-nav');
+  const sidebar   = document.getElementById('sidebar');
+  const pageHead  = document.getElementById('page-head');
+  const btnExport = document.getElementById('btn-export');
+
+  const trendPanel  = document.getElementById('trend-panel');
+  const trendLine   = document.getElementById('trend-line');
+  const trendArea   = document.getElementById('trend-area');
+  const xAxisLabels = document.getElementById('x-axis-labels');
+  const yAxisLabel  = document.getElementById('y-axis-label');
+
+  const pts = [
+    document.getElementById('pt0'), document.getElementById('pt1'),
+    document.getElementById('pt2'), document.getElementById('pt3'),
+    document.getElementById('pt4'), document.getElementById('pt5'),
+    document.getElementById('pt6'), document.getElementById('pt7'),
+  ];
+  const pt7Outer = document.getElementById('pt7-outer');
+  const pt7Label = document.getElementById('pt7-label');
+
+  const radarPanel = document.getElementById('radar-panel');
+  const radarPoly  = document.getElementById('radar-poly');
+
+  const indTable  = document.getElementById('ind-table');
+  const tableRows = [...document.querySelectorAll('#table-body .table-row')];
+
+  const pdfFlash     = document.getElementById('pdf-flash');
+  const pdfFlashText = document.getElementById('pdf-flash-text');
+
+  const cursor = document.getElementById('cursor');
+
+  /* ===== Initial states ===== */
+  gsap.set(topNav,   { opacity: 0, y: -20 });
+  gsap.set(sidebar,  { opacity: 0, x: -30 });
+  gsap.set(pageHead, { opacity: 0 });
+  gsap.set(trendPanel, { opacity: 0, y: 10 });
+  gsap.set(radarPanel, { opacity: 0, y: 10 });
+  gsap.set(indTable,   { opacity: 0 });
+  gsap.set(tableRows,  { opacity: 0, y: 5 });
+  gsap.set(pdfFlash,   { opacity: 0 });
+  gsap.set(cursor,     { opacity: 0, left: '-80px', top: '-80px' });
+
+  /* Trend line initially fully hidden */
+  gsap.set(trendArea, { opacity: 0 });
+  gsap.set(xAxisLabels, { opacity: 0 });
+
+  /* Radar polygon: start at scale 0 from center */
+  gsap.set(radarPoly, { scale: 0, opacity: 0, transformOrigin: '190px 130px' });
+
+  /* Table rows initially invisible */
+  gsap.set(tableRows, { opacity: 0, y: 5 });
+
+  /* ===== Timeline ===== */
+  const tl = gsap.timeline();
+
+  /* 0.5s: top nav slides down */
+  tl.call(() => playSfx(sfxWhoosh, 0.5), null, 0.5);
+  tl.to(topNav, { opacity: 1, y: 0, duration: 0.45, ease: easeSettle }, 0.5);
+
+  /* 1.0s: sidebar slides in from left */
+  tl.to(sidebar, { opacity: 1, x: 0, duration: 0.4, ease: easeSettle }, 1.0);
+
+  /* 1.5s: page header fades in */
+  tl.to(pageHead, { opacity: 1, duration: 0.3, ease: easeSine }, 1.5);
+
+  /* 2.0s: trend panel fades up */
+  tl.to(trendPanel, { opacity: 1, y: 0, duration: 0.35, ease: easeSettle }, 2.0);
+
+  /* 3.0s: trend line starts drawing (2.5s animation) + typing sfx */
+  tl.call(() => playSfx(sfxType, 0.6), null, 3.0);
+  tl.to(trendLine, {
+    strokeDashoffset: 0,
+    duration: 2.5,
+    ease: 'power1.inOut',
+  }, 3.0);
+  /* Area fill fades in alongside line draw */
+  tl.to(trendArea, { opacity: 1, duration: 2.0, ease: easeSine }, 3.2);
+  /* X-axis labels appear as line draws */
+  tl.to(xAxisLabels, { opacity: 1, duration: 0.5, ease: easeSine }, 4.0);
+
+  /* 5.5s: data points pop in staggered */
+  pts.forEach((pt, i) => {
+    const t = 5.5 + i * 0.08;
+    tl.fromTo(pt,
+      { opacity: 0, scale: 0, transformOrigin: `${pt.getAttribute('cx')}px ${pt.getAttribute('cy')}px` },
+      { opacity: 1, scale: 1, duration: 0.22, ease: 'back.out(2)' },
+      t
+    );
+  });
+  /* Final point extra highlight */
+  tl.to(pt7Outer, { opacity: 1, duration: 0.25, ease: easeSine }, 6.15);
+  tl.to(pt7Label, { opacity: 1, duration: 0.2, ease: easeSine }, 6.25);
+
+  /* 7.0s: radar panel fades in */
+  tl.call(() => playSfx(sfxWhoosh, 0.4), null, 7.0);
+  tl.to(radarPanel, { opacity: 1, y: 0, duration: 0.35, ease: easeSettle }, 7.0);
+
+  /* 7.5s: radar polygon scales in from center */
+  tl.to(radarPoly, {
+    scale: 1, opacity: 1,
+    duration: 0.8, ease: 'power2.out',
+  }, 7.5);
+
+  /* 9.0s: indicator table rows stagger in */
+  tl.to(indTable, { opacity: 1, duration: 0.2, ease: easeSine }, 9.0);
+  tableRows.forEach((row, i) => {
+    tl.to(row, { opacity: 1, y: 0, duration: 0.25, ease: easeSettle }, 9.0 + i * 0.12);
+  });
+
+  /* 11.0s: cursor appears, moves toward Export PDF button */
+  /* Export PDF button is approximately at right:40px from frame, top:~160px */
+  /* In 1920x1080 coords, btn is near x=1800, y=160 */
+  tl.set(cursor, { left: '1640px', top: '100px', opacity: 0 }, 11.0);
+  tl.to(cursor, { opacity: 1, duration: 0.2, ease: easeSine }, 11.0);
+  tl.to(cursor, { left: '1800px', top: '153px', duration: 0.65, ease: easeSettle }, 11.1);
+
+  /* 12.0s: click - Export PDF button scale pulse */
+  tl.call(() => playSfx(sfxClick, 0.55), null, 12.0);
+  tl.to(btnExport, { scale: 0.96, duration: 0.08, ease: 'power2.in' }, 12.0);
+  tl.to(btnExport, { scale: 1.0, duration: 0.18, ease: 'back.out(2)' }, 12.08);
+
+  /* 12.5s: pdf flash appears */
+  tl.to(pdfFlash, { opacity: 1, duration: 0.3, ease: easeSine }, 12.5);
+
+  /* 14.0s: pdf flash text changes to "PDF ready" */
+  tl.call(() => {
+    pdfFlashText.textContent = 'PDF ready — 2.4 MB';
+    // Change dot to a check color
+    const icon = pdfFlash.querySelector('.pdf-flash-icon');
+    if (icon) icon.style.background = '#4B6A55';
+  }, null, 14.0);
+
+  /* 16.0 - 25.0s: hold */
+
+  /* Cursor fades out at 16.5s */
+  tl.to(cursor, { opacity: 0, duration: 0.3, ease: easeSine }, 16.5);
+
+})();
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

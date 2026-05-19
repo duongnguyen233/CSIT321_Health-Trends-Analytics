@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 1, Hook (preview) | CareData promo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Caveat:wght@400;600&display=swap">
+
+<style>
+:root{
+  /* CareData production tokens */
+  --cream:#F6F2EB;
+  --paper:#FBF8F2;
+  --line-soft:#EAE3D2;
+  --line:#E1DBCC;
+  --line-strong:#D6CDB6;
+  --ink-900:#1F2622;
+  --ink-700:#3D4743;
+  --ink-500:#6B7570;
+  --ink-300:#A4ABA4;
+  --sage:#9FB4A0;
+  --sage-bright:#B8D1B5;
+  --sage-ink:#4B6A55;
+  --sage-tint:#EEF1EC;
+  --clay:#C8B89B;
+  --clay-ink:#836B47;
+  --dusty-blue:#A6B6C4;
+  --status-good:#8AA791;
+  --status-bad:#B86F62;
+  --highlight-yellow:#F7E7A8;
+  --sticky-yellow:#F2DC93;
+  --sticky-yellow-edge:#E5CC7B;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background:
+    radial-gradient(60vw 50vw at 50% 50%, rgba(159,180,160,0.06), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  color:var(--cream);
+  font-family:"Geist",ui-sans-serif,system-ui,sans-serif;
+  font-feature-settings:"ss01","cv11";
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+/* ===== Stage frame: native 1920x1080, scales to viewport ===== */
+.frame-wrap{
+  position:relative;
+  width:1920px; height:1080px;
+  /* transform-origin top-left so fit()'s scale(2) at 4K expands the frame
+     from (0,0) → (3840,2160) and fills the canvas. With center origin the
+     scaled visual shifts to (-960,-540)→(2880,1620), clipping left/top
+     off-canvas and leaving right/bottom black. */
+  transform-origin:0 0;
+}
+.stage{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.10), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%, rgba(200,184,155,0.06), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  overflow:hidden;
+  transform-origin:50% 50%;
+  will-change:transform, filter;
+}
+.phrase{ display:inline; }
+
+/* light grain on dark, very subtle */
+.grain{
+  position:absolute; inset:0;
+  pointer-events:none;
+  opacity:0.05;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+/* sage rule signaling structure */
+.top-rule{
+  position:absolute; left:0; right:0; top:72px;
+  height:1px; background:var(--sage); opacity:0.18;
+}
+
+/* faint stamp top-right */
+.stamp{
+  position:absolute; top:42px; right:60px;
+  font-family:"Geist",sans-serif;
+  font-weight:600;
+  font-size:14px;
+  letter-spacing:0.16em;
+  color:var(--cream);
+  opacity:0.20;
+  transform:rotate(-4deg);
+  border:1.5px solid currentColor;
+  padding:8px 16px;
+  border-radius:4px;
+}
+
+/* footer watermark */
+.footer{
+  position:absolute; bottom:38px; left:60px;
+  font-family:"Geist",sans-serif;
+  font-weight:400;
+  font-size:11px;
+  letter-spacing:0.18em;
+  color:var(--cream);
+  opacity:0.45;
+}
+
+/* fade to black at scene exit */
+.curtain{
+  position:absolute; inset:0;
+  background:#000;
+  opacity:0;
+  z-index:50;
+  pointer-events:none;
+}
+
+/* ===== Headline ===== */
+.hook{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-family:"Instrument Serif", "EB Garamond", "Georgia", serif;
+  font-weight:400;
+  font-size:80px;
+  line-height:1.04;
+  letter-spacing:-0.02em;
+  color:var(--cream);
+  text-align:center;        /* phrase stays centered, both during typing and when fully landed */
+  white-space:nowrap;       /* one line, camera handles overflow during close-up */
+  z-index:10;
+  will-change:transform, filter;
+}
+.hook .ch{
+  display:none;
+}
+.hook .ch.shown{
+  display:inline;
+}
+.hook .italic{
+  font-style:italic;
+  color:var(--cream);
+  transition:color 0.20s ease-out;
+}
+.hook .italic.flipped{
+  color:var(--sage-bright);
+}
+.caret{
+  display:inline-block;
+  width:2px; height:62px;
+  background:var(--cream);
+  margin-left:6px;
+  vertical-align:-12px;
+  animation:blink 1s steps(2,start) infinite;
+  opacity:0;
+  box-shadow:0 0 8px rgba(242,235,216,0.4);
+}
+@keyframes blink{
+  0%, 50%{ opacity:1; }
+  51%, 100%{ opacity:0; }
+}
+
+/* ===== Fragments shared ===== */
+.fragments{ position:absolute; inset:0; z-index:5; pointer-events:none; }
+.frag{
+  position:absolute;
+  opacity:0;
+  filter:blur(10px);
+  will-change:transform, opacity, filter;
+  transform-origin:center center;
+}
+.card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:6px;
+  box-shadow:
+    0 24px 48px rgba(0,0,0,0.45),
+    0 6px 14px rgba(0,0,0,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.85);
+  padding:14px 16px;
+  font-family:"Geist",sans-serif;
+  color:var(--ink-700);
+}
+
+/* ---------- Fragment A: Excel snippet ---------- */
+.frag-a{ width:440px; }
+.xl-tab{
+  display:inline-block;
+  font-family:"Geist Mono","ui-monospace",monospace;
+  font-size:10.5px;
+  background:var(--sage-tint);
+  color:var(--sage-ink);
+  padding:3px 9px;
+  border-radius:3px 3px 0 0;
+  border:1px solid var(--sage);
+  border-bottom:none;
+  font-weight:500;
+  letter-spacing:0.01em;
+}
+.xl-grid{
+  margin-top:0; padding:0;
+  background:#fff;
+  border:1px solid var(--line);
+  font-family:"Geist Mono","ui-monospace",monospace;
+  font-size:10px;
+  color:var(--ink-700);
+}
+.xl-grid .row{ display:grid; grid-template-columns:80px repeat(7, 1fr); border-bottom:1px solid var(--line-soft);}
+.xl-grid .row:last-child{ border-bottom:none; }
+.xl-grid .row > div{ padding:5px 6px; border-right:1px solid var(--line-soft); }
+.xl-grid .row > div:last-child{ border-right:none; }
+.xl-grid .head{ background:#F2EBD8; font-weight:600; color:var(--ink-900); font-size:9.5px; letter-spacing:0.02em; }
+.xl-cf{ background:var(--highlight-yellow); color:var(--ink-900); font-weight:600; }
+.xl-err{
+  display:inline-flex; align-items:center; gap:4px;
+  margin-top:6px;
+  font-family:"Geist Mono",monospace;
+  font-size:10px;
+  color:var(--status-bad);
+  background:#FBE7E2;
+  padding:3px 8px;
+  border-radius:3px;
+}
+.xl-err .dot{ width:6px; height:6px; border-radius:50%; background:var(--status-bad); display:inline-block;}
+
+/* ---------- Fragment B: GPMS form PDF ---------- */
+.frag-b{ width:400px; }
+.gpms-card{ padding:18px 18px 16px; }
+.gpms-eyebrow{
+  font-size:9px; letter-spacing:0.18em; text-transform:uppercase;
+  color:var(--ink-500); font-weight:600;
+}
+.gpms-h{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:18px;
+  color:var(--ink-900);
+  margin-top:6px;
+  line-height:1.18;
+}
+.gpms-period{
+  margin-top:10px;
+  font-size:10.5px; color:var(--ink-700);
+  border-top:1px solid var(--line-soft);
+  border-bottom:1px solid var(--line-soft);
+  padding:6px 0;
+  display:flex; justify-content:space-between;
+}
+.gpms-fields{ margin-top:14px; display:flex; flex-direction:column; gap:11px; font-size:11px; }
+.gpms-field label{ display:block; color:var(--ink-700); margin-bottom:4px; font-weight:500; font-size:10px; letter-spacing:0.02em; text-transform:uppercase;}
+.gpms-field .underline{
+  height:14px;
+  border-bottom:1px dotted var(--ink-300);
+  background:repeating-linear-gradient(90deg, transparent 0 4px, var(--ink-300) 4px 5px);
+  background:none;
+  margin-bottom:2px;
+}
+.gpms-radios{ display:flex; gap:10px; font-family:"Geist Mono",monospace; font-size:10px; color:var(--ink-700);}
+.gpms-radios span{ display:inline-flex; align-items:center; gap:5px;}
+.gpms-radios .box{ display:inline-block; width:11px; height:11px; border:1px solid var(--ink-700); border-radius:2px;}
+.gpms-stage-grid{
+  margin-top:4px;
+  display:grid; grid-template-columns:repeat(6, 1fr);
+  border:1px solid var(--line);
+  font-family:"Geist Mono",monospace; font-size:9.5px;
+}
+.gpms-stage-grid > div{ padding:4px 0; text-align:center; border-right:1px solid var(--line-soft); color:var(--ink-700);}
+.gpms-stage-grid > div:last-child{ border-right:none;}
+.gpms-stage-grid .lbl{ background:var(--sage-tint); color:var(--sage-ink); font-weight:600; font-size:9px;}
+.gpms-foot{
+  margin-top:14px;
+  font-size:8.5px; letter-spacing:0.1em;
+  color:var(--ink-500); text-transform:uppercase;
+  display:flex; justify-content:space-between;
+}
+
+/* ---------- Fragment C: Audit clipboard ---------- */
+.frag-c{ width:360px; }
+.clip-board{
+  background:#F4ECD9;
+  border:1px solid var(--line-strong);
+  border-radius:4px 4px 8px 8px;
+  padding:30px 18px 18px;
+  position:relative;
+  box-shadow:
+    0 16px 30px rgba(31,38,34,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+}
+.clip-metal{
+  position:absolute; top:-10px; left:50%; transform:translateX(-50%);
+  width:90px; height:24px;
+  background:linear-gradient(180deg,#B8B8B6 0%, #8E8E8C 100%);
+  border-radius:4px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+.clip-metal::before, .clip-metal::after{
+  content:""; position:absolute; top:8px;
+  width:8px; height:8px; border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, #fff, #888);
+}
+.clip-metal::before{ left:8px; }
+.clip-metal::after{ right:8px; }
+.clip-title{
+  font-family:"Instrument Serif", serif;
+  font-size:15px; color:var(--ink-900);
+  border-bottom:1px solid var(--line-strong);
+  padding-bottom:6px;
+}
+.clip-sub{
+  font-size:9px; letter-spacing:0.16em; text-transform:uppercase;
+  color:var(--ink-500); font-weight:600; margin-bottom:6px;
+}
+.clip-rows{ margin-top:8px; display:flex; flex-direction:column; gap:6px; font-size:11px; color:var(--ink-700); }
+.clip-row{ display:flex; align-items:center; gap:8px; }
+.clip-box{
+  width:13px; height:13px; border:1.2px solid var(--ink-700); border-radius:2px;
+  flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px;
+}
+.clip-box.checked{ background:var(--sage); border-color:var(--sage-ink); color:var(--ink-900);}
+.clip-row.clay{ color:var(--clay-ink); }
+.clip-row.clay .clip-box{ border-color:var(--clay-ink); background:#F1E2C9; }
+.clip-row.clay .tag{
+  margin-left:auto; font-size:9px; letter-spacing:0.1em; text-transform:uppercase;
+  background:var(--clay); color:var(--ink-900); padding:1px 6px; border-radius:3px;
+}
+.clip-stickynote{
+  position:absolute;
+  bottom:-22px; right:-18px;
+  width:140px;
+  background:var(--sticky-yellow);
+  border:1px solid var(--sticky-yellow-edge);
+  padding:8px 10px;
+  font-family:"Caveat", cursive;
+  font-size:14px;
+  color:var(--ink-900);
+  transform:rotate(6deg);
+  box-shadow:0 6px 14px rgba(31,38,34,0.16);
+  line-height:1.15;
+}
+.clip-stickynote::before{
+  content:""; position:absolute; top:-6px; left:50%; transform:translateX(-50%);
+  width:36px; height:14px;
+  background:rgba(255,255,255,0.55);
+  border:1px solid rgba(31,38,34,0.08);
+}
+
+/* ---------- Fragment D: Email card ---------- */
+.frag-d{ width:440px; }
+.email-card{ padding:14px 16px; }
+.email-top{ display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+.email-dot{ width:9px; height:9px; border-radius:50%; background:var(--status-bad);}
+.email-sender{ font-size:10.5px; font-weight:600; color:var(--ink-900); letter-spacing:0.01em;}
+.email-time{ margin-left:auto; font-size:10px; color:var(--ink-500); font-family:"Geist Mono", monospace;}
+.email-subject{ font-size:13px; color:var(--ink-900); font-weight:500; line-height:1.3;}
+.email-preview{ font-size:11px; color:var(--ink-500); margin-top:6px; line-height:1.4;}
+
+/* ---------- Fragment E: yellow sticky note ---------- */
+.frag-e{ width:240px; height:240px; }
+.sticky-e{
+  width:100%; height:100%;
+  background:var(--sticky-yellow);
+  border:1px solid var(--sticky-yellow-edge);
+  padding:18px 16px;
+  font-family:"Caveat", cursive;
+  font-size:22px;
+  line-height:1.2;
+  color:var(--ink-900);
+  box-shadow:0 12px 22px rgba(31,38,34,0.14);
+  position:relative;
+}
+.sticky-e::before{
+  content:""; position:absolute; top:-8px; left:50%; transform:translateX(-50%) rotate(-3deg);
+  width:54px; height:18px;
+  background:rgba(255,255,255,0.6);
+  border:1px solid rgba(31,38,34,0.08);
+}
+.sticky-e .strike{ text-decoration:line-through; text-decoration-thickness:2px; opacity:0.6;}
+.sticky-e .arrow{
+  display:inline-block;
+  font-size:18px;
+  margin:0 6px;
+  color:var(--sage-ink);
+}
+
+/* ---------- Fragment F: indicator definition ---------- */
+.frag-f{ width:380px; }
+.def-card{ padding:16px 18px; }
+.def-eyebrow{
+  font-size:9px; letter-spacing:0.18em; text-transform:uppercase;
+  color:var(--sage-ink); font-weight:600;
+}
+.def-title{
+  font-family:"Instrument Serif", serif;
+  font-size:16px; color:var(--ink-900);
+  margin-top:6px; line-height:1.18;
+}
+.def-body{ margin-top:10px; font-size:10.5px; line-height:1.45; color:var(--ink-700); display:flex; flex-direction:column; gap:8px;}
+.def-body .hl{ border-left:2px solid var(--sage); padding:2px 0 2px 10px; color:var(--ink-900);}
+
+/* ---------- Fragment G: formula bar strip ---------- */
+.frag-g{ width:550px; }
+.fx-strip{
+  background:#fff;
+  border:1px solid var(--line);
+  display:flex; align-items:center;
+  font-family:"Geist Mono",monospace;
+  font-size:11px;
+  color:var(--ink-900);
+  border-radius:3px;
+  box-shadow:0 8px 18px rgba(31,38,34,0.08);
+  overflow:hidden;
+}
+.fx-fx{
+  width:36px;
+  text-align:center;
+  font-style:italic;
+  background:#F2EBD8;
+  color:var(--ink-700);
+  padding:9px 0;
+  border-right:1px solid var(--line);
+  font-family:"Instrument Serif",serif;
+  font-size:14px;
+}
+.fx-formula{ flex:1; padding:9px 12px; white-space:nowrap; overflow:hidden;}
+.fx-err{
+  margin-right:6px;
+  font-size:10px;
+  background:#FBE7E2; color:var(--status-bad);
+  padding:3px 8px; border-radius:3px; font-weight:600; letter-spacing:0.04em;
+}
+
+/* ---------- Fragment H: April 2026 calendar ---------- */
+.frag-h{ width:280px; }
+.cal-card{ padding:14px 14px 12px; }
+.cal-head{ display:flex; align-items:center; justify-content:space-between; }
+.cal-month{ font-family:"Instrument Serif", serif; font-size:14px; color:var(--ink-900);}
+.cal-yr{ font-size:11px; color:var(--ink-500); font-family:"Geist Mono", monospace;}
+.cal-grid{
+  margin-top:8px;
+  display:grid; grid-template-columns:repeat(7,1fr); gap:2px;
+  font-size:10px; font-family:"Geist Mono", monospace; color:var(--ink-700);
+}
+.cal-grid .dh{ font-size:8.5px; color:var(--ink-500); text-align:center; padding:3px 0; letter-spacing:0.06em;}
+.cal-grid .d{
+  text-align:center; padding:4px 0;
+  border-radius:50%;
+  width:22px; height:22px; line-height:14px;
+  margin:0 auto;
+}
+.cal-grid .d.dim{ color:var(--ink-300);}
+.cal-grid .d.due{
+  background:var(--clay);
+  color:var(--ink-900);
+  font-weight:700;
+  position:relative;
+}
+.cal-tag{
+  position:absolute; right:10px; top:36px;
+  font-size:8.5px; letter-spacing:0.14em; text-transform:uppercase;
+  background:var(--clay); color:var(--ink-900);
+  padding:2px 6px; border-radius:3px; font-weight:700;
+}
+.cal-week{
+  margin-top:10px;
+  font-size:9.5px; color:var(--ink-700); line-height:1.5;
+  border-top:1px solid var(--line-soft); padding-top:8px;
+}
+.cal-week b{ color:var(--ink-900); font-weight:600;}
+
+/* ===== Secondary chips, smaller flits ===== */
+.chip{
+  position:absolute;
+  opacity:0;
+  font-family:"Geist Mono","ui-monospace",monospace;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:0.02em;
+  background:#fff;
+  border:1px solid var(--line);
+  padding:6px 12px;
+  border-radius:999px;
+  box-shadow:0 6px 14px rgba(31,38,34,0.08);
+  color:var(--ink-900);
+  white-space:nowrap;
+  z-index:6;
+}
+.chip.tape{
+  background:var(--sticky-yellow);
+  border-color:var(--sticky-yellow-edge);
+  font-family:"Caveat",cursive;
+  font-size:18px;
+  font-weight:400;
+  border-radius:2px;
+  padding:4px 14px;
+}
+.chip.ledger{
+  background:#F4ECD9;
+  border-color:var(--line-strong);
+  font-family:"Geist Mono",monospace;
+  color:var(--ink-700);
+}
+.chip .err{ color:var(--status-bad);}
+.chip .ok{ color:var(--sage-ink);}
+
+/* ===== Streak intro line ===== */
+.streak{
+  position:absolute;
+  top:50%;
+  left:-20%;
+  width:140%;
+  height:1.5px;
+  transform-origin:left center;
+  transform:scaleX(0);
+  background:linear-gradient(90deg,
+    transparent 0%,
+    var(--sage) 30%,
+    var(--sage-ink) 50%,
+    var(--sage) 70%,
+    transparent 100%);
+  opacity:0.55;
+  z-index:8;
+  filter:blur(0.5px);
+  box-shadow:0 0 14px rgba(75,106,85,0.35);
+}
+
+/* ===== Flash overlay ===== */
+.flash{
+  position:absolute; inset:0;
+  background:rgba(159,180,160,0.0);
+  z-index:7;
+  pointer-events:none;
+  mix-blend-mode:multiply;
+}
+
+/* ===== Vignette overlay (dims around headline late in scene) ===== */
+.vignette{
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 48%, transparent 0%, transparent 50%, rgba(31,38,34,0.0) 100%);
+  z-index:9;
+  pointer-events:none;
+}
+
+/* Replay hud */
+.hud{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  background:rgba(15,15,17,0.85);
+  color:#EAE3D2; font-family:"Geist Mono", monospace; font-size:11px;
+  padding:8px 14px; border-radius:999px;
+  display:flex; gap:14px; align-items:center; z-index:100;
+  letter-spacing:0.06em;
+}
+.hud button{
+  appearance:none; border:1px solid #555; background:transparent; color:#EAE3D2;
+  font-family:inherit; font-size:11px; padding:3px 10px; border-radius:999px; cursor:pointer;
+  letter-spacing:0.06em;
+}
+.hud button:hover{ background:#222;}
+.hud .timer{ font-variant-numeric:tabular-nums; min-width:46px;}
+</style>
+</head>
+<body>
+
+<!-- SFX: typing audio. Hyperframes invariant: every timed element needs
+     data-start / data-duration / data-track-index. One <audio> per typing
+     burst — Phase A (b0–b2), Phase B (b3–b4), Phase D (b5.5–b7.5). The
+     source typing.mp3 is 18.9 s, so each instance plays from t=0 of the clip
+     for data-duration seconds and is then cut. Path resolves from previews/
+     as ../audio/typing_clip.mp3 and from the project root after rerender-scene.mjs
+     rewrites ../audio/ → audio/ when swapping the comp into index.html. -->
+<audio id="sfx-typing-a" class="sfx-typing" src="../audio/typing_clip.mp3" data-start="0.00" data-duration="1.00" data-track-index="audio-0"></audio>
+<audio id="sfx-typing-b" class="sfx-typing" src="../audio/typing_clip.mp3" data-start="1.50" data-duration="0.50" data-track-index="audio-1"></audio>
+<audio id="sfx-typing-d" class="sfx-typing" src="../audio/typing_clip.mp3" data-start="2.75" data-duration="1.00" data-track-index="audio-2"></audio>
+
+<div class="frame-wrap" id="frame">
+  <div class="stage" id="stage">
+    <div class="grain"></div>
+    <div class="top-rule"></div>
+    <div class="stamp">BAYSIDE&nbsp;AGED&nbsp;CARE&nbsp;/&nbsp;Q1&nbsp;2026</div>
+    <div class="footer">CSIT321&nbsp;CAPSTONE</div>
+
+    <h1 class="hook" id="hook"></h1>
+
+    <div class="fragments" id="fragments">
+
+      <!-- A: Excel snippet -->
+      <div class="frag frag-a" data-key="A" style="left:80px; top:80px;">
+        <div class="xl-tab">Q1-2026-PressureInjuries.xlsx</div>
+        <div class="xl-grid">
+          <div class="row head">
+            <div>Resident</div><div>S1</div><div>S2</div><div>S3</div><div>S4</div><div>DTI</div><div>Unstg</div><div>Total</div>
+          </div>
+          <div class="row"><div>DR-0148</div><div>1</div><div class="xl-cf">2</div><div>0</div><div>0</div><div>0</div><div>0</div><div>3</div></div>
+          <div class="row"><div>DR-0091</div><div>0</div><div>1</div><div>0</div><div>0</div><div>0</div><div>0</div><div>1</div></div>
+          <div class="row"><div>DR-0203</div><div>0</div><div>0</div><div>0</div><div>0</div><div>0</div><div>0</div><div>0</div></div>
+          <div class="row"><div>DR-0157</div><div>2</div><div>0</div><div>0</div><div>0</div><div>0</div><div>0</div><div>2</div></div>
+          <div class="row"><div>DR-0211</div><div>0</div><div>0</div><div>0</div><div>0</div><div>0</div><div>1</div><div>1</div></div>
+          <div class="row"><div>DR-0327</div><div>1</div><div>0</div><div>0</div><div>0</div><div>0</div><div>0</div><div>1</div></div>
+        </div>
+        <div class="xl-err"><span class="dot"></span>#VALUE! row 14, col F (formula references missing sheet)</div>
+      </div>
+
+      <!-- B: GPMS PDF -->
+      <div class="frag frag-b" data-key="B" style="right:90px; top:30px;">
+        <div class="card gpms-card">
+          <div class="gpms-eyebrow">GPMS Quarterly Submission &middot; Section 1 of 13</div>
+          <div class="gpms-h">Pressure Injuries</div>
+          <div class="gpms-period">
+            <span>Reporting period</span>
+            <span>1 Jan to 31 Mar 2026</span>
+          </div>
+          <div class="gpms-fields">
+            <div class="gpms-field">
+              <label>Date assessed</label>
+              <div class="underline" style="border-bottom:1px dotted var(--ink-300); height:14px;"></div>
+            </div>
+            <div class="gpms-field">
+              <label>Residents assessed</label>
+              <div class="underline" style="border-bottom:1px dotted var(--ink-300); height:14px;"></div>
+            </div>
+            <div class="gpms-field">
+              <label>Any pressure injury identified</label>
+              <div class="gpms-radios">
+                <span><span class="box"></span>Yes</span>
+                <span><span class="box"></span>No</span>
+              </div>
+            </div>
+            <div class="gpms-field">
+              <label>Stage distribution</label>
+              <div class="gpms-stage-grid">
+                <div class="lbl">S1</div><div class="lbl">S2</div><div class="lbl">S3</div><div class="lbl">S4</div><div class="lbl">DTI</div><div class="lbl">Unstg</div>
+                <div>__</div><div>__</div><div>__</div><div>__</div><div>__</div><div>__</div>
+              </div>
+            </div>
+          </div>
+          <div class="gpms-foot">
+            <span>Dept of Health and Aged Care</span>
+            <span>v 4.0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- C: Audit clipboard -->
+      <div class="frag frag-c" data-key="C" style="right:80px; top:580px;">
+        <div class="clip-board">
+          <div class="clip-metal"></div>
+          <div class="clip-sub">Quality Indicator Audit</div>
+          <div class="clip-title">Q1 2026 weekly review</div>
+          <div class="clip-rows">
+            <div class="clip-row"><span class="clip-box checked">&#10003;</span>Pressure injuries reviewed</div>
+            <div class="clip-row"><span class="clip-box checked">&#10003;</span>Falls, major injury</div>
+            <div class="clip-row"><span class="clip-box checked">&#10003;</span>Polypharmacy</div>
+            <div class="clip-row clay"><span class="clip-box">&nbsp;</span>Antipsychotic without diagnosis<span class="tag">overdue</span></div>
+            <div class="clip-row"><span class="clip-box">&nbsp;</span>ADL Barthel sub-scores</div>
+            <div class="clip-row"><span class="clip-box">&nbsp;</span>Restraint events</div>
+            <div class="clip-row"><span class="clip-box">&nbsp;</span>Allied health gap</div>
+            <div class="clip-row"><span class="clip-box">&nbsp;</span>Workforce roster</div>
+          </div>
+          <div class="clip-stickynote">
+            review pending<br>
+            schedule for<br>
+            Friday morning
+          </div>
+        </div>
+      </div>
+
+      <!-- D: email -->
+      <div class="frag frag-d" data-key="D" style="left:60px; top:610px;">
+        <div class="card email-card">
+          <div class="email-top">
+            <span class="email-dot"></span>
+            <span class="email-sender">Department of Health and Aged Care</span>
+            <span class="email-time">07:42</span>
+          </div>
+          <div class="email-subject">Reminder: GPMS Q1 Quarterly Data Submission due 30 Apr 2026</div>
+          <div class="email-preview">Your facility has not yet completed Section 7 (Incontinence Care) and Section 12 (Enrolled Nursing). Please review and submit before the close of business on 30 April&hellip;</div>
+        </div>
+      </div>
+
+      <!-- E: yellow sticky -->
+      <div class="frag frag-e" data-key="E" style="left:880px; top:80px;">
+        <div class="sticky-e">
+          <span class="strike">Falls Q3?</span><br>
+          <span class="arrow">&#8594;</span> ask the<br>
+          roster sheet&nbsp;<span style="color:var(--sage-ink); font-weight:600;">found</span>
+        </div>
+      </div>
+
+      <!-- F: indicator definition -->
+      <div class="frag frag-f" data-key="F" style="left:80px; top:740px;">
+        <div class="card def-card">
+          <div class="def-eyebrow">Operational definition</div>
+          <div class="def-title">PI_S2, Stage 2 Pressure Injury</div>
+          <div class="def-body">
+            <p>Partial-thickness loss of dermis presenting clinically as a shallow, open ulcer with a red or pink wound bed.</p>
+            <p class="hl">May also present as an intact or open / ruptured serum-filled blister.</p>
+            <p>Should not be used to describe skin tears, tape burns, perineal dermatitis, maceration, or excoriation.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- G: formula bar -->
+      <div class="frag frag-g" data-key="G" style="left:580px; top:880px;">
+        <div class="fx-strip">
+          <div class="fx-fx">fx</div>
+          <div class="fx-formula">=COUNTIFS('Q1 PI'!B:B,"&gt;2",'Q1 PI'!C:C,"S2") / 'Roster Q1'!$B$2</div>
+          <div class="fx-err">#VALUE!</div>
+        </div>
+      </div>
+
+      <!-- H: April calendar -->
+      <div class="frag frag-h" data-key="H" style="left:1100px; top:560px;">
+        <div class="card cal-card" style="position:relative;">
+          <div class="cal-head">
+            <div class="cal-month">April</div>
+            <div class="cal-yr">2026</div>
+          </div>
+          <div class="cal-grid">
+            <div class="dh">M</div><div class="dh">T</div><div class="dh">W</div><div class="dh">T</div><div class="dh">F</div><div class="dh">S</div><div class="dh">S</div>
+            <div class="d dim">30</div><div class="d dim">31</div><div class="d">1</div><div class="d">2</div><div class="d">3</div><div class="d dim">4</div><div class="d dim">5</div>
+            <div class="d">6</div><div class="d">7</div><div class="d">8</div><div class="d">9</div><div class="d">10</div><div class="d dim">11</div><div class="d dim">12</div>
+            <div class="d">13</div><div class="d">14</div><div class="d">15</div><div class="d">16</div><div class="d">17</div><div class="d dim">18</div><div class="d dim">19</div>
+            <div class="d">20</div><div class="d">21</div><div class="d">22</div><div class="d">23</div><div class="d">24</div><div class="d dim">25</div><div class="d dim">26</div>
+            <div class="d">27</div><div class="d">28</div><div class="d">29</div><div class="d due">30</div><div class="d dim">1</div><div class="d dim">2</div><div class="d dim">3</div>
+          </div>
+          <div class="cal-tag">GPMS&nbsp;DUE</div>
+          <div class="cal-week">
+            <b>Mon</b> Audit prep &middot; <b>Tue</b> Falls review<br>
+            <b>Wed</b> Roster lock &middot; <b>Thu</b> Polypharmacy
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="curtain" id="curtain"></div>
+  </div>
+</div>
+
+<div class="hud">
+  <button id="replay">REPLAY</button>
+  <span class="timer" id="timer">0.00s</span>
+  <span style="opacity:.6">Scene 01 / Hook</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+/* Deterministic PRNG (mulberry32) — Hyperframes lint rejects Math.random() */
+let __seed = 1;
+function rand(){
+  __seed = (__seed + 0x6D2B79F5) | 0;
+  let t = __seed;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return (((t ^ (t >>> 14)) >>> 0) / 4294967296);
+}
+
+/* ===== Fit stage into viewport ===== */
+function fit(){
+  const wrap = document.getElementById('frame');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  /* zoom not transform: scale — natively rasterise at projected resolution; prevents 4K pixel break on 3D-rotated descendants. See ~/.claude/skills/hyperframes-video/rendering.md */
+  wrap.style.zoom = s;
+}
+fit();
+window.addEventListener('resize', fit);
+
+/* ===== Headline typing with italic colour flip ===== */
+const PHRASE1 = "Quality reporting shouldn't";
+const PHRASE2 = "take all quarter.";
+const ITALIC2_FROM = PHRASE2.indexOf("all");
+const ITALIC2_TO = PHRASE2.length - 1; /* exclude trailing period */
+
+function buildHook(){
+  const h = document.getElementById('hook');
+  h.innerHTML = '';
+
+  const p1 = document.createElement('span');
+  p1.className = 'phrase';
+  p1.id = 'phrase1';
+  for (let i = 0; i < PHRASE1.length; i++){
+    const span = document.createElement('span');
+    span.className = 'ch';
+    span.textContent = PHRASE1[i];
+    p1.appendChild(span);
+  }
+  h.appendChild(p1);
+
+  const p2 = document.createElement('span');
+  p2.className = 'phrase';
+  p2.id = 'phrase2';
+  for (let i = 0; i < PHRASE2.length; i++){
+    const span = document.createElement('span');
+    span.className = 'ch';
+    if (i >= ITALIC2_FROM && i < ITALIC2_TO) span.classList.add('italic');
+    span.textContent = PHRASE2[i];
+    p2.appendChild(span);
+  }
+  h.appendChild(p2);
+
+  const caret = document.createElement('span');
+  caret.className = 'caret';
+  caret.id = 'caret';
+  h.appendChild(caret);
+}
+
+/* ===== Master timeline: 3.0s cinematic camera move, ends in darkness ===== */
+let tl;
+const fragKeys = ['A','B','C','D','E','F','G']; /* H Calendar dropped, sits inside the headline horizontal range */
+const fragRotations = { A:-2.5, B:4, C:-3, D:1.5, E:-8, F:3.5, G:0.5, H:-1 };
+const fragEntryVectors = {
+  A:{x:-220, y:-160},
+  B:{x: 240, y:-200},
+  C:{x: 220, y: 200},
+  D:{x:-260, y: 100},
+  E:{x:-40,  y:-260},
+  F:{x:-220, y: 220},
+  G:{x: 60,  y: 240},
+  H:{x: 260, y:-40},
+};
+/* fly-out vectors for Phase E. Larger because the stage no longer scales: each fragment must travel
+   far enough on its own to clear the 1920x1080 viewport. */
+const fragFlyVecs = {
+  A:{x:-1100, y:-820},
+  B:{x: 1180, y:-1000},
+  C:{x: 1180, y: 850},
+  D:{x:-1300, y: 220},
+  E:{x:  200, y:-1300},
+  F:{x:-1300, y: 870},
+  G:{x:  220, y: 1300},
+  H:{x: 1300, y:-220},
+};
+
+function build(){
+  buildHook();
+
+  /* initial fragment state, off-frame and blurred */
+  fragKeys.forEach(k=>{
+    const el = document.querySelector('.frag[data-key="' + k + '"]');
+    el.style.opacity = 0;
+    el.style.filter = 'blur(8px)';
+    el.style.transform = `translate(${fragEntryVectors[k].x}px, ${fragEntryVectors[k].y}px) rotate(${fragRotations[k] + (rand()*4-2)}deg) scale(0.94)`;
+  });
+
+  /* stage holds steady the entire scene. background gradient never zooms.
+     headline starts BIG (scale 2.5) for the close-up macro typing, then shrinks while fragments fly in. */
+  gsap.set('#stage', { scale: 1, filter: 'blur(0px)' });
+  gsap.set('#curtain', { opacity: 0 });
+  gsap.set('#hook', { opacity: 1, xPercent: -50, yPercent: -50, scale: 2.5 });
+
+  const phrase1Chars = Array.from(document.querySelectorAll('#phrase1 .ch'));
+  const phrase2Chars = Array.from(document.querySelectorAll('#phrase2 .ch'));
+
+  tl = gsap.timeline({
+    paused:true,
+    onUpdate:()=>{
+      document.getElementById('timer').textContent = tl.time().toFixed(2) + 's';
+    }
+  });
+
+  /* time 0: reset DOM state for replay */
+  tl.call(()=>{
+    phrase1Chars.forEach(c=> c.classList.remove('shown'));
+    phrase2Chars.forEach(c=>{ c.classList.remove('shown'); c.classList.remove('flipped'); });
+  }, null, 0);
+
+  /* ============================================================
+     TOTAL 4.5s = 9 beats at 120 BPM (0.5s per beat). Typing rhythm 2-1-1.
+     Every major event lands on a full or half beat.
+        0.00 (b0)    Phase A typing starts ("Quality reporting", 13 chunks)
+        1.00 (b2)    Phase A done, Pause 1 (1 beat)
+        1.50 (b3)    Phase B pull-out + " shouldn't" + fragment cascade
+        2.00 (b4)    Phase B done, **0.5s pause after "shouldn't"** (1 beat)
+        2.50 (b5)    Backspace wipe (half-beat, no typing sound)
+        2.75 (b5.5)  Phase D typing "take all quarter."
+        3.75 (b7.5)  Phase D done, Pause 3 (half-beat)
+        4.00 (b8)    Phase 4 fly into face (1 beat)
+        4.50 (b9)    end
+     Per-chunk pace: ~0.077s (Phase A/D), ~0.071s (Phase B). ~70% slower
+     than the original 0.045s/chunk.
+     ============================================================ */
+
+  /* chunk patterns: 2 chars, 1 char, 1 char, repeat. Last group truncated to whatever's left. */
+  const PHASE_A_CHUNKS = [2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1]; /* 17 chars in 13 chunks */
+  const PHASE_B_CHUNKS = [2, 1, 1, 2, 1, 1, 2];                    /* 10 chars in 7 chunks */
+  const PHASE_D_CHUNKS = [2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1]; /* 17 chars in 13 chunks */
+  const PHRASE1_BACK_CHUNKS = [...PHASE_A_CHUNKS, ...PHASE_B_CHUNKS].reverse();
+
+  /* helper: schedule a chunked reveal (or hide). */
+  function chunkedReveal(charsArr, startCharIdx, chunkSizes, startTime, totalDur, withItalic){
+    const tick = totalDur / chunkSizes.length;
+    let charIdx = startCharIdx;
+    chunkSizes.forEach((chunkSize, i) => {
+      const tickTime = startTime + i * tick;
+      const charsToShow = charsArr.slice(charIdx, charIdx + chunkSize);
+      tl.call(() => {
+        charsToShow.forEach(c => c.classList.add('shown'));
+      }, null, tickTime);
+      if (withItalic) {
+        const italicInChunk = charsToShow.filter(c => c.classList.contains('italic'));
+        if (italicInChunk.length) {
+          tl.call(() => {
+            italicInChunk.forEach(c => c.classList.add('flipped'));
+          }, null, tickTime + 0.05);
+        }
+      }
+      charIdx += chunkSize;
+    });
+  }
+
+  function chunkedHide(charsArr, chunkSizes, startTime, totalDur){
+    const tick = totalDur / chunkSizes.length;
+    let charIdx = charsArr.length;
+    chunkSizes.forEach((chunkSize, i) => {
+      const tickTime = startTime + i * tick;
+      charIdx -= chunkSize;
+      const startSlice = charIdx;
+      const charsToHide = charsArr.slice(startSlice, startSlice + chunkSize);
+      tl.call(() => {
+        charsToHide.forEach(c => c.classList.remove('shown'));
+      }, null, tickTime);
+    });
+  }
+
+  /* Typing audio is declared via three <audio class="sfx-typing"> elements
+     in <body>, each with data-start/data-duration matching one of the typing
+     bursts. Hyperframes manages playback declaratively; no imperative
+     play()/pause() calls in JS. */
+
+  /* === Phase A: 0.00 to 1.00 (b0 to b2)  CLOSE-UP TYPING "Quality reporting" === */
+  tl.to('#caret', { opacity: 1, duration: 0.05 }, 0);
+  chunkedReveal(phrase1Chars, 0, PHASE_A_CHUNKS, 0, 1.0, false);
+
+  /* === PAUSE 1, 1.00 to 1.50 (b2 to b3, 1 beat). === */
+
+  /* === Phase B: 1.50 to 2.00 (b3 to b4)  PULL-OUT + " shouldn't" + FRAGMENT CASCADE === */
+  tl.to('#hook', {
+    scale: 1.0,
+    duration: 0.5,
+    ease: 'cubic-bezier(.16,.85,.30,1)'
+  }, 1.5);
+
+  chunkedReveal(phrase1Chars, "Quality reporting".length, PHASE_B_CHUNKS, 1.5, 0.5, false);
+
+  /* Fragments cascade in across Phase B and ALL settle before b4 (2.00) so
+     the held pause from 2.00→2.50 has zero residual motion. With 7 fragments,
+     stagger 0.020s and duration 0.35s starting at 1.50: last frag (i=6)
+     starts at 1.62 and ends at 1.97 — fully settled by the pause. */
+  fragKeys.forEach((k, i) => {
+    tl.to('.frag[data-key="' + k + '"]', {
+      x: 0, y: 0,
+      rotate: fragRotations[k],
+      scale: 1, opacity: 1,
+      filter: 'blur(0px)',
+      duration: 0.35,
+      ease: 'cubic-bezier(.22,.85,.30,1)'
+    }, 1.50 + i * 0.020);
+  });
+
+  /* === PAUSE 2 (after "shouldn't"): 2.00 to 2.50 (b4 to b5, FULL BEAT). === */
+
+  /* === Backspace wipe: 2.50 to 2.75 (b5 to b5.5, no typing sound on reverse) === */
+  chunkedHide(phrase1Chars, PHRASE1_BACK_CHUNKS, 2.5, 0.25);
+
+  /* === Phase D: 2.75 to 3.75 (b5.5 to b7.5)  Phrase 2 "take all quarter." with italic flip === */
+  chunkedReveal(phrase2Chars, 0, PHASE_D_CHUNKS, 2.75, 1.0, true);
+
+  /* === PAUSE 3, 3.75 to 4.00 (b7.5 to b8, half-beat). === */
+
+  /* === Phase 4: 4.00 to 4.50 (b8 to b9)  Headline + fragments fly into face. === */
+  tl.to('#hook', {
+    scale: 4.5,
+    filter: 'blur(4px)',
+    duration: 0.5,
+    ease: 'power4.in'
+  }, 4.0);
+
+  fragKeys.forEach((k, i) => {
+    const fv = fragFlyVecs[k];
+    tl.to('.frag[data-key="' + k + '"]', {
+      x: fv.x,
+      y: fv.y,
+      scale: 3.0,
+      opacity: 0,
+      filter: 'blur(18px)',
+      duration: 0.5,
+      ease: 'power4.in'
+    }, 4.0 + i * 0.008);
+  });
+
+  tl.to('#caret', { opacity: 0, duration: 0.12 }, 4.05);
+
+  /* NO curtain to black, stage gradient stays visible so Scene 2 picks up on the same green canvas. */
+}
+
+function play(){
+  if (!tl) build();
+  tl.restart();
+  tl.play();
+}
+
+document.getElementById('replay').addEventListener('click', play);
+// IFRAME-AWARE BOOTSTRAP — patched by shared/patch-scenes.mjs
+window.addEventListener('load', () => {
+  const start = () => { build(); if (window.parent === window) play(); };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+  } else {
+    start();
+  }
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === 'play'  && typeof play === 'function')                          play();
+  if (t === 'pause' && typeof tl   !== 'undefined' && tl)                    tl.pause();
+  if (t === 'reset' && typeof tl   !== 'undefined' && tl) { tl.seek(0); tl.pause(); }
+});
+</script>
+</body>
+</html>

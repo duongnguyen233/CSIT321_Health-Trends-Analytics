@@ -1,0 +1,22 @@
+{
+  "fps": 30,
+  "totalDurationSec": 79.60,
+  "scenes": [
+    { "id":  1, "slug": "hook",                  "name": "Hook",                "startSec":  0.00, "durSec":  4.50 },
+    { "id":  2, "slug": "logo-reveal",           "name": "Logo Reveal",         "startSec":  4.50, "durSec":  3.00 },
+    { "id":  3, "slug": "hero",                  "name": "Hero Headline",       "startSec":  7.50, "durSec":  3.00 },
+    { "id":  4, "slug": "upload",                "name": "Upload + GPMS",       "startSec": 10.50, "durSec":  4.50 },
+    { "id":  5, "slug": "dashboard",             "name": "QI Dashboard",        "startSec": 15.00, "durSec":  6.80 },
+    { "id":  6, "slug": "pi-drilldown",          "name": "PI Drilldown",        "startSec": 21.80, "durSec":  3.50 },
+    { "id":  7, "slug": "benchmarking",          "name": "Benchmarking",        "startSec": 25.30, "durSec":  5.50 },
+    { "id":  8, "slug": "act-break",             "name": "Act Break",           "startSec": 30.80, "durSec":  5.00 },
+    { "id":  9, "slug": "voice-link",            "name": "Voice Setup Link",    "startSec": 35.80, "durSec":  6.50 },
+    { "id": 10, "slug": "recording-battery",     "name": "Recording Battery",   "startSec": 42.30, "durSec": 11.60 },
+    { "id": 11, "slug": "score-resolves",        "name": "Score Resolves",      "startSec": 53.90, "durSec":  3.50 },
+    { "id": 12, "slug": "nurse-dashboard",       "name": "Nurse Dashboard",     "startSec": 57.40, "durSec":  5.60 },
+    { "id": 13, "slug": "trust-stamps",          "name": "Trust Stamps",        "startSec": 63.00, "durSec":  5.50 },
+    { "id": 14, "slug": "audit-ready-payoff",    "name": "Audit-Ready Payoff",  "startSec": 68.50, "durSec":  4.95 },
+    { "id": 15, "slug": "tagline",               "name": "Tagline",             "startSec": 73.45, "durSec":  2.65 },
+    { "id": 16, "slug": "final-card",            "name": "Final Card",          "startSec": 76.10, "durSec":  3.50 }
+  ]
+}

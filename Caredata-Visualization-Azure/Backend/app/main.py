@@ -1,8 +1,27 @@
+import asyncio
+import logging
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, health_scan, mydata, upload_csv, qi, gpms, voice
-from app.services.voice_seed import seed_demo_data
+
+# Make sure our app-level loggers actually surface in stdout. Without this
+# uvicorn's default config drops everything below WARNING from third-party
+# loggers, which silently swallowed background-task tracebacks during
+# debugging. INFO is the right floor for production too.
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
+# uvicorn's access log already handles its own formatting; downgrade so we
+# don't get duplicate request rows.
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+
+from app.api import auth, health_scan, mydata, upload_csv, qi, gpms, voice_v2
+from app.services.voice_changepoint import cpd_loop_forever
+from app.services.voice_seed_v2 import seed_v2_demo_data
 
 app = FastAPI(title="CareData Backend (Azure)")
 
@@ -30,16 +49,18 @@ app.include_router(mydata.router)
 app.include_router(upload_csv.router)
 app.include_router(qi.router)
 app.include_router(gpms.router)
-app.include_router(voice.router)
+app.include_router(voice_v2.router)
 
 
 @app.on_event("startup")
-def startup_event():
-    seed_demo_data()
+async def startup_event():
+    seed_v2_demo_data()
+    # Schedule the nightly change-point scan unless explicitly disabled
+    # (tests set VOICE_DISABLE_CPD_LOOP=1 to keep test runs deterministic).
+    if not os.environ.get("VOICE_DISABLE_CPD_LOOP"):
+        asyncio.create_task(cpd_loop_forever())
 
 
 @app.get("/")
 def read_root():
     return {"message": "API is running"}
-
-

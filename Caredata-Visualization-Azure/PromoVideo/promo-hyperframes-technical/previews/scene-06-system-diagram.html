@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 03 - System Diagram (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+  --win-bg:       #FFFFFF;
+  --win-border:   #E2DCCC;
+}
+
+body {
+  background: var(--paper);
+  display:flex; align-items:center; justify-content:center;
+}
+
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+  background: var(--paper);
+}
+
+.stage {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 20% 25%, rgba(159,180,160,0.09), transparent 55%),
+    radial-gradient(circle at 78% 72%, rgba(166,182,196,0.07), transparent 60%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.30;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist",sans-serif; font-weight:500;
+  font-size:11px; letter-spacing:0.20em;
+  color:var(--ink-500); opacity:0.55; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+
+/* dot-grid background */
+.dot-grid {
+  position:absolute; inset:0;
+  opacity:0.08; pointer-events:none; z-index:5;
+}
+
+/* headline */
+#diag-title {
+  position:absolute;
+  left:50%; top:36px;
+  font-family:"Instrument Serif",serif;
+  font-weight:400; font-size:52px;
+  color:var(--ink-900); letter-spacing:-0.02em;
+  z-index:30; white-space:nowrap;
+  opacity:0;
+}
+
+/* SVG diagram layer */
+#diag {
+  position:absolute;
+  top:110px; left:0;
+  width:1920px; height:960px;
+  z-index:20;
+}
+
+/* status chips */
+.status-chip {
+  position:absolute;
+  font-family:"Geist Mono",monospace;
+  font-size:13px; font-weight:600;
+  letter-spacing:0.04em;
+  padding:4px 10px; border-radius:6px;
+  background:var(--sage-tint);
+  color:var(--sage-ink);
+  border:1px solid rgba(75,106,85,0.22);
+  opacity:0; z-index:35;
+  pointer-events:none;
+  box-shadow: 0 3px 10px rgba(60,55,40,0.10);
+}
+.status-chip.warn {
+  background:#F6EEDF; color:var(--clay-ink);
+  border-color:rgba(131,107,71,0.28);
+}
+
+/* env terminal */
+#env-caption {
+  position:absolute;
+  bottom:56px; left:50%;
+  width:820px;
+  background:var(--win-bg);
+  border:1px solid var(--win-border);
+  border-radius:12px;
+  overflow:hidden; z-index:40; opacity:0;
+  box-shadow:
+    0 1px 0 #FFFFFF inset,
+    0 16px 36px rgba(60,55,40,0.12),
+    0 3px 8px rgba(60,55,40,0.06);
+}
+#env-caption .win-chrome {
+  display:flex; align-items:center;
+  height:32px;
+  background:#F2EEE4;
+  border-bottom:1px solid var(--win-border);
+  padding:0 14px;
+  font-family:"Geist Mono",monospace;
+  font-size:11px; font-weight:500;
+  letter-spacing:0.06em; color:var(--ink-500);
+}
+#env-caption .win-chrome .lights {
+  display:inline-flex; gap:6px; margin-right:14px;
+}
+#env-caption .win-chrome .lights span {
+  width:9px; height:9px; border-radius:50%;
+  background:#D9D3C4; border:1px solid rgba(0,0,0,0.04);
+}
+#env-caption .win-chrome .lights span:first-child  { background:#D8B0A4; }
+#env-caption .win-chrome .lights span:nth-child(2) { background:#D9CDA4; }
+#env-caption .win-chrome .lights span:nth-child(3) { background:#B0C5B2; }
+#env-caption .win-body {
+  padding:20px 24px 22px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:21px; line-height:1.60;
+  color:var(--ink-900); white-space:pre; min-height:130px;
+}
+#env-caption .win-body .cm { color:#8E948D; font-style:italic; }
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE &middot; GROUP W08 / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO &middot; CARE-DATA &middot; 03 / 18</div>
+
+  <!-- dot-grid -->
+  <svg class="dot-grid" width="1920" height="1080" preserveAspectRatio="none">
+    <defs>
+      <pattern id="dots" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
+        <circle cx="24" cy="24" r="1.2" fill="#1F2622"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#dots)"/>
+  </svg>
+
+  <!-- headline (text set in HTML, fades in via GSAP) -->
+  <h2 id="diag-title">How the bytes move.</h2>
+
+  <!-- ===== DIAGRAM ===== -->
+  <svg id="diag" viewBox="0 0 1920 970" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <!-- arrowhead -->
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+              markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L10,5 L0,10 z" fill="#9FB4A0"/>
+      </marker>
+      <!-- card drop-shadow filter -->
+      <filter id="card-shadow" x="-10%" y="-10%" width="125%" height="135%">
+        <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="rgba(60,55,40,0.09)"/>
+        <feDropShadow dx="0" dy="1" stdDeviation="2"  flood-color="rgba(60,55,40,0.05)"/>
+      </filter>
+      <!-- glow filter for trace dot -->
+      <filter id="dot-glow" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="6" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <!-- ===== Zone separator ===== -->
+    <line id="zone-sep" x1="80" y1="390" x2="1840" y2="390"
+          stroke="#A4ABA4" stroke-width="1" stroke-dasharray="5 12" opacity="0"/>
+    <text id="lbl-app" x="76" y="208" text-anchor="end" fill="#A4ABA4"
+          font-family="Geist Mono" font-size="11" font-weight="700" letter-spacing="0.16em"
+          opacity="0" transform="rotate(-90,76,208)">APPLICATION</text>
+    <text id="lbl-store" x="76" y="600" text-anchor="end" fill="#A4ABA4"
+          font-family="Geist Mono" font-size="11" font-weight="700" letter-spacing="0.16em"
+          opacity="0" transform="rotate(-90,76,600)">PERSISTENCE</text>
+
+    <!-- ===== ARROWS (drawn by GSAP stroke-dashoffset, pathLength=1) ===== -->
+
+    <!-- FE -> BE (HTTPS) -->
+    <path id="arrow-fe-be"
+          d="M 502 218 H 1262"
+          stroke="#9FB4A0" stroke-width="2" fill="none" marker-end="url(#arrow)"
+          stroke-dasharray="1" stroke-dashoffset="1" pathLength="1"/>
+    <text id="lbl-https" x="880" y="202" text-anchor="middle" fill="#6B7570"
+          font-family="Geist Mono" font-size="17" opacity="0">HTTPS · REST/JSON</text>
+
+    <!-- BE -> Azure Tables -->
+    <path id="arrow-be-az"
+          d="M 1340 338 L 600 470"
+          stroke="#9FB4A0" stroke-width="2" fill="none" marker-end="url(#arrow)"
+          stroke-dasharray="1" stroke-dashoffset="1" pathLength="1"/>
+
+    <!-- BE -> Azure Blob -->
+    <path id="arrow-be-ab"
+          d="M 1480 338 L 960 470"
+          stroke="#9FB4A0" stroke-width="2" fill="none" marker-end="url(#arrow)"
+          stroke-dasharray="1" stroke-dashoffset="1" pathLength="1"/>
+
+    <!-- BE -> In-Memory (curved right) -->
+    <path id="arrow-be-fb"
+          d="M 1630 338 Q 1820 420, 1380 470"
+          stroke="#A4ABA4" stroke-width="1.5" fill="none" marker-end="url(#arrow)"
+          stroke-dasharray="6 8" pathLength="1"
+          stroke-dashoffset="1"/>
+
+    <!-- AZ -> In-Memory fallback arc (below) -->
+    <path id="arrow-fallback"
+          d="M 752 580 Q 990 730, 1228 580"
+          stroke="#C8B89B" stroke-width="1.5" fill="none" marker-end="url(#arrow)"
+          stroke-dasharray="5 7" pathLength="1"
+          stroke-dashoffset="1" opacity="0"/>
+    <text id="lbl-fallback" x="990" y="752" text-anchor="middle" fill="#836B47"
+          font-family="Geist" font-size="16" font-style="italic" opacity="0">
+      fall through if no conn string
+    </text>
+
+    <!-- ===== NODE: Frontend (x=140 y=98 w=362 h=240) center=321,218 ===== -->
+    <g id="node-fe" opacity="0" filter="url(#card-shadow)">
+      <!-- card -->
+      <rect x="140" y="98" width="362" height="240" rx="14"
+            fill="#FFFFFF" stroke="#9FB4A0" stroke-width="2"/>
+      <!-- header bar (rounded top, flat bottom) -->
+      <path d="M 154,98 L 488,98 Q 502,98 502,112 L 502,144 L 140,144 L 140,112 Q 140,98 154,98 Z"
+            fill="#EEF1EC"/>
+      <line x1="140" y1="144" x2="502" y2="144" stroke="#9FB4A0" stroke-width="1" opacity="0.30"/>
+      <!-- header label -->
+      <text x="321" y="126" text-anchor="middle" fill="#4B6A55"
+            font-family="Geist Mono" font-size="11" font-weight="700" letter-spacing="0.16em">FRONTEND</text>
+      <!-- content -->
+      <g class="node-text" opacity="0">
+        <text x="321" y="186" text-anchor="middle" fill="#1F2622"
+              font-family="Geist" font-weight="600" font-size="30">React + Vite</text>
+        <text x="321" y="220" text-anchor="middle" fill="#6B7570"
+              font-family="Geist Mono" font-size="18">port 5173</text>
+        <text x="321" y="252" text-anchor="middle" fill="#6B7570"
+              font-family="Geist" font-size="16" font-style="italic">Framer Motion · Axios · OAuth</text>
+        <text x="321" y="278" text-anchor="middle" fill="#9FB4A0"
+              font-family="Geist Mono" font-size="13">Tailwind CSS · 7 design tokens</text>
+      </g>
+    </g>
+
+    <!-- ===== NODE: Backend (x=1262 y=98 w=440 h=240) center=1482,218 ===== -->
+    <g id="node-be" opacity="0" filter="url(#card-shadow)">
+      <rect x="1262" y="98" width="440" height="240" rx="14"
+            fill="#FFFFFF" stroke="#9FB4A0" stroke-width="2"/>
+      <path d="M 1276,98 L 1688,98 Q 1702,98 1702,112 L 1702,144 L 1262,144 L 1262,112 Q 1262,98 1276,98 Z"
+            fill="#EEF1EC"/>
+      <line x1="1262" y1="144" x2="1702" y2="144" stroke="#9FB4A0" stroke-width="1" opacity="0.30"/>
+      <text x="1482" y="126" text-anchor="middle" fill="#4B6A55"
+            font-family="Geist Mono" font-size="11" font-weight="700" letter-spacing="0.16em">BACKEND</text>
+      <g class="node-text" opacity="0">
+        <text x="1482" y="186" text-anchor="middle" fill="#1F2622"
+              font-family="Geist" font-weight="600" font-size="28">FastAPI / Uvicorn</text>
+        <text x="1482" y="220" text-anchor="middle" fill="#6B7570"
+              font-family="Geist Mono" font-size="18">port 8000</text>
+        <text x="1482" y="252" text-anchor="middle" fill="#6B7570"
+              font-family="Geist" font-size="16" font-style="italic">6 routers · JWT · /api/voice/v2</text>
+        <text x="1482" y="278" text-anchor="middle" fill="#9FB4A0"
+              font-family="Geist Mono" font-size="13">python-jose · PyAV · OpenAI</text>
+      </g>
+    </g>
+
+    <!-- ===== NODE: Azure Tables (x=452 y=470 w=300 h=200) center=602,570 ===== -->
+    <g id="node-az" opacity="0" filter="url(#card-shadow)">
+      <rect x="452" y="470" width="300" height="200" rx="14"
+            fill="#FFFFFF" stroke="#A6B6C4" stroke-width="2"/>
+      <path d="M 466,470 L 738,470 Q 752,470 752,484 L 752,516 L 452,516 L 452,484 Q 452,470 466,470 Z"
+            fill="#E8EFF5"/>
+      <line x1="452" y1="516" x2="752" y2="516" stroke="#A6B6C4" stroke-width="1" opacity="0.30"/>
+      <text x="602" y="498" text-anchor="middle" fill="#4B6A8A"
+            font-family="Geist Mono" font-size="11" font-weight="700" letter-spacing="0.16em">AZURE TABLES</text>
+      <g class="node-text" opacity="0">
+        <text x="602" y="554" text-anchor="middle" fill="#1F2622"
+              font-family="Geist" font-weight="600" font-size="26">Table Storage</text>
+        <text x="602" y="586" text-anchor="middle" fill="#6B7570"
+              font-family="Geist Mono" font-size="16">assessments · scans</text>
+        <text x="602" y="616" text-anchor="middle" fill="#6B7570"
+              font-family="Geist" font-size="15" font-style="italic">primary persistence</text>
+        <text x="602" y="644" text-anchor="middle" fill="#A6B6C4"
+              font-family="Geist Mono" font-size="12">SDK · connection string</text>
+      </g>
+    </g>
+
+    <!-- ===== NODE: Azure Blob (x=812 y=470 w=300 h=200) center=962,570 ===== -->
+    <g id="node-ab" opacity="0" filter="url(#card-shadow)">
+      <rect x="812" y="470" width="300" height="200" rx="14"
+            fill="#FFFFFF" stroke="#A6B6C4" stroke-width="2"/>
+      <path d="M 826,470 L 1098,470 Q 1112,470 1112,484 L 1112,516 L 812,516 L 812,484 Q 812,470 826,470 Z"
+            fill="#E8EFF5"/>
+      <line x1="812" y1="516" x2="1112" y2="516" stroke="#A6B6C4" stroke-width="1" opacity="0.30"/>
+      <text x="962" y="498" text-anchor="middle" fill="#4B6A8A"
+            font-family="Geist Mono" font-size="11" font-weight="700" letter-spacing="0.16em">AZURE BLOB</text>
+      <g class="node-text" opacity="0">
+        <text x="962" y="554" text-anchor="middle" fill="#1F2622"
+              font-family="Geist" font-weight="600" font-size="26">Blob Storage</text>
+        <text x="962" y="586" text-anchor="middle" fill="#6B7570"
+              font-family="Geist Mono" font-size="16">audio-recordings/</text>
+        <text x="962" y="616" text-anchor="middle" fill="#6B7570"
+              font-family="Geist" font-size="15" font-style="italic">WebM / Opus payloads</text>
+        <text x="962" y="644" text-anchor="middle" fill="#A6B6C4"
+              font-family="Geist Mono" font-size="12">PyAV decode · no ffmpeg</text>
+      </g>
+    </g>
+
+    <!-- ===== NODE: In-Memory (x=1232 y=470 w=300 h=200) center=1382,570 ===== -->
+    <g id="node-fb" opacity="0" filter="url(#card-shadow)">
+      <rect x="1232" y="470" width="300" height="200" rx="14"
+            fill="#FFFFFF" stroke="#C8B89B" stroke-width="2"/>
+      <path d="M 1246,470 L 1518,470 Q 1532,470 1532,484 L 1532,516 L 1232,516 L 1232,484 Q 1232,470 1246,470 Z"
+            fill="#F4EDE0"/>
+      <line x1="1232" y1="516" x2="1532" y2="516" stroke="#C8B89B" stroke-width="1" opacity="0.30"/>
+      <text x="1382" y="498" text-anchor="middle" fill="#836B47"
+            font-family="Geist Mono" font-size="11" font-weight="700" letter-spacing="0.16em">FALLBACK</text>
+      <g class="node-text" opacity="0">
+        <text x="1382" y="554" text-anchor="middle" fill="#1F2622"
+              font-family="Geist" font-weight="600" font-size="26">In-Memory</text>
+        <text x="1382" y="586" text-anchor="middle" fill="#6B7570"
+              font-family="Geist Mono" font-size="16">_in_memory dict</text>
+        <text x="1382" y="616" text-anchor="middle" fill="#6B7570"
+              font-family="Geist" font-size="15" font-style="italic">no conn string → auto</text>
+        <text x="1382" y="644" text-anchor="middle" fill="#C8B89B"
+              font-family="Geist Mono" font-size="12">same 200 OK response</text>
+      </g>
+    </g>
+
+    <!-- ===== Trace dot (large, glowing) ===== -->
+    <circle id="trace-dot" cx="-100" cy="-100" r="13" fill="#9FB4A0"
+            opacity="0" filter="url(#dot-glow)"/>
+    <!-- outer pulse ring -->
+    <circle id="trace-ring" cx="-100" cy="-100" r="22" fill="none"
+            stroke="#9FB4A0" stroke-width="1.5" opacity="0"/>
+  </svg>
+
+  <!-- Status chips -->
+  <div class="status-chip" id="chip-fe">200 OK</div>
+  <div class="status-chip" id="chip-be">200 OK</div>
+  <div class="status-chip" id="chip-az">200 OK</div>
+  <div class="status-chip warn" id="chip-az-fail">503 · no conn</div>
+  <div class="status-chip" id="chip-fb">200 OK</div>
+
+  <!-- Env terminal -->
+  <div id="env-caption">
+    <div class="win-chrome">
+      <span class="lights"><span></span><span></span><span></span></span>
+      Backend / .env
+    </div>
+    <div class="win-body" id="env-body"></div>
+  </div>
+
+  <!-- SFX: typing only (for terminal). Whoosh for exit. -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function() {
+  await document.fonts.ready;
+
+  /* fit to viewport (Iron Rule: zoom not transform:scale) */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((window.innerWidth  - 1920 * s) / 2) + 'px';
+    frame.style.top  = ((window.innerHeight - 1080 * s) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* refs */
+  const title    = document.getElementById('diag-title');
+  const nodeFE   = document.getElementById('node-fe');
+  const nodeBE   = document.getElementById('node-be');
+  const nodeAZ   = document.getElementById('node-az');
+  const nodeAB   = document.getElementById('node-ab');
+  const nodeFB   = document.getElementById('node-fb');
+
+  const arrFEBE  = document.getElementById('arrow-fe-be');
+  const lblHTTPS = document.getElementById('lbl-https');
+  const arrBEAZ  = document.getElementById('arrow-be-az');
+  const arrBEAB  = document.getElementById('arrow-be-ab');
+  const arrBEFB  = document.getElementById('arrow-be-fb');
+  const arrFB    = document.getElementById('arrow-fallback');
+  const lblFB    = document.getElementById('lbl-fallback');
+
+  const zoneSep  = document.getElementById('zone-sep');
+  const lblApp   = document.getElementById('lbl-app');
+  const lblStore = document.getElementById('lbl-store');
+
+  const traceDot  = document.getElementById('trace-dot');
+  const traceRing = document.getElementById('trace-ring');
+
+  const envCap   = document.getElementById('env-caption');
+  const envBody  = document.getElementById('env-body');
+
+  const chipFE     = document.getElementById('chip-fe');
+  const chipBE     = document.getElementById('chip-be');
+  const chipAZ     = document.getElementById('chip-az');
+  const chipAZFail = document.getElementById('chip-az-fail');
+  const chipFB     = document.getElementById('chip-fb');
+
+  const sfxType   = document.getElementById('sfx-type');
+  const sfxWhoosh = document.getElementById('sfx-whoosh');
+
+  /* diagToScreen: SVG viewBox y -> screen y (SVG top is at 110px) */
+  function diagToScreen(x, y) { return { x, y: y + 110 }; }
+
+  function positionChip(chip, ax, ay, dx, dy) {
+    const p = diagToScreen(ax, ay);
+    chip.style.left = (p.x + dx) + 'px';
+    chip.style.top  = (p.y + dy) + 'px';
+  }
+  positionChip(chipFE,     321,  218, -22,  -88);
+  positionChip(chipBE,    1482,  218, -28,  -88);
+  positionChip(chipAZ,     602,  570, -26,  108);
+  positionChip(chipAZFail, 602,  570, -104, 108);
+  positionChip(chipFB,    1382,  570, -26,  108);
+
+  /* chunked typing helper (1-1-3 rhythm) */
+  function chunkText(text) {
+    const chunks = []; let i = 0, phase = 0;
+    while (i < text.length) {
+      const n = phase === 2 ? 3 : 1;
+      chunks.push(text.slice(i, Math.min(i + n, text.length)));
+      i += n; phase = (phase + 1) % 3;
+    }
+    return chunks;
+  }
+  function typeChunked(tl, el, text, { at = 0, tickMs = 55 } = {}) {
+    const chunks = chunkText(text);
+    chunks.forEach((c, i) => {
+      tl.call(() => { el.textContent += c; }, null, at + i * tickMs / 1000);
+    });
+    return chunks.length * tickMs / 1000;
+  }
+
+  /* node pop-in helper — scale from 0.88 at svgOrigin */
+  function popNode(tl, node, cx, cy, at) {
+    gsap.set(node, { opacity: 0, scale: 0.88, svgOrigin: cx + ' ' + cy });
+    tl.to(node, { opacity: 1, scale: 1, duration: 0.38,
+                  ease: 'back.out(1.4)', svgOrigin: cx + ' ' + cy }, at);
+    tl.to(node.querySelector('.node-text'),
+      { opacity: 1, duration: 0.28, ease: 'sine.out' }, at + 0.30);
+  }
+
+  /* chip flash helper */
+  function chipFlash(chip, at, dur = 0.45) {
+    tl.to(chip, { opacity: 1, duration: 0.10, ease: 'sine.out' }, at);
+    tl.to(chip, { opacity: 0, duration: 0.22, ease: 'sine.in'  }, at + dur);
+  }
+
+  /* node border pulse */
+  function nodePulse(node, at) {
+    const rect = node.querySelector('rect');
+    tl.to(rect, { strokeWidth: 3.0, duration: 0.12, ease: 'sine.out' }, at);
+    tl.to(rect, { strokeWidth: 2.0, duration: 0.22, ease: 'sine.in'  }, at + 0.12);
+  }
+
+  /* move trace dot + ring to (cx, cy) in SVG coords */
+  function moveDot(cx, cy, at, dur, ease = 'power2.inOut') {
+    tl.to(traceDot,  { attr: { cx, cy }, duration: dur, ease }, at);
+    tl.to(traceRing, { attr: { cx, cy }, duration: dur, ease }, at);
+  }
+
+  /* ===== Initial state ===== */
+  gsap.set([nodeFE, nodeBE, nodeAZ, nodeAB, nodeFB], { opacity: 0 });
+  gsap.set([chipFE, chipBE, chipAZ, chipAZFail, chipFB], { opacity: 0 });
+  gsap.set(envCap, { opacity: 0 });
+  gsap.set(title,  { opacity: 0, xPercent: -50 });
+
+  const tl = gsap.timeline();
+  const ease = 'cubic-bezier(.22,.85,.30,1)';
+
+  /* ===== 0.0: Headline fades in ===== */
+  tl.to(title, { opacity: 1, duration: 0.50, ease: 'sine.out' }, 0.10);
+
+  /* ===== 0.6 -> 3.4: Zone labels + separator ===== */
+  tl.to([zoneSep, lblApp, lblStore], { opacity: 1, duration: 0.40, ease: 'sine.out' }, 0.60);
+
+  /* ===== 0.8 -> 1.6: Frontend node pops in ===== */
+  popNode(tl, nodeFE, 321, 218, 0.80);
+
+  /* ===== 1.4 -> 2.2: Backend node pops in ===== */
+  popNode(tl, nodeBE, 1482, 218, 1.40);
+
+  /* ===== 1.8 -> 2.8: FE -> BE arrow draws ===== */
+  tl.to(arrFEBE, { strokeDashoffset: 0, duration: 0.90, ease }, 1.80);
+  tl.to(lblHTTPS, { opacity: 1, duration: 0.30, ease: 'sine.out' }, 2.70);
+
+  /* ===== 2.4 -> 3.1: Azure Tables pops in + arrow ===== */
+  popNode(tl, nodeAZ, 602, 570, 2.40);
+  tl.to(arrBEAZ, { strokeDashoffset: 0, duration: 0.80, ease }, 2.40);
+
+  /* ===== 3.0 -> 3.7: Azure Blob pops in + arrow ===== */
+  popNode(tl, nodeAB, 962, 570, 3.00);
+  tl.to(arrBEAB, { strokeDashoffset: 0, duration: 0.80, ease }, 3.00);
+
+  /* ===== 3.6 -> 4.3: In-Memory pops in + curved dashed arrow ===== */
+  popNode(tl, nodeFB, 1382, 570, 3.60);
+  tl.to(arrBEFB, { strokeDashoffset: 0, duration: 0.70, ease }, 3.60);
+
+  /* ===== 4.3 -> 5.2: Fallback arc + label ===== */
+  tl.set(arrFB, { opacity: 1 }, 4.30);
+  tl.to(arrFB,  { strokeDashoffset: 0, duration: 0.80, ease }, 4.30);
+  tl.to(lblFB,  { opacity: 1, duration: 0.30, ease: 'sine.out' }, 5.10);
+
+  /* ===== 5.5 -> 5.8: short hold, all visible ===== */
+
+  /* =================================================
+     TRACE 1 — happy path: FE -> BE -> AZ -> BE -> FE
+     Node anchors (SVG viewBox coords):
+       FE  = (321, 218)
+       BE  = (1482, 218)
+       AZ  = (602,  570)
+     ================================================= */
+
+  const aFE = { x: 321,  y: 218 };
+  const aBE = { x: 1482, y: 218 };
+  const aAZ = { x: 602,  y: 570 };
+  const aAB = { x: 962,  y: 570 };
+  const aFB = { x: 1382, y: 570 };
+
+  /* place dot at FE */
+  tl.set(traceDot,  { attr: { cx: aFE.x, cy: aFE.y }, opacity: 1 }, 5.80);
+  tl.set(traceRing, { attr: { cx: aFE.x, cy: aFE.y }, opacity: 0.5 }, 5.80);
+
+  /* Leg 1: FE -> BE (5.8 -> 6.9) */
+  moveDot(aBE.x, aBE.y, 5.80, 1.10);
+  nodePulse(nodeFE, 5.80);
+  chipFlash(chipFE, 5.80);
+  tl.call(() => {
+    try { sfxWhoosh.currentTime = 0; sfxWhoosh.volume = 0.08; sfxWhoosh.play(); } catch(_) {}
+  }, null, 5.80);
+
+  nodePulse(nodeBE, 6.90);
+  chipFlash(chipBE, 6.90);
+
+  /* Leg 2: BE -> AZ (7.0 -> 8.0) */
+  moveDot(aAZ.x, aAZ.y, 7.00, 1.00);
+  nodePulse(nodeAZ, 8.00);
+  chipFlash(chipAZ, 8.00);
+
+  /* Leg 3: AZ -> BE (8.1 -> 8.9) */
+  moveDot(aBE.x, aBE.y, 8.10, 0.80);
+  nodePulse(nodeBE, 8.90);
+
+  /* Leg 4: BE -> FE (9.0 -> 9.7) */
+  moveDot(aFE.x, aFE.y, 9.00, 0.70);
+  nodePulse(nodeFE, 9.70);
+  chipFlash(chipFE, 9.70);
+
+  /* dot fades */
+  tl.to([traceDot, traceRing], { opacity: 0, duration: 0.25, ease: 'sine.in' }, 9.80);
+
+  /* =================================================
+     TRACE 2 — fallback path: FE -> BE -> AZ -> [503] -> FB -> BE -> FE
+     ================================================= */
+
+  tl.set(traceDot,  { attr: { cx: aFE.x, cy: aFE.y }, opacity: 1 }, 10.30);
+  tl.set(traceRing, { attr: { cx: aFE.x, cy: aFE.y }, opacity: 0.5 }, 10.30);
+
+  /* Leg 1: FE -> BE (10.3 -> 11.0) */
+  moveDot(aBE.x, aBE.y, 10.30, 0.70);
+  nodePulse(nodeFE, 10.30);
+  tl.call(() => {
+    try { sfxWhoosh.currentTime = 0; sfxWhoosh.volume = 0.08; sfxWhoosh.play(); } catch(_) {}
+  }, null, 10.30);
+
+  /* Leg 2: BE -> AZ (11.0 -> 11.75) */
+  moveDot(aAZ.x, aAZ.y, 11.00, 0.75);
+  nodePulse(nodeBE, 11.00);
+
+  /* AZ FAILS at 11.75 */
+  tl.to(nodeAZ, { opacity: 0.30, duration: 0.18, ease: 'sine.in'  }, 11.75);
+  chipFlash(chipAZFail, 11.75, 0.70);
+  tl.to(nodeAZ, { opacity: 1.00, duration: 0.25, ease: 'sine.out' }, 12.00);
+
+  /* Leg 3: AZ -> FB via fallback arc (11.85 -> 12.75) */
+  moveDot(aFB.x, aFB.y, 11.85, 0.90, 'power2.inOut');
+  nodePulse(nodeFB, 12.75);
+  chipFlash(chipFB, 12.75);
+
+  /* Leg 4: FB -> BE (12.85 -> 13.55) */
+  moveDot(aBE.x, aBE.y, 12.85, 0.70);
+  nodePulse(nodeBE, 13.55);
+
+  /* Leg 5: BE -> FE (13.65 -> 14.25) */
+  moveDot(aFE.x, aFE.y, 13.65, 0.60);
+  nodePulse(nodeFE, 14.25);
+  chipFlash(chipFE, 14.25);
+
+  /* dot fades */
+  tl.to([traceDot, traceRing], { opacity: 0, duration: 0.25, ease: 'sine.in' }, 14.30);
+
+  /* =================================================
+     ENV TERMINAL — typing sound fires ONLY here
+     ================================================= */
+  tl.to(envCap, { opacity: 1, xPercent: -50, duration: 0.35, ease: 'sine.out' }, 14.80);
+
+  const line1 = '# Backend/.env';
+  const line2 = 'AZURE_STORAGE_CONNECTION_STRING=';
+  const line3 = '# in-memory fallback engages';
+
+  /* Typing sound starts 150 ms before the first character lands (latency lead) */
+  tl.call(() => {
+    try { sfxType.currentTime = 0; sfxType.play(); } catch(_) {}
+  }, null, 14.65);
+
+  typeChunked(tl, envBody, line1, { at: 14.80, tickMs: 50 });
+  tl.call(() => { envBody.textContent += '\n'; }, null, 15.55);
+
+  typeChunked(tl, envBody, line2, { at: 15.65, tickMs: 36 });
+  tl.call(() => { envBody.textContent += '\n'; }, null, 16.85);
+
+  typeChunked(tl, envBody, line3, { at: 16.95, tickMs: 38 });
+
+  /* Stop typing sound the moment the last character lands */
+  tl.call(() => {
+    try { sfxType.pause(); sfxType.currentTime = 0; } catch(_) {}
+  }, null, 17.75);
+
+  tl.call(() => {
+    const txt = envBody.textContent;
+    envBody.innerHTML = txt.split('\n').map(line =>
+      line.startsWith('#') ? '<span class="cm">' + line + '</span>' : line
+    ).join('\n');
+  }, null, 17.80);
+
+  /* ===== Hold 17.8 -> 19.0 ===== */
+
+  /* ===== 19.0: M25 whip-pan left ===== */
+  tl.call(() => {
+    try { sfxWhoosh.currentTime = 0; sfxWhoosh.volume = 1.0; sfxWhoosh.play(); } catch(_) {}
+  }, null, 18.88);
+
+  tl.to(frame, {
+    x: -1920, duration: 1.00, ease: 'power3.in',
+    filter: 'blur(14px)',
+  }, 19.00);
+
+  /* scene ends ~20.0 s */
+})();
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

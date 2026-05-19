@@ -1,84 +1,185 @@
 /**
- * VoiceAlertsFeed, displays unacknowledged voice biomarker alerts.
- *
- * Props:
- *   alerts         , array of alert objects from API
- *   onAcknowledge  , async (analysisId) => void
- *   loading        , boolean
+ * VoiceAlertsFeed (v2) — sidebar feed of open alerts ordered newest first.
+ * Styled to match the rest of the Caredata UI (cd-surface, sage/clay/ink
+ * tints, Geist + Instrument Serif typography).
  */
-export default function VoiceAlertsFeed({ alerts = [], onAcknowledge, loading = false }) {
-  if (loading) {
-    return (
-      <div className="text-center py-6">
-        <p className="text-sm text-gray-400">Loading alerts...</p>
-      </div>
-    );
-  }
+import { useMemo, useState } from "react";
 
-  if (alerts.length === 0) {
-    return (
-      <div className="text-center py-8 bg-green-50 border border-green-200 rounded-xl">
-        <p className="text-green-700 font-medium">No active alerts</p>
-        <p className="text-sm text-green-600 mt-1">All voice biomarkers are within normal range.</p>
-      </div>
-    );
-  }
+import { ackAlert } from "../../services/voiceApiV2";
 
-  const formatDate = (iso) => {
-    if (!iso) return "";
-    try {
-      return new Date(iso).toLocaleDateString("en-AU", {
-        day: "numeric",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch {
-      return iso;
+
+const DIMENSION_LABELS = {
+  phonatory: "Voice quality",
+  articulatory: "Speech clarity",
+  prosodic: "Speech rhythm",
+  respiratory: "Breath support",
+  linguistic: "Language fluency",
+};
+
+
+export default function VoiceAlertsFeed({ alerts = [], residents = [], onOpen, onAfterAck }) {
+  const [acking, setAcking] = useState({});
+
+  const residentByProfile = useMemo(() => {
+    const map = {};
+    for (const r of residents) {
+      if (r.profile_id) map[r.profile_id] = r;
     }
-  };
+    return map;
+  }, [residents]);
 
-  const levelStyles = {
-    red: { bg: "bg-red-50", border: "border-red-300", dot: "bg-red-500", text: "text-red-700" },
-    amber: { bg: "bg-amber-50", border: "border-amber-300", dot: "bg-amber-500", text: "text-amber-700" },
-    urgent: { bg: "bg-red-100", border: "border-red-400", dot: "bg-red-600", text: "text-red-800" },
-  };
+  async function handleAck(id) {
+    setAcking((prev) => ({ ...prev, [id]: true }));
+    try {
+      await ackAlert(id);
+      onAfterAck?.();
+    } finally {
+      setAcking((prev) => ({ ...prev, [id]: false }));
+    }
+  }
 
   return (
-    <div className="space-y-3">
-      {alerts.map((alert) => {
-        const style = levelStyles[alert.alert_level] || levelStyles.amber;
-        return (
-          <div
-            key={alert.analysis_id}
-            className={`${style.bg} ${style.border} border rounded-xl p-4 flex items-start justify-between gap-4`}
-          >
-            <div className="flex items-start gap-3 min-w-0">
-              <span className={`w-3 h-3 ${style.dot} rounded-full mt-1.5 flex-shrink-0`} />
-              <div className="min-w-0">
-                <p className={`font-semibold ${style.text}`}>
-                  {alert.display_name || alert.resident_id || "Resident"}
+    <div
+      style={{
+        background: "var(--bg-white)",
+        border: "1px solid var(--line)",
+        borderRadius: "var(--r-lg)",
+        padding: 16,
+      }}
+    >
+      <div className="flex items-baseline justify-between mb-3">
+        <h3
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            color: "var(--ink-500)",
+          }}
+        >
+          Open alerts
+        </h3>
+        <span
+          className="tabular-nums"
+          style={{ fontSize: 13, fontWeight: 500, color: "var(--ink-700)" }}
+        >
+          {alerts.length}
+        </span>
+      </div>
+
+      {alerts.length === 0 ? (
+        <p
+          style={{
+            fontSize: 13,
+            color: "var(--ink-500)",
+            fontStyle: "italic",
+          }}
+        >
+          No open alerts.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {alerts.slice(0, 12).map((a) => {
+            const resident = residentByProfile[a.profile_id];
+            return (
+              <li
+                key={a.alert_id}
+                style={{
+                  border: "1px solid var(--line-soft)",
+                  borderRadius: 12,
+                  padding: 12,
+                  background: "var(--bg-paper)",
+                }}
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <SeverityChip severity={a.severity} />
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: "var(--ink-700)",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {DIMENSION_LABELS[a.dimension] || a.dimension}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => resident && onOpen?.(resident)}
+                  disabled={!resident}
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: "var(--ink-900)",
+                    textAlign: "left",
+                    width: "100%",
+                    background: "transparent",
+                  }}
+                  title={resident ? "Open resident detail" : a.resident_id}
+                >
+                  {resident?.display_name || a.resident_id || "—"}
+                </button>
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: "var(--ink-700)",
+                    marginTop: 4,
+                    lineHeight: 1.45,
+                  }}
+                >
+                  {a.summary}
                 </p>
-                <p className="text-sm text-gray-600 mt-0.5 line-clamp-2">
-                  {alert.narrative_report
-                    ? alert.narrative_report.slice(0, 120) + (alert.narrative_report.length > 120 ? "..." : "")
-                    : `${alert.alert_level.toUpperCase()} alert, voice biomarker deviation detected.`}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {formatDate(alert.created_at)} · Confidence: {alert.confidence || "low"}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => onAcknowledge(alert.analysis_id)}
-              className="flex-shrink-0 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white
-                         border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Acknowledge
-            </button>
-          </div>
-        );
-      })}
+                <div className="flex items-center justify-between mt-2">
+                  <span style={{ fontSize: 10, color: "var(--ink-500)" }}>
+                    {a.created_at?.slice(0, 16).replace("T", " ")}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleAck(a.alert_id)}
+                    disabled={!!acking[a.alert_id]}
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 500,
+                      color: "var(--ink-700)",
+                      textDecoration: "underline",
+                      background: "transparent",
+                      opacity: acking[a.alert_id] ? 0.5 : 1,
+                    }}
+                  >
+                    {acking[a.alert_id] ? "Acking…" : "Acknowledge"}
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
+  );
+}
+
+
+function SeverityChip({ severity }) {
+  const styles = {
+    info: { bg: "var(--bg-sage-tint)", fg: "var(--sage-ink)" },
+    watch: { bg: "#F4E5C9", fg: "#7A5A1F" },
+    review: { bg: "#F4D7D7", fg: "#7A2424" },
+  };
+  const s = styles[severity] || styles.info;
+  return (
+    <span
+      style={{
+        fontSize: 9,
+        textTransform: "uppercase",
+        fontWeight: 700,
+        padding: "2px 7px",
+        borderRadius: 999,
+        background: s.bg,
+        color: s.fg,
+        letterSpacing: "0.06em",
+      }}
+    >
+      {severity}
+    </span>
   );
 }

@@ -44,6 +44,10 @@ def _entity_to_dict(e: dict) -> dict:
         "baseline_recording_count": e.get("baseline_recording_count", 0),
         "last_recording_date": e.get("last_recording_date"),
         "created_at": e.get("created_at"),
+        # Phase 3 baseline fields
+        "baseline_locked_at": e.get("baseline_locked_at"),
+        "baseline_version": e.get("baseline_version", 0),
+        "baseline_blob_uri": e.get("baseline_blob_uri") or e.get("baseline_blob_key"),
     }
 
 
@@ -51,10 +55,15 @@ def create_profile(
     resident_id: str,
     facility_id: str,
     display_name: str,
-    password_hash: str,
+    password_hash: str = "",
     consent_status: str = "active",
 ) -> dict:
-    """Create a new resident voice profile. Returns profile dict."""
+    """Create a new resident voice profile. Returns profile dict.
+
+    `password_hash` defaults to empty for v2 token-only enrolment; legacy
+    callers may continue to pass a real bcrypt hash for the v1 resident-
+    portal flow.
+    """
     profile_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
     entity = {

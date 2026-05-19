@@ -8,6 +8,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Only work inside `Caredata-Visualization-Azure/`** — the other folders (`Front-End/`, `Back-End/`, `Demo-Source-Code/`) are older versions and are not maintained.
 
+### Voice Biomarker tab — redesigned in Phases 1-4
+
+The Voice Screening tab was rebuilt end-to-end against `VOICE_BIOMARKER.md` (adapted to this stack — no Postgres, no arq, no WavLM, no Container Apps). The plan and per-phase autopilot logs live at `docs/superpowers/`. Key invariants:
+
+- Backend mounts `/api/voice/v2/*` only (legacy router deleted in Phase 2; legacy `/api/voice/*` redirect deleted in Phase 4).
+- Tests run with `tests/conftest.py` stripping `AZURE_STORAGE_CONNECTION_STRING` so they never hit production Azure Tables/Blob.
+- `tests/voice/test_framing.py` is a **hard rule**: no disease names anywhere in voice modules. Lines that legitimately need to mention a disclaimer can opt-out via the `# FRAMING_OK` marker.
+- Score vector is 108-d (eGeMAPS + Praat + linguistic + DDK; WavLM dropped per Adaptations table).
+- `voice_seed_v2.seed_v2_demo_data()` runs at startup. Set `AZURE_STORAGE_CONNECTION_STRING=` (empty) and `VOICE_DISABLE_CPD_LOOP=1` for quick local dev runs that bypass Azure Tables / the nightly CPD loop.
+
 ---
 
 ## Dev Commands

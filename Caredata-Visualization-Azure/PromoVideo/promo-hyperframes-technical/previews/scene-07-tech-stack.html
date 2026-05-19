@@ -1,0 +1,1137 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 04 - Backend Runtime Map app/main.py + /docs (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+
+  --win-bg:       #FFFFFF;
+  --win-chrome:   #F2EEE4;
+  --win-border:   #E2DCCC;
+  --code-comment: #8E948D;
+  --code-keyword: #4B6A55;
+  --code-fn:      #3D4743;
+  --code-string:  #836B47;
+  --code-punct:   #6B7570;
+  --code-good:    #6F8E76;
+}
+
+body {
+  background: var(--paper);
+  display:flex; align-items:center; justify-content:center;
+}
+
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;
+  overflow:hidden;
+  flex-shrink:0;
+  background: var(--paper);
+}
+
+/* ===== Stage: light paper with subtle warmth ===== */
+.stage {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 20% 25%, rgba(159,180,160,0.10), transparent 55%),
+    radial-gradient(circle at 78% 72%, rgba(159,180,160,0.08), transparent 60%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+}
+
+/* paper grain */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.32;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+  z-index:55;
+}
+
+/* ===== Watermarks ===== */
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist",sans-serif; font-weight:500;
+  font-size:11px; letter-spacing:0.20em;
+  color:var(--ink-500); opacity:0.55; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--ink-500); opacity:0.55;
+  z-index:60; pointer-events:none;
+}
+
+/* ===== Opening purpose card ===== */
+#scene-purpose {
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%, -50%);
+  z-index:52;
+  width:980px;
+  font-family:"Geist",sans-serif;
+  color:var(--ink-900);
+  opacity:0;
+  pointer-events:none;
+  text-align:center;
+}
+#scene-purpose .eyebrow {
+  font-family:"Geist Mono",monospace;
+  font-size:12px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--sage-ink);
+  font-weight:600;
+  margin-bottom:10px;
+}
+#scene-purpose .headline {
+  font-family:"Instrument Serif",serif;
+  font-size:76px;
+  line-height:0.95;
+  color:var(--ink-900);
+}
+#scene-purpose .sub {
+  margin-top:14px;
+  font-size:24px;
+  line-height:1.35;
+  color:var(--ink-700);
+}
+
+/* ===== IDE chrome ===== */
+.ide-frame {
+  position:absolute;
+  top:60px; left:60px;
+  width:1800px; height:960px;
+  background:#FFFFFF;
+  border:1px solid var(--win-border);
+  border-radius:14px;
+  box-shadow:
+    0 1px 0 #FFFFFF inset,
+    0 18px 48px rgba(60,55,40,0.12),
+    0 4px 12px rgba(60,55,40,0.06);
+  overflow:hidden;
+  z-index:20;
+  opacity:0;
+}
+
+.ide-titlebar {
+  display:flex; align-items:center; gap:12px;
+  height:42px;
+  background:var(--win-chrome);
+  color:var(--ink-500);
+  border-bottom:1px solid var(--win-border);
+  padding:0 18px;
+  font-family:"Geist Mono",monospace;
+  font-size:13px; font-weight:500;
+  letter-spacing:0.04em;
+}
+.ide-titlebar .lights {
+  display:inline-flex; gap:6px; margin-right:8px;
+}
+.ide-titlebar .lights span {
+  width:10px; height:10px; border-radius:50%;
+  background:#D9D3C4;
+  border:1px solid rgba(0,0,0,0.04);
+}
+.ide-titlebar .lights span:first-child  { background:#D8B0A4; }
+.ide-titlebar .lights span:nth-child(2) { background:#D9CDA4; }
+.ide-titlebar .lights span:nth-child(3) { background:#B0C5B2; }
+.ide-titlebar .crumb { color:var(--ink-500); }
+.ide-titlebar .crumb.active { color:var(--ink-900); }
+.ide-titlebar .dim { color:var(--ink-300); }
+
+.ide-body {
+  display:flex;
+  height:836px; /* 960 - 42 titlebar - 32 statusbar - approx */
+}
+
+/* file tree pane */
+.file-tree {
+  width:320px;
+  background:#FAF6EC;
+  border-right:1px solid var(--win-border);
+  color:var(--ink-700);
+  padding:18px 14px;
+  font-family:"Geist Mono",monospace;
+  font-size:14px;
+  line-height:1.9;
+}
+.file-tree .tree-section-title {
+  font-size:10px; letter-spacing:0.20em;
+  color:var(--ink-300); font-weight:600;
+  margin:0 4px 8px;
+  text-transform:uppercase;
+}
+.file-tree .tree-row {
+  padding:3px 8px;
+  border-radius:5px;
+  display:flex; align-items:center;
+  color:var(--ink-700);
+}
+.file-tree .tree-row.indent-1 { padding-left:24px; }
+.file-tree .tree-row.indent-2 { padding-left:42px; }
+.file-tree .tree-row.active {
+  background:var(--sage-tint);
+  color:var(--ink-900);
+  font-weight:500;
+  border-left:3px solid var(--sage);
+  padding-left:5px; /* compensate for border */
+}
+.file-tree .tree-row.active.indent-1 {
+  padding-left:21px;
+}
+.file-tree .caret-blink {
+  display:inline-block;
+  width:2px; height:14px;
+  background:var(--sage-ink);
+  margin-left:6px;
+  vertical-align:middle;
+  animation:blink 0.85s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* editor pane */
+.editor-pane {
+  flex:1;
+  background:#FFFFFF;
+  display:flex; flex-direction:column;
+  min-width:0;
+}
+.tab-bar {
+  background:var(--win-chrome);
+  border-bottom:1px solid var(--win-border);
+  padding:6px 10px 0;
+  display:flex; gap:4px;
+  flex-shrink:0;
+}
+.tab {
+  padding:8px 18px;
+  font-family:"Geist Mono",monospace;
+  font-size:13px;
+  color:var(--ink-500);
+  border:1px solid transparent;
+  border-bottom:none;
+  border-radius:6px 6px 0 0;
+}
+.tab.active {
+  background:#FFFFFF;
+  color:var(--ink-900);
+  border:1px solid var(--win-border);
+  border-bottom:1px solid #FFFFFF;
+  margin-bottom:-1px;
+}
+
+/* code pane */
+.code-pane {
+  flex:1;
+  background:#FFFFFF;
+  color:var(--ink-900);
+  padding:22px 28px 28px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:18px;
+  line-height:1.36;
+  overflow:hidden;
+  position:relative;
+}
+.code-pane .line {
+  white-space:pre;
+  min-height:1.55em;
+}
+.code-pane .line.empty { min-height:1.55em; }
+.code-pane .cm  { color:var(--code-comment); font-style:italic; }
+.code-pane .kw  { color:var(--code-keyword); font-weight:600; }
+.code-pane .fn  { color:var(--code-fn); font-weight:600; }
+.code-pane .st  { color:var(--code-string); }
+.code-pane .pn  { color:var(--code-punct); }
+.code-pane .nm  { color:var(--ink-900); }
+.code-pane .dec { color:var(--clay-ink); }
+.code-pane .caret {
+  display:inline-block;
+  width:2px; height:1em;
+  background:var(--sage-ink);
+  margin-left:2px;
+  vertical-align:text-bottom;
+  animation:blink 0.85s step-end infinite;
+}
+
+/* status bar */
+.ide-statusbar {
+  height:32px;
+  background:var(--win-chrome);
+  color:var(--ink-500);
+  border-top:1px solid var(--win-border);
+  padding:0 18px;
+  display:flex; align-items:center; gap:14px;
+  font-family:"Geist Mono",monospace;
+  font-size:12px;
+  letter-spacing:0.02em;
+}
+.ide-statusbar .ok { color:var(--code-good); }
+.ide-statusbar .sep { color:var(--ink-300); }
+
+/* ===== Side caption rail ===== */
+#side-caption {
+  position:absolute;
+  top:150px; right:72px;
+  width:520px;
+  z-index:30;
+  display:flex; flex-direction:column;
+  gap:14px;
+}
+.cap-chip {
+  background:#FFFFFF;
+  border:1px solid var(--win-border);
+  border-left:3px solid var(--sage);
+  border-radius:8px;
+  padding:14px 18px;
+  font-family:"Geist",sans-serif;
+  font-weight:500;
+  font-size:18px;
+  color:var(--ink-700);
+  line-height:1.45;
+  box-shadow:
+    0 8px 22px rgba(60,55,40,0.10),
+    0 2px 6px rgba(60,55,40,0.05);
+  opacity:0;
+  position:relative;
+}
+.cap-chip .cap-key {
+  display:block;
+  font-family:"Geist Mono",monospace;
+  font-size:12px;
+  letter-spacing:0.10em;
+  color:var(--sage-ink);
+  font-weight:600;
+  margin-bottom:6px;
+  text-transform:uppercase;
+}
+
+/* ===== M6 zoom annotation ===== */
+#annotation {
+  position:absolute;
+  top:560px; right:140px;
+  font-family:"Geist",sans-serif;
+  font-style:italic;
+  font-size:22px;
+  color:var(--sage-ink);
+  background:rgba(238,241,236,0.90);
+  border:1px solid rgba(75,106,85,0.20);
+  padding:10px 16px;
+  border-radius:8px;
+  box-shadow:0 6px 18px rgba(60,55,40,0.10);
+  opacity:0;
+  z-index:35;
+  pointer-events:none;
+}
+
+/* ===== Terminal overlay (the one dark surface) ===== */
+#terminal {
+  position:absolute;
+  bottom:0; left:60px;
+  width:1800px; height:200px;
+  background:rgba(14,18,17,0.98);
+  border:1px solid var(--ink-700);
+  border-bottom:none;
+  border-radius:12px 12px 0 0;
+  padding:18px 26px;
+  transform:translateY(220px);
+  font-family:"JetBrains Mono",monospace;
+  font-size:18px;
+  color:var(--paper-warm);
+  line-height:1.8;
+  z-index:40;
+  box-shadow:0 -10px 30px rgba(14,18,17,0.18);
+}
+#terminal .term-line { display:none; white-space:pre; }
+#terminal .term-line .prompt { color:var(--sage); margin-right:6px; }
+#terminal .term-line .info { color:var(--ink-300); }
+#terminal .term-line .url { color:var(--sage-ink); text-decoration:underline; text-decoration-color:var(--sage); }
+#terminal .term-caret {
+  display:inline-block;
+  width:9px; height:18px;
+  background:var(--paper-warm);
+  vertical-align:middle;
+  margin-left:4px;
+  animation:blink 0.85s step-end infinite;
+}
+
+/* ===== Runtime flow rail ===== */
+.flow-node {
+  min-width:164px;
+  background:rgba(255,255,255,0.96);
+  border:1px solid var(--win-border);
+  border-radius:8px;
+  padding:12px 14px;
+  box-shadow:0 8px 22px rgba(60,55,40,0.10);
+}
+.flow-node .k {
+  display:block;
+  font-family:"Geist Mono",monospace;
+  font-size:11px;
+  letter-spacing:0.10em;
+  color:var(--sage-ink);
+  text-transform:uppercase;
+  font-weight:600;
+  margin-bottom:4px;
+}
+.flow-node .v {
+  display:block;
+  font-size:17px;
+  color:var(--ink-900);
+  font-weight:600;
+}
+.flow-arrow {
+  font-family:"Geist Mono",monospace;
+  font-size:22px;
+  color:var(--sage-ink);
+  opacity:0.72;
+}
+
+/* ===== Swagger pane ===== */
+#swagger-pane {
+  position:absolute;
+  top:60px;
+  left:1920px; /* off to the right initially */
+  width:1200px; height:960px;
+  background:#FFFFFF;
+  border:1px solid var(--win-border);
+  border-radius:14px;
+  overflow:hidden;
+  opacity:0;
+  z-index:45;
+  box-shadow:
+    0 1px 0 #FFFFFF inset,
+    0 22px 56px rgba(60,55,40,0.16),
+    0 4px 12px rgba(60,55,40,0.08);
+}
+#swagger-img {
+  width:100%; height:100%;
+  object-fit:cover; object-position:top;
+  display:none; /* shown only if PNG loads */
+}
+
+/* Inline Swagger facsimile (used when snapshot PNG is not present) */
+#swagger-fallback {
+  width:100%; height:100%;
+  background:#FAFAFA;
+  display:flex; flex-direction:column;
+  font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+  color:#3b4151;
+  overflow:hidden;
+  position:relative;
+}
+.sw-topbar {
+  background:#1B1B1B;
+  height:60px;
+  display:flex; align-items:center;
+  padding:0 22px;
+  color:#FFFFFF;
+  border-bottom:1px solid #000;
+  flex-shrink:0;
+}
+.sw-topbar .sw-logo {
+  font-family:"Helvetica Neue", sans-serif;
+  font-weight:700; font-size:24px;
+  letter-spacing:-0.01em;
+}
+.sw-topbar .sw-search {
+  margin-left:auto;
+  background:#FFFFFF;
+  color:#3b4151;
+  border:1px solid #41444e;
+  border-radius:4px;
+  padding:6px 12px;
+  font-size:13px;
+  width:280px;
+  font-family:"Helvetica Neue", sans-serif;
+}
+.sw-info {
+  padding:18px 24px 14px;
+  border-bottom:1px solid #ebebeb;
+  background:#FFFFFF;
+  flex-shrink:0;
+}
+.sw-info h2 { font-size:24px; font-weight:700; color:#3b4151; }
+.sw-info .sw-ver {
+  display:inline-block;
+  margin-left:10px;
+  background:#7d8492;
+  color:#FFFFFF;
+  font-size:11px; font-weight:700;
+  padding:3px 8px; border-radius:4px;
+  vertical-align:middle;
+}
+.sw-info .sw-base {
+  display:block; margin-top:6px;
+  font-family:monospace; font-size:13px; color:#3b4151;
+}
+.sw-info .sw-desc {
+  margin-top:8px; font-size:14px; color:#3b4151;
+}
+.sw-tags {
+  flex:1; overflow:hidden;
+  padding:14px 24px 24px;
+  background:#FAFAFA;
+}
+.sw-tag {
+  margin-bottom:14px;
+  border:1px solid transparent;
+  border-radius:4px;
+  background:#FFFFFF;
+  opacity:0;
+}
+.sw-tag .sw-tag-head {
+  display:flex; align-items:center;
+  padding:10px 16px;
+  cursor:pointer;
+  border-radius:4px 4px 0 0;
+}
+.sw-tag .sw-tag-name {
+  font-family:"Helvetica Neue", sans-serif;
+  font-size:22px; font-weight:400;
+  color:#3b4151;
+}
+.sw-tag .sw-tag-desc {
+  margin-left:18px;
+  font-size:13px; color:#666;
+  flex:1;
+}
+.sw-tag .sw-tag-arrow {
+  font-size:18px; color:#3b4151;
+  transform:rotate(0deg);
+}
+.sw-tag .sw-endpoints {
+  border-top:1px solid #ebebeb;
+  padding:6px 14px 10px;
+}
+.sw-endpoint {
+  display:flex; align-items:stretch;
+  margin-top:6px;
+  border:1px solid transparent;
+  border-radius:4px;
+  overflow:hidden;
+}
+.sw-endpoint .sw-verb {
+  width:80px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:"Helvetica Neue", sans-serif;
+  font-weight:700; font-size:13px;
+  color:#FFFFFF; letter-spacing:0.04em;
+  text-transform:uppercase;
+}
+.sw-endpoint .sw-path {
+  flex:1; padding:10px 14px;
+  font-family:monospace; font-size:14px;
+  color:#3b4151;
+  display:flex; align-items:center;
+}
+.sw-endpoint .sw-summary {
+  margin-left:auto; font-size:12px;
+  color:#666; padding-right:14px;
+  display:flex; align-items:center;
+  font-family:"Helvetica Neue", sans-serif;
+}
+.sw-verb.get  { background:#61affe; }
+.sw-verb.post { background:#49cc90; }
+.sw-verb.put  { background:#fca130; }
+.sw-verb.del  { background:#f93e3e; }
+
+.sw-tag.tag-auth        { border-color:rgba(73,204,144,0.30); }
+.sw-tag.tag-mydata      { border-color:rgba(97,175,254,0.30); }
+.sw-tag.tag-upload      { border-color:rgba(252,161,48,0.30); }
+.sw-tag.tag-health      { border-color:rgba(73,204,144,0.30); }
+.sw-tag.tag-voice       { border-color:rgba(73,204,144,0.45); }
+
+.sw-endpoint.row-get  { background:rgba(97,175,254,0.08); border-color:rgba(97,175,254,0.30); }
+.sw-endpoint.row-post { background:rgba(73,204,144,0.08); border-color:rgba(73,204,144,0.30); }
+.sw-endpoint.row-put  { background:rgba(252,161,48,0.08); border-color:rgba(252,161,48,0.30); }
+.sw-endpoint.row-del  { background:rgba(249,62,62,0.08); border-color:rgba(249,62,62,0.30); }
+
+/* annotation chip floating over Swagger pane */
+#swagger-annot {
+  position:absolute;
+  left:50%;
+  bottom:60px;
+  transform:translateX(-50%);
+  background:rgba(159,180,160,0.20);
+  border:1px solid var(--sage);
+  border-radius:999px;
+  padding:10px 22px;
+  font-family:"Geist",sans-serif;
+  font-weight:500;
+  font-size:20px;
+  color:var(--ink-900);
+  opacity:0;
+  white-space:nowrap;
+  z-index:48;
+  box-shadow:0 6px 18px rgba(60,55,40,0.12);
+}
+
+/* curtain */
+#curtain {
+  position:absolute; inset:0;
+  background:#0E1211; opacity:0;
+  pointer-events:none; z-index:100;
+}
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+
+  <div class="watermark-bl">CSIT321 CAPSTONE / TECHNICAL OVERVIEW</div>
+  <div class="watermark-tr">REPO / CARE-DATA / 04 / 18</div>
+
+  <div id="scene-purpose">
+    <div class="eyebrow">Scene 04 / Backend runtime map</div>
+    <div class="headline">FastAPI is the traffic controller.</div>
+    <div class="sub">This is not setup. It shows how the live backend routes requests, stores QI data, and starts the voice v2 background jobs.</div>
+  </div>
+
+  <!-- ===== IDE chrome ===== -->
+  <div id="ide" class="ide-frame">
+
+    <div class="ide-titlebar">
+      <span class="lights"><span></span><span></span><span></span></span>
+      <span class="crumb">Backend</span>
+      <span class="dim">/</span>
+      <span class="crumb">app</span>
+      <span class="dim">/</span>
+      <span class="crumb active">main.py</span>
+      <span class="dim" style="margin-left:18px;">/</span>
+      <span class="crumb">CareData</span>
+    </div>
+
+    <div class="ide-body">
+      <aside class="file-tree">
+        <div class="tree-section-title">EXPLORER</div>
+        <div class="tree-row">v Backend/</div>
+        <div class="tree-row indent-1">v app/</div>
+        <div class="tree-row indent-2 active">main.py<span class="caret-blink"></span></div>
+        <div class="tree-row indent-2">> api/auth.py</div>
+        <div class="tree-row indent-2">> api/upload_csv.py</div>
+        <div class="tree-row indent-2">> api/qi.py</div>
+        <div class="tree-row indent-2">> api/gpms.py</div>
+        <div class="tree-row indent-2">> api/voice_v2.py</div>
+        <div class="tree-row indent-2">> services/voice_*.py</div>
+        <div class="tree-row indent-1">> tests/voice/</div>
+        <div class="tree-row indent-1">requirements.txt</div>
+        <div class="tree-row indent-1">.env</div>
+      </aside>
+
+      <main class="editor-pane">
+        <div class="tab-bar">
+          <div class="tab active">main.py</div>
+        </div>
+        <div id="code" class="code-pane"></div>
+      </main>
+    </div>
+
+    <div class="ide-statusbar">
+      <span>Python 3.11</span>
+      <span class="sep">/</span>
+      <span>FastAPI + Uvicorn</span>
+      <span class="sep">/</span>
+      <span class="ok">tests stay offline via conftest</span>
+      <span class="sep">/</span>
+      <span>UTF-8</span>
+      <span class="sep">/</span>
+      <span>LF</span>
+      <span style="margin-left:auto;">main.py</span>
+    </div>
+  </div>
+
+  <!-- Side caption rail -->
+  <div id="side-caption">
+    <!-- chips injected by JS -->
+  </div>
+
+  <!-- M6 zoom annotation -->
+  <div id="annotation">voice_v2 owns the /api/voice/v2 contract: upload, features, score, alerts</div>
+
+  <!-- Terminal overlay -->
+  <div id="terminal">
+    <div class="term-line" id="term-1"><span class="prompt">$</span>python -m uvicorn app.main:app --reload --port 8000</div>
+    <div class="term-line" id="term-2"><span class="info">INFO:</span>     Application startup complete.</div>
+    <div class="term-line" id="term-3"><span class="info">INFO:</span>     Uvicorn running on <span class="url">http://0.0.0.0:8000</span></div>
+    <div class="term-line" id="term-4"><span class="info">#</span>  Without Azure connection string: Tables and Blob fall back to memory for dev/tests</div>
+    <div class="term-line" id="term-5"><span class="info">#</span>  Architecture: React:5173 → FastAPI:8000 → Azure Tables (QI + users) + Blob (audio)</div>
+    <div class="term-line" id="term-6"><span class="info">#</span>  Voice v2: /api/voice/v2/* — public upload, nurse dashboard, nightly CPD scoring</div>
+  </div>
+
+  <!-- Swagger pane -->
+  <div id="swagger-pane">
+    <img id="swagger-img" src="../snapshots/04-swagger-ui.png" alt="">
+    <div id="swagger-fallback">
+      <div class="sw-topbar">
+        <div class="sw-logo">CareData Backend (Azure)</div>
+        <input class="sw-search" type="text" placeholder="Explore" value="Explore" readonly>
+      </div>
+      <div class="sw-info">
+        <h2>CareData Backend (Azure) <span class="sw-ver">0.1.0</span> <span style="font-size:13px; color:#666;">OAS 3.1</span></h2>
+        <span class="sw-base">app.caredata.io/openapi.json</span>
+        <div class="sw-desc">CareData Backend (Azure). FastAPI router map, JWT auth, Azure Tables, Blob audio, voice biomarker v2.</div>
+      </div>
+      <div class="sw-tags">
+
+        <div class="sw-tag tag-auth" data-tag="auth">
+          <div class="sw-tag-head">
+            <div class="sw-tag-name">auth</div>
+            <div class="sw-tag-desc">email verification, JWT issue, Google token exchange, /me</div>
+            <div class="sw-tag-arrow">v</div>
+          </div>
+          <div class="sw-endpoints">
+            <div class="sw-endpoint row-post">
+              <div class="sw-verb post">POST</div>
+              <div class="sw-path">/auth/login</div>
+              <div class="sw-summary">Issue JWT</div>
+            </div>
+            <div class="sw-endpoint row-post">
+              <div class="sw-verb post">POST</div>
+              <div class="sw-path">/auth/google</div>
+              <div class="sw-summary">Google OAuth exchange</div>
+            </div>
+            <div class="sw-endpoint row-get">
+              <div class="sw-verb get">GET</div>
+              <div class="sw-path">/auth/me</div>
+              <div class="sw-summary">Current user</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sw-tag tag-mydata" data-tag="mydata">
+          <div class="sw-tag-head">
+            <div class="sw-tag-name">mydata</div>
+            <div class="sw-tag-desc">saved facility settings and health data for the signed-in user</div>
+            <div class="sw-tag-arrow">v</div>
+          </div>
+          <div class="sw-endpoints">
+            <div class="sw-endpoint row-get">
+              <div class="sw-verb get">GET</div>
+              <div class="sw-path">/mydata</div>
+              <div class="sw-summary">Read stored data</div>
+            </div>
+            <div class="sw-endpoint row-post">
+              <div class="sw-verb post">POST</div>
+              <div class="sw-path">/mydata</div>
+              <div class="sw-summary">Save data</div>
+            </div>
+            <div class="sw-endpoint row-del">
+              <div class="sw-verb get">GET</div>
+              <div class="sw-path">/mydata/recommendations</div>
+              <div class="sw-summary">AI recommendations</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sw-tag tag-upload" data-tag="upload-csv">
+          <div class="sw-tag-head">
+            <div class="sw-tag-name">upload-csv</div>
+            <div class="sw-tag-desc">CSV ingest, pure-Python QI calculations, persisted history</div>
+            <div class="sw-tag-arrow">v</div>
+          </div>
+          <div class="sw-endpoints">
+            <div class="sw-endpoint row-post">
+              <div class="sw-verb post">POST</div>
+              <div class="sw-path">/upload-csv/analyze</div>
+              <div class="sw-summary">Compute 14 QI indicators</div>
+            </div>
+            <div class="sw-endpoint row-get">
+              <div class="sw-verb get">GET</div>
+              <div class="sw-path">/upload-csv/history</div>
+              <div class="sw-summary">Audit trail</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sw-tag tag-upload" data-tag="qi">
+          <div class="sw-tag-head">
+            <div class="sw-tag-name">qi / gpms</div>
+            <div class="sw-tag-desc">dashboard aggregates, residents, GPMS draft records</div>
+            <div class="sw-tag-arrow">v</div>
+          </div>
+          <div class="sw-endpoints">
+            <div class="sw-endpoint row-get">
+              <div class="sw-verb get">GET</div>
+              <div class="sw-path">/api/qi/aggregates</div>
+              <div class="sw-summary">Dashboard + reports</div>
+            </div>
+            <div class="sw-endpoint row-get">
+              <div class="sw-verb get">GET</div>
+              <div class="sw-path">/api/qi/residents?date=...</div>
+              <div class="sw-summary">Resident rows</div>
+            </div>
+            <div class="sw-endpoint row-put">
+              <div class="sw-verb put">PUT</div>
+              <div class="sw-path">/api/gpms/{date}</div>
+              <div class="sw-summary">Save GPMS draft</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sw-tag tag-voice" data-tag="voice/v2" id="sw-tag-voice">
+          <div class="sw-tag-head">
+            <div class="sw-tag-name">voice/v2</div>
+            <div class="sw-tag-desc">public recording flow plus nurse dashboard endpoints</div>
+            <div class="sw-tag-arrow">v</div>
+          </div>
+          <div class="sw-endpoints">
+            <div class="sw-endpoint row-post">
+              <div class="sw-verb post">POST</div>
+              <div class="sw-path">/api/voice/v2/r/{token}</div>
+              <div class="sw-summary">Recording script metadata</div>
+            </div>
+            <div class="sw-endpoint row-post">
+              <div class="sw-verb post">POST</div>
+              <div class="sw-path">/api/voice/v2/upload</div>
+              <div class="sw-summary">Upload audio, enqueue processing</div>
+            </div>
+            <div class="sw-endpoint row-post">
+              <div class="sw-verb post">POST</div>
+              <div class="sw-path">/api/voice/v2/n/residents/{id}/issue-link</div>
+              <div class="sw-summary">Nurse link issue</div>
+            </div>
+            <div class="sw-endpoint row-get">
+              <div class="sw-verb get">GET</div>
+              <div class="sw-path">/api/voice/v2/n/alerts</div>
+              <div class="sw-summary">Open dimension alerts</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="swagger-annot">Public upload, nurse review, background scoring.</div>
+  </div>
+
+  <div class="grain"></div>
+
+  <!-- Curtain -->
+  <div id="curtain"></div>
+
+  <!-- SFX -->
+  <audio id="sfx-type"   src="../audio/typing.mp3"      preload="auto"></audio>
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3"      preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3" preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function() {
+  await document.fonts.ready;
+
+  /* fit to viewport via zoom (Iron Rule: zoom not transform:scale) */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((vw - fw) / 2) + 'px';
+    frame.style.top  = ((vh - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* swagger snapshot fallback: if PNG loads, hide the inline facsimile */
+  const swImg = document.getElementById('swagger-img');
+  const swFallback = document.getElementById('swagger-fallback');
+  swImg.addEventListener('load', () => {
+    if (swImg.naturalWidth > 4) {
+      swImg.style.display = 'block';
+      swFallback.style.display = 'none';
+    }
+  });
+  swImg.addEventListener('error', () => {
+    swImg.style.display = 'none';
+    swFallback.style.display = 'flex';
+  });
+
+  /* refs */
+  const purpose   = document.getElementById('scene-purpose');
+  const ide       = document.getElementById('ide');
+  const code      = document.getElementById('code');
+  const sideCap   = document.getElementById('side-caption');
+  const annot     = document.getElementById('annotation');
+  const term      = document.getElementById('terminal');
+  const term1     = document.getElementById('term-1');
+  const term2     = document.getElementById('term-2');
+  const term3     = document.getElementById('term-3');
+  const term4     = document.getElementById('term-4');
+  const swagger   = document.getElementById('swagger-pane');
+  const swAnnot   = document.getElementById('swagger-annot');
+  const curtain   = document.getElementById('curtain');
+  const sfxType   = document.getElementById('sfx-type');
+  const sfxWhoosh = document.getElementById('sfx-whoosh');
+  const sfxClick  = document.getElementById('sfx-click');
+
+  function playSfx(el) {
+    try { el.currentTime = 0; el.play(); } catch (_) {}
+  }
+  sfxType.volume = 0.24;
+  sfxWhoosh.volume = 0.72;
+  sfxClick.volume = 0.45;
+
+  /* ===== Code snippet — verbatim from compositions/snippets/04-app-main.txt ===== */
+  /* Lines, with syntax-highlighted HTML markup. Each entry is the rendered HTML for one line. */
+  const lines = [
+    /*  0 */ `<span class="cm"># app/main.py  —  CareData backend entrypoint</span>`,
+    /*  1 */ ``,
+    /*  2 */ `<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI`,
+    /*  3 */ `<span class="kw">from</span> fastapi.middleware.cors <span class="kw">import</span> CORSMiddleware`,
+    /*  4 */ `<span class="kw">from</span> app.api <span class="kw">import</span> auth, health_scan, mydata, upload_csv, qi, gpms, voice_v2`,
+    /*  5 */ ``,
+    /*  6 */ `app = <span class="fn">FastAPI</span>(<span class="nm">title</span>=<span class="st">"CareData Backend (Azure)"</span>)`,
+    /*  7 */ `app.<span class="fn">add_middleware</span>(CORSMiddleware, <span class="nm">allow_origins</span>=origins, ...)`,
+    /*  8 */ ``,
+    /*  9 */ `<span class="cm"># ── Six routers, each owns one concern ───────────────────────</span>`,
+    /* 10 */ `app.<span class="fn">include_router</span>(auth.router)          <span class="cm"># /auth  — JWT + Google OAuth</span>`,
+    /* 11 */ `app.<span class="fn">include_router</span>(mydata.router)        <span class="cm"># /mydata — facility settings</span>`,
+    /* 12 */ `app.<span class="fn">include_router</span>(upload_csv.router)    <span class="cm"># /upload-csv — 44 QI indicators</span>`,
+    /* 13 */ `app.<span class="fn">include_router</span>(qi.router)            <span class="cm"># /api/qi — dashboard aggregates</span>`,
+    /* 14 */ `app.<span class="fn">include_router</span>(gpms.router)          <span class="cm"># /api/gpms — GPMS draft forms</span>`,
+    /* 15 */ `app.<span class="fn">include_router</span>(voice_v2.router)      <span class="cm"># /api/voice/v2 — biomarker pipeline</span>`,
+    /* 16 */ ``,
+    /* 17 */ `<span class="cm"># ── Startup: seed demo data + start nightly CPD loop ─────────</span>`,
+    /* 18 */ `<span class="dec">@app.on_event</span>(<span class="st">"startup"</span>)`,
+    /* 19 */ `<span class="kw">async def</span> <span class="fn">startup_event</span>():`,
+    /* 20 */ `    <span class="fn">seed_v2_demo_data</span>()                   <span class="cm"># primes 60-resident demo data</span>`,
+    /* 21 */ `    <span class="kw">if not</span> os.<span class="fn">getenv</span>(<span class="st">"VOICE_DISABLE_CPD_LOOP"</span>):`,
+    /* 22 */ `        asyncio.<span class="fn">create_task</span>(<span class="fn">cpd_loop_forever</span>())  <span class="cm"># nightly drift detection</span>`
+  ];
+
+  /* Pre-create empty line containers so the layout doesn't shift as lines reveal */
+  const lineEls = lines.map((_, i) => {
+    const div = document.createElement('div');
+    div.className = 'line' + (lines[i] === '' ? ' empty' : '');
+    div.dataset.idx = i;
+    div.innerHTML = lines[i];
+    div.style.opacity = lines[i] === '' ? 1 : 0;
+    div.style.transform = 'translateY(8px)';
+    code.appendChild(div);
+    return div;
+  });
+
+  /* Helper: quick code-read reveal. Typing SFX is rare and low volume. */
+  function revealLine(tl, idx, at, { sfx = false } = {}) {
+    if (sfx && lines[idx].trim() !== '') {
+      tl.call(() => playSfx(sfxType), null, at);
+    }
+    const html = lines[idx];
+    if (html === '') {
+      return;
+    }
+    const target = lineEls[idx];
+    tl.to(target, { opacity: 1, y: 0, duration: 0.18, ease: 'sine.out' }, at);
+  }
+
+  /* Slice an HTML string to roughly N visible characters, leaving tags balanced. */
+  function sliceHtmlByVisibleChars(html, n) {
+    let out = '', visible = 0, i = 0;
+    const stack = [];
+    while (i < html.length && visible < n) {
+      if (html[i] === '<') {
+        const close = html.indexOf('>', i);
+        if (close === -1) break;
+        const tag = html.slice(i, close + 1);
+        out += tag;
+        const m = tag.match(/^<\/?([a-zA-Z0-9]+)/);
+        if (m) {
+          if (tag.startsWith('</')) {
+            if (stack.length && stack[stack.length - 1] === m[1]) stack.pop();
+          } else if (!tag.endsWith('/>')) {
+            stack.push(m[1]);
+          }
+        }
+        i = close + 1;
+      } else {
+        out += html[i];
+        visible++;
+        i++;
+      }
+    }
+    /* close any open tags */
+    while (stack.length) out += '</' + stack.pop() + '>';
+    return out;
+  }
+
+  /* ===== Side caption chips ===== */
+  function makeChip(key, body) {
+    const d = document.createElement('div');
+    d.className = 'cap-chip';
+    d.innerHTML = `<span class="cap-key">${key}</span>${body}`;
+    sideCap.appendChild(d);
+    gsap.set(d, { opacity: 0, x: 60 });
+    return d;
+  }
+
+  /* Build all chips up-front; we slide them in/out by absolute time. */
+  const chipTitle  = makeChip('runtime map', 'main.py is the backend entrypoint: logging, CORS, routers, startup work.');
+  const chipCors   = makeChip('cors', 'Local Vite, production domains, and Azure Static Web Apps are explicitly allowed.');
+  const chipAuth   = makeChip('/auth',        'register, verify email, login, Google exchange, and JWT-backed /me.');
+  const chipMy     = makeChip('/mydata',      'facility settings and saved health data, persisted per signed-in user.');
+  const chipUpload = makeChip('/upload-csv',  'CSV upload computes all 14 QI indicators, stores upload history, assessments, aggregates, and GPMS fields.');
+  const chipQiGpms = makeChip('/api/qi + /api/gpms', 'Dashboard and reports read pre-computed aggregates. GPMS saves draft form data, not auto-submission.');
+  const chipVoice  = makeChip('/api/voice/v2', 'public recording token flow, audio upload, nurse dashboard, scores, and alert acknowledgement.');
+  const chipSeed   = makeChip('startup work', 'seed_v2_demo_data() primes the demo. cpd_loop_forever() schedules nightly change-point detection unless disabled for tests.');
+
+  /* Stack chips vertically by toggling display so only one is visible at a time */
+  [chipTitle, chipCors, chipAuth, chipMy, chipUpload, chipQiGpms, chipVoice, chipSeed].forEach(c => {
+    c.style.position = 'absolute';
+    c.style.top = '0';
+    c.style.right = '0';
+    c.style.left = '0';
+  });
+  sideCap.style.height = '260px';
+
+  function showChip(tl, chip, at, holdUntil) {
+    tl.call(() => playSfx(sfxClick), null, at);
+    tl.to(chip, { opacity: 1, x: 0, duration: 0.40, ease: 'cubic-bezier(0.16,0.85,0.30,1)' }, at);
+    tl.to(chip, { opacity: 0, x: 60, duration: 0.30, ease: 'sine.in' }, holdUntil);
+  }
+
+  /* ===== Initial state ===== */
+  gsap.set(purpose, { opacity: 0, y: 18 });
+  gsap.set(ide, { opacity: 0, y: 24 });
+  gsap.set(annot, { opacity: 0, x: 30 });
+  gsap.set(term, { y: 220 });
+  gsap.set(swagger, { opacity: 0, x: 0 });
+  gsap.set(swAnnot, { opacity: 0, y: 12 });
+  gsap.set(curtain, { opacity: 0 });
+
+  const ease1 = 'cubic-bezier(0.16,0.85,0.30,1)';
+  const ease2 = 'cubic-bezier(0.22,0.85,0.30,1)';
+  const tl = gsap.timeline();
+
+  /* Revised scene 04: runtime map, not setup. Fast start, limited typing SFX. */
+  tl.to(purpose, { opacity: 1, y: 0, duration: 0.35, ease: ease1 }, 0.00);
+  tl.to(purpose, { opacity: 0, y: -18, duration: 0.30, ease: 'sine.in' }, 0.95);
+  tl.to(ide, { opacity: 1, y: 0, duration: 0.50, ease: ease1 }, 1.15);
+  tl.call(() => playSfx(sfxType), null, 1.30);
+
+  [
+    [0, 1.35], [2, 1.55], [3, 1.75], [4, 2.00],
+    [6, 2.35], [7, 2.65]
+  ].forEach(([idx, at]) => revealLine(tl, idx, at));
+  showChip(tl, chipTitle, 1.80, 4.70);
+
+  revealLine(tl, 9, 4.50);
+
+  const runtimeRouterLines = [
+    { idx: 10, at: 7.30, chip: chipAuth,   chipAt: 7.75 },
+    { idx: 11, at: 8.10, chip: chipMy,     chipAt: 8.55 },
+    { idx: 12, at: 8.90, chip: chipUpload, chipAt: 9.35 },
+    { idx: 13, at: 9.70, chip: chipQiGpms, chipAt: 10.15 },
+    { idx: 14, at: 10.50, chip: chipQiGpms, chipAt: 10.95 },
+    { idx: 15, at: 11.30, chip: chipVoice, chipAt: 11.75 }
+  ];
+  runtimeRouterLines.forEach((row, i) => {
+    revealLine(tl, row.idx, row.at);
+    const dismissAt = (i < runtimeRouterLines.length - 1)
+      ? runtimeRouterLines[i + 1].chipAt + 0.05
+      : 14.40;
+    showChip(tl, row.chip, row.chipAt, dismissAt);
+  });
+
+  const runtimeVoiceLine = lineEls[15];
+  function zoomRuntimeToLine(targetEl) {
+    const codeRect = code.getBoundingClientRect();
+    const targetRect = targetEl.getBoundingClientRect();
+    const yPct = ((targetRect.top + targetRect.height / 2) - codeRect.top) / codeRect.height * 100;
+    code.style.transformOrigin = `40% ${yPct}%`;
+  }
+  tl.call(() => playSfx(sfxWhoosh), null, 14.50);
+  tl.call(() => zoomRuntimeToLine(runtimeVoiceLine), null, 14.45);
+  tl.to(code, { scale: 1.38, duration: 0.40, ease: ease1 }, 14.50);
+  tl.to(annot, { opacity: 1, x: 0, duration: 0.35, ease: ease1 }, 14.70);
+  tl.call(() => playSfx(sfxWhoosh), null, 16.10);
+  tl.to(code, { scale: 1.0, duration: 0.40, ease: ease1 }, 16.10);
+  tl.to(annot, { opacity: 0, x: 30, duration: 0.30, ease: 'sine.in' }, 16.10);
+
+  revealLine(tl, 17, 16.90);
+  revealLine(tl, 18, 17.25);
+  revealLine(tl, 19, 17.60);
+  revealLine(tl, 20, 17.95);
+  revealLine(tl, 21, 18.30);
+  revealLine(tl, 22, 18.65);
+  showChip(tl, chipSeed, 17.00, 19.60);
+
+  tl.call(() => playSfx(sfxWhoosh), null, 19.70);
+  tl.to(term, { y: 0, duration: 0.30, ease: ease1 }, 19.70);
+  tl.call(() => { term1.style.display = 'block'; playSfx(sfxType); }, null, 20.05);
+  tl.call(() => { term2.style.display = 'block'; }, null, 20.50);
+  tl.call(() => { term3.style.display = 'block'; }, null, 20.95);
+  tl.call(() => { term4.style.display = 'block'; }, null, 21.40);
+  const term5 = document.getElementById('term-5');
+  const term6 = document.getElementById('term-6');
+  tl.call(() => { if(term5) term5.style.display = 'block'; }, null, 21.85);
+  tl.call(() => { if(term6) term6.style.display = 'block'; }, null, 22.30);
+
+  tl.call(() => playSfx(sfxWhoosh), null, 21.90);
+  tl.call(() => playSfx(sfxClick),  null, 21.90);
+  gsap.set(swagger, { left: 1920, opacity: 0 });
+  tl.to(swagger, { left: 640, opacity: 1, duration: 0.60, ease: ease1 }, 21.90);
+  const runtimeTags = document.querySelectorAll('.sw-tag');
+  runtimeTags.forEach((tag, i) => {
+    tl.to(tag, { opacity: 1, duration: 0.35, ease: 'sine.out' }, 22.50 + i * 0.10);
+  });
+
+  const runtimeVoiceTag = document.getElementById('sw-tag-voice');
+  function zoomRuntimeToSwTag() {
+    const swRect = swagger.getBoundingClientRect();
+    const tagRect = runtimeVoiceTag.getBoundingClientRect();
+    const xPct = ((tagRect.left + tagRect.width / 2) - swRect.left) / swRect.width * 100;
+    const yPct = ((tagRect.top + tagRect.height / 2) - swRect.top) / swRect.height * 100;
+    swagger.style.transformOrigin = `${xPct}% ${yPct}%`;
+  }
+  tl.call(() => playSfx(sfxWhoosh), null, 24.90);
+  tl.call(zoomRuntimeToSwTag, null, 24.85);
+  tl.to(swagger, { scale: 1.30, duration: 0.30, ease: ease1 }, 24.90);
+  tl.to(swAnnot, { opacity: 1, y: 0, duration: 0.35, ease: ease1 }, 25.10);
+
+  tl.call(() => playSfx(sfxWhoosh), null, 26.40);
+  tl.to([ide, swagger], {
+    x: '-=3000',
+    filter: 'blur(12px)',
+    opacity: 0,
+    duration: 0.50,
+    ease: 'power3.in'
+  }, 26.40);
+  tl.to([sideCap, annot, term], {
+    opacity: 0, duration: 0.30, ease: 'sine.in'
+  }, 26.40);
+  tl.call(() => {}, null, 26.90);
+})();
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

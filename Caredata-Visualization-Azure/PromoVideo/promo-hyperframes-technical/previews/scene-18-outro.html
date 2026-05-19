@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en" data-preview="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 18 - Outro (preview) | CareData Technical Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; overflow:hidden; }
+
+:root {
+  --paper:      #FBF8F2;
+  --cream:      #F6F2EB;
+  --ink-900:    #1F2622;
+  --ink-700:    #3D4743;
+  --ink-500:    #6B7570;
+  --ink-300:    #A4ABA4;
+  --sage:       #9FB4A0;
+  --sage-ink:   #4B6A55;
+  --sage-tint:  #EEF1EC;
+  --clay:       #C8B89B;
+  --clay-ink:   #836B47;
+  --dusty-blue: #A6B6C4;
+}
+
+body {
+  background: var(--cream);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.frame-wrap {
+  position:relative;
+  width:1920px; height:1080px;
+  overflow:hidden;
+  flex-shrink:0;
+}
+
+/* Cream paper stage - light theme differentiates from dark marketing outro */
+.stage {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(159,180,160,0.09), transparent 55%),
+    radial-gradient(circle at 80% 70%, rgba(166,182,196,0.07), transparent 55%),
+    linear-gradient(160deg, #FBF8F2 0%, #F6F2EB 55%, #F1ECDF 100%);
+}
+
+/* Subtle grain on paper */
+.grain {
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.30;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+
+/* Watermarks */
+.watermark-bl {
+  position:absolute; bottom:36px; left:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.20em; text-transform:uppercase;
+  color:var(--ink-500); opacity:0.45; z-index:60;
+  pointer-events:none;
+}
+.watermark-tr {
+  position:absolute; top:42px; right:64px;
+  font-family:"Geist Mono",monospace; font-weight:500;
+  font-size:11px; letter-spacing:0.18em; text-transform:uppercase;
+  color:var(--ink-500); opacity:0.45; z-index:60;
+  pointer-events:none;
+}
+
+/* ===== Trust stamps ===== */
+#stamps-wrap {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:0;
+  opacity:0;
+}
+
+.trust-row {
+  display:flex; align-items:center; justify-content:center; gap:52px;
+}
+
+.trust-stamp {
+  opacity:0;
+  padding:28px 48px;
+  border:2px solid var(--sage);
+  border-radius:16px;
+  background:rgba(255,255,255,0.80);
+  backdrop-filter:blur(8px);
+  box-shadow:0 8px 28px rgba(31,38,34,0.08), 0 1px 0 rgba(255,255,255,0.9) inset;
+}
+.trust-stamp .label {
+  font-family:"Geist",sans-serif;
+  font-weight:600;
+  font-size:32px;
+  letter-spacing:0.02em;
+  color:var(--ink-900);
+}
+.trust-stamp .sub {
+  margin-top:6px;
+  font-family:"Geist Mono",monospace;
+  font-size:12px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--sage-ink);
+}
+
+#stamps-sub {
+  position:absolute;
+  bottom:340px;
+  left:50%; transform:translateX(-50%);
+  opacity:0;
+  font-family:"Geist",sans-serif;
+  font-weight:400;
+  font-size:22px;
+  letter-spacing:0.01em;
+  color:var(--ink-500);
+  white-space:nowrap;
+}
+
+/* ===== Final lockup ===== */
+#lockup {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  gap:40px;
+  opacity:0;
+}
+
+#lockup-mark {
+  width:120px; height:120px;
+  border-radius:26px;
+  position:relative;
+  flex-shrink:0;
+  opacity:0;
+  overflow:visible;
+  filter:
+    drop-shadow(0 20px 48px rgba(0,0,0,0.18))
+    drop-shadow(0 0 0 1px rgba(255,255,255,0.4));
+}
+#lockup-mark svg { width:100%; height:100%; display:block; }
+
+#lockup-text {
+  display:flex; flex-direction:column; gap:2px;
+  opacity:0;
+}
+#lockup-text .wordmark {
+  font-family:"Geist",sans-serif;
+  font-weight:600;
+  font-size:88px;
+  letter-spacing:-0.018em;
+  line-height:1;
+  color:var(--ink-900);
+}
+#lockup-text .tag {
+  font-family:"Geist",sans-serif;
+  font-weight:400;
+  font-size:22px;
+  color:var(--ink-500);
+  letter-spacing:0.01em;
+  margin-top:2px;
+}
+#lockup-text .mono-tag {
+  margin-top:14px;
+  font-family:"Geist Mono",monospace;
+  font-size:14px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--sage-ink);
+  opacity:0.80;
+}
+
+/* Thin sage rule between stamps and lockup phases */
+#sage-rule {
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:0px; height:1px;
+  background:var(--sage);
+  opacity:0;
+}
+
+/* "End." caption */
+#end-mark {
+  position:absolute;
+  bottom:132px; left:50%;
+  transform:translateX(-50%);
+  opacity:0;
+  font-family:"Instrument Serif",serif;
+  font-style:italic;
+  font-weight:400;
+  font-size:28px;
+  color:var(--ink-300);
+  white-space:nowrap;
+  z-index:10;
+}
+
+/* Footer attribution */
+#footer-attrib {
+  position:absolute;
+  bottom:44px; left:50%;
+  transform:translateX(-50%);
+  opacity:0;
+  font-family:"Geist Mono",monospace;
+  font-size:11px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--ink-500);
+  white-space:nowrap;
+  z-index:10;
+}
+</style>
+</head>
+
+<body>
+<div class="frame-wrap" id="frame">
+  <div class="stage"></div>
+  <div class="grain"></div>
+
+  <div class="watermark-bl">CSIT321 Capstone / Technical Overview</div>
+  <div class="watermark-tr">Scene 18 / 18</div>
+
+  <!-- Trust stamps phase -->
+  <div id="stamps-wrap">
+    <div class="trust-row">
+      <div class="trust-stamp" id="stamp-fhir" style="transform:rotate(-0.8deg)">
+        <div class="label">FHIR R4</div>
+        <div class="sub">Interoperability standard</div>
+      </div>
+      <div class="trust-stamp" id="stamp-privacy" style="transform:rotate(0.5deg)">
+        <div class="label">Privacy Act 1988</div>
+        <div class="sub">Australian data protection</div>
+      </div>
+      <div class="trust-stamp" id="stamp-gpms" style="transform:rotate(-0.4deg)">
+        <div class="label">GPMS-format export</div>
+        <div class="sub">Government-standard reporting</div>
+      </div>
+    </div>
+  </div>
+  <div id="stamps-sub">Designed for the regulator's language.</div>
+
+  <!-- Thin sage rule (revealed between phases) -->
+  <div id="sage-rule"></div>
+
+  <!-- Final lockup -->
+  <div id="lockup">
+    <div id="lockup-mark">
+      <svg viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="brandGrad18" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="oklch(0.72 0.06 150)"/>
+            <stop offset="100%" stop-color="oklch(0.78 0.05 180)"/>
+          </linearGradient>
+        </defs>
+        <rect width="100" height="100" rx="22" fill="url(#brandGrad18)"/>
+        <path
+          d="M 22,55.6 L 32.08,55.6 L 37.68,44.4 L 45.52,64 L 53.36,33.2 L 61.2,55.6 L 78,55.6"
+          fill="none"
+          stroke="#FBF8F2"
+          stroke-width="4.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div id="lockup-text">
+      <div class="wordmark">CareData</div>
+      <div class="tag">Health Analytics Portal</div>
+      <div class="mono-tag">CSIT321 Capstone &middot; University of Wollongong</div>
+    </div>
+  </div>
+
+  <div id="end-mark">End.</div>
+  <div id="footer-attrib">Bayside Aged Care &middot; Q1 2026 &middot; Technical Overview</div>
+
+  <audio id="sfx-whoosh" src="../audio/whoosh.mp3" preload="auto"></audio>
+  <audio id="sfx-click"  src="../audio/mouse_click.mp3" preload="auto"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(async function () {
+  await document.fonts.ready;
+
+  /* Fit to viewport using zoom (not transform: scale) */
+  const frame = document.getElementById('frame');
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    frame.style.zoom = s;
+    const fw = 1920 * s, fh = 1080 * s;
+    frame.style.position = 'fixed';
+    frame.style.left = ((window.innerWidth - fw) / 2) + 'px';
+    frame.style.top  = ((window.innerHeight - fh) / 2) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  /* Element refs */
+  const stampsWrap  = document.getElementById('stamps-wrap');
+  const stampFhir   = document.getElementById('stamp-fhir');
+  const stampPrivacy= document.getElementById('stamp-privacy');
+  const stampGpms   = document.getElementById('stamp-gpms');
+  const stampsSub   = document.getElementById('stamps-sub');
+  const sageRule    = document.getElementById('sage-rule');
+  const lockup      = document.getElementById('lockup');
+  const lockupMark  = document.getElementById('lockup-mark');
+  const lockupText  = document.getElementById('lockup-text');
+  const endMark     = document.getElementById('end-mark');
+  const footerAttrib= document.getElementById('footer-attrib');
+  const sfxWhoosh   = document.getElementById('sfx-whoosh');
+  const sfxClick    = document.getElementById('sfx-click');
+
+  function playSfx(el, vol) {
+    try { el.volume = vol ?? 1.0; el.currentTime = 0; el.play(); } catch(_) {}
+  }
+
+  const ease = 'cubic-bezier(0.16,0.85,0.30,1)';
+
+  /* ---- Initial state (everything invisible) ---- */
+  gsap.set([stampsWrap, stampFhir, stampPrivacy, stampGpms, stampsSub,
+            sageRule, lockup, lockupMark, lockupText, endMark, footerAttrib],
+    { opacity: 0 });
+  gsap.set([stampFhir, stampPrivacy, stampGpms], { y: 18, scale: 0.96 });
+  gsap.set(lockupMark, { scale: 0.92 });
+  gsap.set(lockupText, { x: 12 });
+
+  /* ================================================================
+     TIMELINE  ~11 seconds, 120 BPM (0.5 s/beat), editorial documentary
+     ================================================================
+
+     Phase A  0.0 - 7.0s   Trust stamps on cream stage
+     Phase B  7.0 - 11.5s  Stamps dissolve, lockup fades in, hold
+
+     Beat map:
+       b0   0.0   Stage visible (already cream)
+       b1   0.5   Stamps wrap fades in, FHIR R4 lands
+       b3   1.5   Privacy Act lands
+       b5   2.5   GPMS-format lands
+       b7   3.5   "Designed for..." subtitle fades
+       b11  5.5   (Hold stamps visible)
+       b13  6.5   Stamps + sub begin to dissolve
+       b14  7.0   Lockup cross-fades in
+       b16  8.0   Lock mark finishes, text slides in
+       b19  9.5   "End." fades
+       b20  10.0  Footer fades
+       b22  11.0  Hold
+  ================================================================ */
+
+  const tl = gsap.timeline();
+
+  /* Phase A: stamps appear one at a time, calm scale-fade (not bounce) */
+  tl.to(stampsWrap, { opacity: 1, duration: 0.40, ease: 'sine.out' }, 0.5);
+
+  tl.call(() => playSfx(sfxWhoosh, 0.40), null, 0.5);
+  tl.to(stampFhir,   { opacity: 1, y: 0, scale: 1, duration: 0.55, ease }, 0.5);
+
+  tl.call(() => playSfx(sfxWhoosh, 0.38), null, 1.5);
+  tl.to(stampPrivacy,{ opacity: 1, y: 0, scale: 1, duration: 0.55, ease }, 1.5);
+
+  tl.call(() => playSfx(sfxWhoosh, 0.36), null, 2.5);
+  tl.to(stampGpms,   { opacity: 1, y: 0, scale: 1, duration: 0.55, ease }, 2.5);
+
+  /* Subtitle fades in gently below the stamps */
+  tl.to(stampsSub, { opacity: 1, duration: 0.60, ease: 'sine.out' }, 3.5);
+
+  /* Hold stamps visible at full opacity through beat 13 */
+
+  /* Phase B: stamps + sub dissolve out; lockup cross-fades in */
+  tl.to([stampsWrap, stampsSub], { opacity: 0, duration: 0.70, ease: 'sine.in' }, 6.5);
+
+  /* Lockup fades in: mark first, then text slides in 0.3s later */
+  tl.call(() => playSfx(sfxWhoosh, 0.28), null, 7.0);
+  tl.to(lockup,    { opacity: 1, duration: 0.40, ease: 'sine.out' }, 7.0);
+  tl.to(lockupMark,{ opacity: 1, scale: 1.0, duration: 0.55, ease }, 7.0);
+  tl.to(lockupText,{ opacity: 1, x: 0,      duration: 0.55, ease }, 7.3);
+
+  /* "End." */
+  tl.to(endMark,     { opacity: 1, duration: 0.50, ease: 'sine.out' }, 9.0);
+
+  /* Footer */
+  tl.to(footerAttrib,{ opacity: 1, duration: 0.50, ease: 'sine.out' }, 9.5);
+
+  /* Hold at 11.5s - no curtain, no fade to black */
+})();
+</script>
+<script src="_nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,1160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Scene 12, Nurse Dashboard (preview) | CareData promo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+:root{
+  --cream:#F6F2EB;
+  --paper:#FBF8F2;
+  --line:#E1DBCC;
+  --line-soft:#EAE3D2;
+  --ink-900:#1F2622;
+  --ink-700:#3D4743;
+  --ink-500:#6B7570;
+  --ink-300:#A4ABA4;
+  --sage:#9FB4A0;
+  --sage-bright:#B8D1B5;
+  --sage-ink:#4B6A55;
+  --sage-tint:#EEF1EC;
+  --clay:#C8B89B;
+  --clay-bright:#D4C4A8;
+  --clay-ink:#836B47;
+  --clay-deep:#9C7B4F;
+  --clay-tint:rgba(200,184,155,0.16);
+  --dusty-blue:#A6B6C4;
+  --status-bad:#B86F62;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ height:100%; }
+body{
+  background:#0E1211;
+  color:var(--cream);
+  font-family:"Geist",ui-sans-serif,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.frame-wrap{
+  position:relative;
+  width:1920px; height:1080px;
+  transform-origin:0 0;     /* 4K canvas-fill */
+  transform-style:preserve-3d;
+}
+.stage{
+  position:absolute; inset:0;
+  perspective:1800px;
+  perspective-origin:50% 45%;
+  transform-style:preserve-3d;
+  background:
+    radial-gradient(70vw 60vw at 50% 50%, rgba(159,180,160,0.10), transparent 65%),
+    radial-gradient(45vw 50vw at 8% 0%, rgba(200,184,155,0.05), transparent 60%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.05), transparent 65%),
+    linear-gradient(145deg, #0E1211 0%, #1A1F1B 50%, #0F1311 100%);
+  overflow:hidden;
+}
+.grain{
+  position:absolute; inset:0;
+  pointer-events:none; opacity:0.05;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size:420px 420px;
+}
+.footer{
+  position:absolute; bottom:38px; left:60px;
+  font-size:11px; letter-spacing:0.18em;
+  color:var(--cream); opacity:0.45;
+  z-index:60;
+}
+
+/* === Browser mockup === */
+.browser{
+  position:absolute;
+  top:5%; left:7%;
+  width:86%; height:90%;
+  background:var(--cream);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:
+    0 60px 120px rgba(0,0,0,0.55),
+    0 30px 60px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.04);
+  display:flex; flex-direction:column;
+  z-index:10;
+  opacity:0;
+  transform-style:preserve-3d;
+  will-change:transform, opacity;
+}
+
+/* Browser chrome (compact) */
+.chrome{
+  background:#E5E0D2;
+  flex-shrink:0;
+  border-bottom:1px solid rgba(31,38,34,0.08);
+  padding:8px 14px;
+  display:flex; align-items:center; gap:14px;
+}
+.traffic{
+  display:flex; gap:7px;
+}
+.traffic span{
+  width:11px; height:11px; border-radius:50%;
+}
+.traffic .red{ background:#FF6058; }
+.traffic .yel{ background:#FFBE2E; }
+.traffic .grn{ background:#28C941; }
+.address-bar{
+  flex:1;
+  height:28px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:999px;
+  display:flex; align-items:center;
+  padding:0 14px;
+  font-family:"Geist Mono", monospace;
+  font-size:12px;
+  color:var(--ink-700);
+  gap:8px;
+  max-width:520px;
+}
+.address-bar .lock{ color:var(--sage-ink); display:flex; }
+.address-bar .lock svg{ width:11px; height:11px; }
+.address-bar .domain{ color:var(--ink-500); }
+.address-bar .path{ color:var(--ink-900); font-weight:500; }
+
+/* === App shell === */
+.app{
+  flex:1;
+  display:flex; flex-direction:column;
+  background:var(--paper);
+  overflow:hidden;
+}
+
+/* Top nav */
+.app-nav{
+  height:54px; flex-shrink:0;
+  background:#fff;
+  border-bottom:1px solid rgba(31,38,34,0.07);
+  display:flex; align-items:center;
+  padding:0 28px;
+  gap:34px;
+}
+.brand{
+  display:flex; align-items:center; gap:9px;
+  flex-shrink:0;
+}
+.mark{
+  width:26px; height:26px;
+  background:linear-gradient(145deg, oklch(0.72 0.06 150) 0%, oklch(0.78 0.05 180) 100%);
+  border-radius:6px; position:relative;
+}
+.mark svg{ position:absolute; inset:5px; }
+.brand .name{
+  font-size:14px; font-weight:600; color:var(--ink-900);
+  letter-spacing:-0.01em;
+}
+.app-nav-links{
+  display:flex; gap:26px;
+  font-size:13px; color:var(--ink-500);
+  font-weight:500;
+}
+.app-nav-links a{
+  color:inherit; text-decoration:none;
+  padding:5px 2px;
+  position:relative;
+}
+.app-nav-links a.active{
+  color:var(--ink-900); font-weight:600;
+}
+.app-nav-links a.active::after{
+  content:''; position:absolute; left:0; right:0; bottom:-13px;
+  height:2px; background:var(--primary, #FF7B00);
+}
+.app-nav-right{
+  margin-left:auto;
+  display:flex; align-items:center; gap:14px;
+  font-size:12px; color:var(--ink-500);
+}
+.avatar{
+  width:30px; height:30px; border-radius:50%;
+  background:linear-gradient(145deg, var(--sage), var(--dusty-blue));
+  color:#fff; font-size:11px; font-weight:600;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* Page body */
+.page{
+  flex:1;
+  padding:24px 36px 28px;
+  overflow:hidden;
+  display:flex; flex-direction:column;
+  gap:18px;
+}
+.page-head{
+  display:flex; justify-content:space-between; align-items:flex-end;
+}
+.page-eye{
+  font-size:11px;
+  text-transform:uppercase; letter-spacing:0.16em;
+  color:var(--ink-500); font-weight:600;
+  margin-bottom:5px;
+}
+.page-h1{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:38px;
+  letter-spacing:-0.02em;
+  color:var(--ink-900);
+  line-height:1;
+}
+.page-sub{
+  margin-top:7px;
+  font-size:13px;
+  color:var(--ink-500);
+  max-width:520px;
+}
+.page-head-r{
+  display:flex; gap:9px;
+}
+.btn-secondary{
+  border:1px solid var(--line);
+  background:#fff;
+  padding:8px 14px;
+  border-radius:8px;
+  font-family:inherit; font-size:12px; font-weight:600;
+  color:var(--ink-700);
+  display:flex; align-items:center; gap:7px;
+}
+.btn-primary{
+  border:none;
+  background:var(--ink-900);
+  color:var(--cream);
+  padding:8px 16px;
+  border-radius:8px;
+  font-family:inherit; font-size:12px; font-weight:600;
+  display:flex; align-items:center; gap:7px;
+}
+
+/* Tab strip */
+.tabs{
+  display:flex; gap:6px;
+  border-bottom:1px solid var(--line);
+  flex-shrink:0;
+}
+.tab{
+  padding:10px 16px 11px;
+  font-size:13px;
+  color:var(--ink-500);
+  font-weight:500;
+  position:relative;
+  display:inline-flex; align-items:center; gap:8px;
+}
+.tab .pill{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:20px; height:18px;
+  padding:0 6px;
+  border-radius:999px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  font-family:"Geist Mono", monospace;
+  font-size:10.5px; font-weight:600;
+  color:var(--ink-700);
+}
+.tab.active{
+  color:var(--ink-900);
+  font-weight:600;
+}
+.tab.active::after{
+  content:''; position:absolute; left:8px; right:8px; bottom:-1px;
+  height:2px; background:var(--ink-900);
+}
+.tab.watch .pill{ background:var(--clay-tint); border-color:rgba(200,184,155,0.55); color:var(--clay-deep); }
+.tab.review .pill{ background:rgba(184,111,98,0.10); border-color:rgba(184,111,98,0.35); color:var(--status-bad); }
+
+/* KPI row */
+.kpis{
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:14px;
+  flex-shrink:0;
+}
+.kpi{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:14px 18px 16px;
+  position:relative;
+  opacity:0;
+  will-change:transform, opacity;
+}
+.kpi-eye{
+  font-size:10.5px;
+  text-transform:uppercase; letter-spacing:0.14em;
+  color:var(--ink-500); font-weight:600;
+  margin-bottom:6px;
+}
+.kpi-num{
+  font-family:"Instrument Serif", serif;
+  font-weight:400;
+  font-size:46px;
+  line-height:0.95;
+  letter-spacing:-0.02em;
+  color:var(--ink-900);
+  font-variant-numeric:tabular-nums;
+  display:flex; align-items:baseline; gap:8px;
+}
+.kpi-num .of{
+  font-size:16px;
+  font-style:italic;
+  color:var(--ink-300);
+}
+.kpi-foot{
+  margin-top:6px;
+  display:flex; align-items:center; gap:8px;
+  font-size:11px;
+  color:var(--ink-500);
+}
+.kpi-foot .dot{ width:6px; height:6px; border-radius:50%; background:var(--sage); }
+.kpi.warn .kpi-num{ color:var(--clay-deep); }
+.kpi.warn .kpi-foot .dot{ background:var(--clay-deep); }
+.kpi.bad .kpi-num{ color:var(--status-bad); }
+.kpi.bad .kpi-foot .dot{ background:var(--status-bad); }
+
+/* Main grid: residents table + alerts feed */
+.main-grid{
+  flex:1;
+  display:grid;
+  grid-template-columns:1fr 360px;
+  gap:18px;
+  min-height:0;
+}
+
+.table-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+.table-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:13px 18px;
+  border-bottom:1px solid var(--line);
+}
+.table-head .h{
+  font-size:13px;
+  font-weight:600;
+  color:var(--ink-900);
+}
+.table-head .filter-pill{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:11px;
+  color:var(--ink-500);
+  background:var(--paper);
+  border:1px solid var(--line);
+  padding:5px 10px;
+  border-radius:999px;
+  font-family:"Geist Mono", monospace;
+}
+
+.tbl{
+  width:100%;
+  flex:1;
+  font-size:12.5px;
+  border-collapse:collapse;
+  table-layout:fixed;
+}
+.tbl thead{
+  background:var(--paper);
+}
+.tbl th{
+  text-align:left;
+  padding:9px 16px;
+  font-size:10.5px;
+  text-transform:uppercase; letter-spacing:0.12em;
+  color:var(--ink-500); font-weight:600;
+  border-bottom:1px solid var(--line);
+}
+.tbl td{
+  padding:11px 16px;
+  border-bottom:1px solid var(--line-soft);
+  vertical-align:middle;
+  color:var(--ink-700);
+}
+.tbl tr.row{
+  opacity:0;
+  transform:translateY(8px);
+  will-change:transform, opacity;
+  transition:background-color 0.36s ease;
+}
+.tbl .resident{
+  display:flex; align-items:center; gap:10px;
+}
+.tbl .resident .av{
+  width:26px; height:26px;
+  border-radius:50%;
+  background:linear-gradient(145deg, var(--sage-tint), var(--sage));
+  color:var(--sage-ink);
+  font-size:10px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+  letter-spacing:-0.02em;
+}
+.tbl .resident .id{
+  font-family:"Geist Mono", monospace;
+  font-size:11.5px;
+  color:var(--ink-900); font-weight:600;
+}
+.tbl .resident .room{
+  font-size:11px; color:var(--ink-500);
+  margin-top:1px;
+}
+.tbl td.score{
+  font-family:"Instrument Serif", serif;
+  font-size:22px;
+  letter-spacing:-0.01em;
+  color:var(--ink-900);
+  font-variant-numeric:tabular-nums;
+}
+.tbl .delta{
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:"Geist Mono", monospace;
+  font-size:11px; font-weight:600;
+}
+.tbl .delta.down{ color:var(--status-bad); }
+.tbl .delta.flat{ color:var(--ink-500); }
+.tbl .delta.up{   color:var(--sage-ink); }
+.tbl .pill-status{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:10.5px;
+  font-weight:600;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+}
+.tbl .pill-status .dot{ width:6px; height:6px; border-radius:50%; }
+.tbl .pill-status.baseline{
+  background:var(--sage-tint); color:var(--sage-ink); border:1px solid rgba(159,180,160,0.45);
+}
+.tbl .pill-status.baseline .dot{ background:var(--sage-ink); }
+.tbl .pill-status.watch{
+  background:var(--clay-tint); color:var(--clay-deep); border:1px solid rgba(200,184,155,0.55);
+}
+.tbl .pill-status.watch .dot{ background:var(--clay-deep); }
+.tbl .pill-status.review{
+  background:rgba(184,111,98,0.10); color:var(--status-bad); border:1px solid rgba(184,111,98,0.35);
+}
+.tbl .pill-status.review .dot{ background:var(--status-bad); }
+
+/* Highlighted Watch row (DR-0148) */
+.tbl tr.row.watch{
+  background:var(--clay-tint);
+}
+.tbl tr.row.watch .resident .id{ color:var(--clay-deep); }
+.tbl tr.row.watch td.score{ color:var(--clay-deep); }
+.tbl tr.row.watch .resident .av{
+  background:linear-gradient(145deg, var(--clay-bright), var(--clay));
+  color:#fff;
+}
+
+/* Alerts feed (right rail) */
+.feed{
+  display:flex; flex-direction:column;
+  gap:14px;
+  opacity:0;
+  will-change:transform, opacity;
+}
+.feed-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 4px 4px;
+}
+.feed-head .h{
+  font-size:14px; font-weight:600;
+  color:var(--ink-900);
+}
+.feed-head .count{
+  font-family:"Geist Mono", monospace;
+  font-size:11px; color:var(--clay-deep); font-weight:600;
+  padding:2px 8px;
+  background:var(--clay-tint);
+  border-radius:999px;
+  border:1px solid rgba(200,184,155,0.55);
+}
+
+.alert{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:14px 16px 16px;
+  position:relative;
+}
+.alert .meta{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:8px;
+}
+.alert .meta .pill-status{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:3px 9px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+}
+.alert .meta .pill-status .dot{
+  width:6px; height:6px; border-radius:50%;
+}
+.alert .meta .when{
+  font-family:"Geist Mono", monospace;
+  font-size:10.5px; color:var(--ink-500);
+}
+.alert .who{
+  display:flex; align-items:center; gap:9px;
+  margin-bottom:9px;
+}
+.alert .who .av{
+  width:28px; height:28px;
+  border-radius:50%;
+  font-size:10.5px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+}
+.alert .who .id{
+  font-family:"Geist Mono", monospace;
+  font-size:12.5px; color:var(--ink-900); font-weight:600;
+}
+.alert .who .room{
+  font-size:11px; color:var(--ink-500);
+  margin-top:1px;
+}
+.alert .body-row{
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:10px;
+  margin-bottom:9px;
+}
+.alert .stat{
+  font-family:"Instrument Serif", serif;
+  font-size:30px;
+  line-height:1;
+  letter-spacing:-0.02em;
+  color:var(--ink-900);
+  font-variant-numeric:tabular-nums;
+}
+.alert .stat .of{
+  font-style:italic;
+  font-size:14px;
+  color:var(--ink-300);
+}
+.alert .text{
+  font-size:12px;
+  color:var(--ink-700);
+  line-height:1.45;
+}
+.alert .actions{
+  display:flex; gap:6px;
+}
+.alert .actions button{
+  appearance:none;
+  border:1px solid var(--line);
+  background:#fff;
+  padding:5px 10px;
+  border-radius:7px;
+  font-family:inherit;
+  font-size:11px; font-weight:500;
+  color:var(--ink-700);
+}
+.alert .actions button.primary{
+  background:var(--ink-900); color:var(--cream); border-color:var(--ink-900);
+}
+
+/* Watch alert specifics */
+.alert.watch{
+  background:linear-gradient(180deg, var(--clay-tint) 0%, #fff 60%);
+  border-color:rgba(200,184,155,0.55);
+}
+.alert.watch .meta .pill-status{
+  background:var(--clay-tint); color:var(--clay-deep);
+  border:1px solid rgba(200,184,155,0.55);
+}
+.alert.watch .meta .pill-status .dot{ background:var(--clay-deep); }
+.alert.watch .who .av{
+  background:linear-gradient(145deg, var(--clay-bright), var(--clay));
+  color:#fff;
+}
+.alert.watch .stat{ color:var(--clay-deep); }
+.alert.watch::before{
+  content:''; position:absolute; left:0; top:14px; bottom:14px; width:3px;
+  background:var(--clay-deep);
+  border-radius:0 3px 3px 0;
+}
+
+/* Pulse on the watch dot (M23) */
+.alert.watch .meta .pill-status .dot{
+  box-shadow:0 0 0 0 rgba(200,184,155,0.7);
+  animation:sev-pulse 1.6s ease-in-out infinite;
+}
+@keyframes sev-pulse{
+  0%, 100%{ transform:scale(1); box-shadow:0 0 0 0 rgba(200,184,155,0.7); }
+  50%{ transform:scale(1.25); box-shadow:0 0 0 8px rgba(200,184,155,0); }
+}
+
+/* Review alert */
+.alert.review .meta .pill-status{
+  background:rgba(184,111,98,0.10); color:var(--status-bad);
+  border:1px solid rgba(184,111,98,0.35);
+}
+.alert.review .meta .pill-status .dot{ background:var(--status-bad); }
+.alert.review .who .av{
+  background:linear-gradient(145deg, #E8B6AE, var(--status-bad));
+  color:#fff;
+}
+
+/* Hud */
+/* End-of-scene transition — soft luminous bloom bridging into Scene 13's
+   cream paper. NO hard ring border — that produced a visible green outline
+   on expansion. Uses radial-gradient circles + heavy blur for true glow. */
+
+/* Outer soft halo — large, sage-tinted. Reduced blur (60px → 24px) and dropped
+   mix-blend-mode entirely below — at 4K those filters are GPU-bombs that crash
+   the headless Chromium render. Radial-gradient already has soft falloff so the
+   visual loss is minimal. */
+.bloom-outer{
+  position:absolute;
+  top:50%; left:50%;
+  width:1600px; height:1600px;
+  margin-left:-800px; margin-top:-800px;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:80;
+  opacity:0;
+  transform:scale(0.04);
+  background:radial-gradient(circle,
+    rgba(184,209,181,0.85) 0%,
+    rgba(184,209,181,0.55) 30%,
+    rgba(184,209,181,0.20) 55%,
+    rgba(184,209,181,0.00) 80%);
+  filter:blur(24px);
+  will-change:transform, opacity;
+}
+
+/* Inner bright core — punches the eye, feels like a real bloom */
+.bloom-core{
+  position:absolute;
+  top:50%; left:50%;
+  width:900px; height:900px;
+  margin-left:-450px; margin-top:-450px;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:81;
+  opacity:0;
+  transform:scale(0.06);
+  background:radial-gradient(circle,
+    rgba(255,253,245,1.0) 0%,
+    rgba(246,242,235,0.95) 20%,
+    rgba(184,209,181,0.55) 45%,
+    rgba(246,242,235,0.0) 75%);
+  filter:blur(12px);
+  will-change:transform, opacity;
+}
+
+/* Cream overlay — crossfades the dark stage to Scene 13's paper background.
+   Sits ABOVE the dashboard so the wash dominates the final frames cleanly. */
+.cream-fade{
+  position:absolute; inset:0;
+  pointer-events:none;
+  z-index:82;
+  opacity:0;
+  background:
+    radial-gradient(60vw 50vw at 50% 30%, rgba(255,255,255,0.55), transparent 70%),
+    radial-gradient(40vw 50vw at 8% 100%, rgba(200,184,155,0.18), transparent 65%),
+    radial-gradient(40vw 50vw at 96% 100%, rgba(166,182,196,0.18), transparent 65%),
+    linear-gradient(160deg, #FBF8F2 0%, #F2EBDA 60%, #E9E1CC 100%);
+  will-change:opacity;
+}
+
+.hud{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  background:rgba(15,15,17,0.85);
+  color:#EAE3D2; font-family:"Geist Mono", monospace; font-size:11px;
+  padding:8px 14px; border-radius:999px;
+  display:flex; gap:14px; align-items:center; z-index:100;
+  letter-spacing:0.06em;
+}
+.hud button{
+  appearance:none; border:1px solid #555; background:transparent; color:#EAE3D2;
+  font-family:inherit; font-size:11px; padding:3px 10px; border-radius:999px; cursor:pointer;
+}
+.hud button:hover{ background:#222; }
+.hud .timer{ font-variant-numeric:tabular-nums; min-width:46px; }
+</style>
+</head>
+<body>
+
+<div class="frame-wrap" id="frame">
+  <div class="stage">
+    <div class="grain"></div>
+    <div class="footer">CSIT321&nbsp;CAPSTONE</div>
+
+    <!-- End-of-scene transition: luminous bloom + cream wash bridging into Scene 13 -->
+    <div class="bloom-outer" id="bloomOuter"></div>
+    <div class="bloom-core"  id="bloomCore"></div>
+    <div class="cream-fade"  id="creamFade"></div>
+
+    <div class="browser" id="browser">
+      <div class="chrome">
+        <div class="traffic"><span class="red"></span><span class="yel"></span><span class="grn"></span></div>
+        <div class="address-bar">
+          <span class="lock">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="7" width="8" height="6" rx="1"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>
+          </span>
+          <span class="domain">caredata.com/</span><span class="path">voice/dashboard</span>
+        </div>
+      </div>
+
+      <div class="app">
+        <!-- Top nav -->
+        <div class="app-nav">
+          <div class="brand">
+            <span class="mark">
+              <svg viewBox="0 0 18 18"><path d="M0,11 L3,11 L5,7 L7.5,14 L10,3 L12.5,11 L18,11" fill="none" stroke="#FBF8F2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="name">CareData</span>
+          </div>
+          <nav class="app-nav-links">
+            <a>Dashboard</a>
+            <a>Data Entry</a>
+            <a>QI Reports</a>
+            <a>Benchmarking</a>
+            <a class="active">Voice screening</a>
+            <a>Settings</a>
+          </nav>
+          <div class="app-nav-right">
+            <span>Bayside Aged Care · Wollongong</span>
+            <span class="avatar">PD</span>
+          </div>
+        </div>
+
+        <!-- Page body -->
+        <div class="page">
+          <div class="page-head">
+            <div>
+              <div class="page-eye">Voice screening · 8 May 2026</div>
+              <div class="page-h1">Today's check-ins.</div>
+              <div class="page-sub">Daily snapshots from each resident's recording, sorted by clinical concern.</div>
+            </div>
+            <div class="page-head-r">
+              <button class="btn-secondary">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6h10M5 10h6M7 14h2"/></svg>
+                Filter
+              </button>
+              <button class="btn-primary">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3v10M3 8h10"/></svg>
+                New recording link
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tabs">
+            <div class="tab active">All residents <span class="pill">60</span></div>
+            <div class="tab review">Review alerts <span class="pill">1</span></div>
+            <div class="tab watch">Watch alerts <span class="pill">3</span></div>
+            <div class="tab">Needs baseline <span class="pill">2</span></div>
+          </div>
+
+          <!-- KPIs -->
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-eye">Residents</div>
+              <div class="kpi-num"><span data-counter data-end="60">0</span></div>
+              <div class="kpi-foot"><span class="dot"></span>Enrolled in voice screening</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-eye">Baselined</div>
+              <div class="kpi-num"><span data-counter data-end="58">0</span><span class="of">/ 60</span></div>
+              <div class="kpi-foot"><span class="dot"></span>14-day baseline established</div>
+            </div>
+            <div class="kpi warn">
+              <div class="kpi-eye">Watch alerts</div>
+              <div class="kpi-num"><span data-counter data-end="3">0</span></div>
+              <div class="kpi-foot"><span class="dot"></span>Drift on ≥ 2 dimensions</div>
+            </div>
+            <div class="kpi bad">
+              <div class="kpi-eye">Review alerts</div>
+              <div class="kpi-num"><span data-counter data-end="1">0</span></div>
+              <div class="kpi-foot"><span class="dot"></span>Awaiting clinical review</div>
+            </div>
+          </div>
+
+          <!-- Main grid: residents table + alerts feed -->
+          <div class="main-grid">
+            <div class="table-card">
+              <div class="table-head">
+                <div class="h">Residents · today's check-in</div>
+                <div class="filter-pill">
+                  <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 5h10M5 8h6M7 11h2"/></svg>
+                  Sorted by concern, descending
+                </div>
+              </div>
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th style="width:28%;">Resident</th>
+                    <th style="width:14%;">Last check-in</th>
+                    <th style="width:13%;">Concern score</th>
+                    <th style="width:14%;">Trend</th>
+                    <th style="width:14%;">Drift on</th>
+                    <th style="width:17%;">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="rowsBody">
+                  <tr class="row review">
+                    <td>
+                      <div class="resident">
+                        <div class="av" style="background:linear-gradient(145deg,#E8B6AE,#B86F62); color:#fff;">DR</div>
+                        <div>
+                          <div class="id">DR-0091</div>
+                          <div class="room">Room 04A</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>54 s ago</td>
+                    <td class="score" style="color:var(--status-bad);">52</td>
+                    <td><span class="delta down">↓ −22</span></td>
+                    <td>3 of 5 dimensions</td>
+                    <td><span class="pill-status review"><span class="dot"></span>Review</span></td>
+                  </tr>
+                  <tr class="row watch" id="rowWatch">
+                    <td>
+                      <div class="resident">
+                        <div class="av">DR</div>
+                        <div>
+                          <div class="id">DR-0148</div>
+                          <div class="room">Room 12B</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>1 min ago</td>
+                    <td class="score">68</td>
+                    <td><span class="delta down">↓ −12</span></td>
+                    <td>2 of 5 dimensions</td>
+                    <td><span class="pill-status watch"><span class="dot"></span>Watch</span></td>
+                  </tr>
+                  <tr class="row">
+                    <td>
+                      <div class="resident">
+                        <div class="av">DR</div>
+                        <div>
+                          <div class="id">DR-0203</div>
+                          <div class="room">Room 06A</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>4 min ago</td>
+                    <td class="score">82</td>
+                    <td><span class="delta flat">→ ±2</span></td>
+                    <td>0 of 5</td>
+                    <td><span class="pill-status baseline"><span class="dot"></span>Baseline</span></td>
+                  </tr>
+                  <tr class="row">
+                    <td>
+                      <div class="resident">
+                        <div class="av">DR</div>
+                        <div>
+                          <div class="id">DR-0157</div>
+                          <div class="room">Room 09C</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>6 min ago</td>
+                    <td class="score">79</td>
+                    <td><span class="delta up">↑ +3</span></td>
+                    <td>0 of 5</td>
+                    <td><span class="pill-status baseline"><span class="dot"></span>Baseline</span></td>
+                  </tr>
+                  <tr class="row">
+                    <td>
+                      <div class="resident">
+                        <div class="av">DR</div>
+                        <div>
+                          <div class="id">DR-0211</div>
+                          <div class="room">Room 11B</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>12 min ago</td>
+                    <td class="score">86</td>
+                    <td><span class="delta flat">→ ±1</span></td>
+                    <td>0 of 5</td>
+                    <td><span class="pill-status baseline"><span class="dot"></span>Baseline</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Right rail alerts feed -->
+            <div class="feed" id="feed">
+              <div class="feed-head">
+                <div class="h">Today's alerts</div>
+                <div class="count">4 active</div>
+              </div>
+
+              <div class="alert watch" id="alertWatch">
+                <div class="meta">
+                  <span class="pill-status"><span class="dot"></span>Watch</span>
+                  <span class="when">1 min ago</span>
+                </div>
+                <div class="who">
+                  <div class="av">DR</div>
+                  <div>
+                    <div class="id">DR-0148</div>
+                    <div class="room">Room 12B</div>
+                  </div>
+                </div>
+                <div class="body-row">
+                  <div class="stat"><span data-counter data-end="68">0</span><span class="of">/ 100</span></div>
+                  <div class="text">
+                    Phonatory and linguistic dimensions<br/>drifted ≥ 10 points from baseline.
+                  </div>
+                </div>
+                <div class="actions">
+                  <button class="primary">Open chart</button>
+                  <button>Acknowledge</button>
+                </div>
+              </div>
+
+              <div class="alert review">
+                <div class="meta">
+                  <span class="pill-status"><span class="dot"></span>Review</span>
+                  <span class="when">54 s ago</span>
+                </div>
+                <div class="who">
+                  <div class="av">DR</div>
+                  <div>
+                    <div class="id">DR-0091</div>
+                    <div class="room">Room 04A</div>
+                  </div>
+                </div>
+                <div class="body-row">
+                  <div class="stat" style="color:var(--status-bad);">52<span class="of">/ 100</span></div>
+                  <div class="text">
+                    3 dimensions drifted, awaiting<br/>clinical review.
+                  </div>
+                </div>
+                <div class="actions">
+                  <button class="primary">Open chart</button>
+                  <button>Assign</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hud">
+  <button id="replay">REPLAY</button>
+  <span class="timer" id="timer">0.00s</span>
+  <span style="opacity:.6">Scene 12 / Nurse Dashboard</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+function fit(){
+  const wrap = document.getElementById('frame');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  /* zoom not transform: scale — natively rasterise at projected resolution; prevents 4K pixel break on 3D-rotated descendants. See ~/.claude/skills/hyperframes-video/rendering.md */
+  wrap.style.zoom = s;
+}
+fit();
+window.addEventListener('resize', fit);
+
+let tl;
+
+function build(){
+  const counters = Array.from(document.querySelectorAll('[data-counter]'));
+  const rows = Array.from(document.querySelectorAll('#rowsBody .row'));
+  const kpis = Array.from(document.querySelectorAll('.kpi'));
+
+  /* Initial state — M6 step-zoom OUT: browser starts zoomed-in
+     on the highlighted Watch row, then pulls back to reveal the dashboard.
+     transformOrigin is set to where DR-0148's row lives within the browser. */
+  gsap.set('#browser', {
+    opacity: 0,
+    scale: 2.4,
+    rotationX: 4,
+    z: 80,
+    y: 0,
+    transformOrigin: '38% 64%',
+    filter: 'blur(3px)'
+  });
+  gsap.set(kpis, { opacity: 0, y: 16 });
+  gsap.set(rows, { opacity: 0, y: 8 });
+  gsap.set('#feed', { opacity: 0, x: 220 });
+  gsap.set('#bloomOuter', { opacity: 0, scale: 0.04 });
+  gsap.set('#bloomCore',  { opacity: 0, scale: 0.06 });
+  gsap.set('#creamFade',  { opacity: 0 });
+  counters.forEach(c => c.textContent = '0');
+
+  tl = gsap.timeline({
+    paused: true,
+    onUpdate: () => {
+      document.getElementById('timer').textContent = tl.time().toFixed(2) + 's';
+    }
+  });
+
+  /* ============================================================
+     TOTAL ~5.6s — beat-locked at 120 BPM
+        b1  0.00      M6 step-zoom OUT — browser pulls back from the
+                      Watch row to the full dashboard
+        b2  0.55      KPI counters cascade + roll up
+        b3  1.30      Residents table rows cascade in (M19)
+        b5  2.30      Right-rail VoiceAlertsFeed slides in (M11)
+        b6  2.85      Watch dot pulse (M23) is already on via CSS,
+                      attention via subtle highlight ramp on watch row
+        b8  3.50–5.60 Hold for read
+     ============================================================ */
+
+  /* === Phase A (b1): Step-zoom OUT === */
+  tl.to('#browser', {
+    opacity: 1,
+    scale: 1.0,
+    rotationX: 0,
+    z: 0,
+    filter: 'blur(0px)',
+    duration: 0.85, ease: 'cubic-bezier(.16,.85,.30,1)'
+  }, 0);
+
+  /* === Phase B (b2): KPI counters cascade + roll up === */
+  tl.to(kpis, {
+    opacity: 1, y: 0,
+    duration: 0.40, stagger: 0.08, ease: 'power3.out'
+  }, 0.55);
+
+  counters
+    .filter(c => c.closest('.kpi'))
+    .forEach((c, i) => {
+      const end = parseFloat(c.dataset.end);
+      const obj = { v: 0 };
+      tl.to(obj, {
+        v: end,
+        duration: 0.55, ease: 'power2.out',
+        onUpdate: () => { c.textContent = Math.round(obj.v); }
+      }, 0.65 + i * 0.08);
+    });
+
+  /* === Phase C (b3): Residents table rows cascade (M19) === */
+  tl.to(rows, {
+    opacity: 1, y: 0,
+    duration: 0.36, stagger: 0.09, ease: 'power3.out'
+  }, 1.30);
+
+  /* === Phase D (b5): Right-rail alerts feed slides in (M11) === */
+  tl.to('#feed', {
+    opacity: 1,
+    x: 0,
+    duration: 0.55, ease: 'cubic-bezier(.22,.85,.30,1)'
+  }, 2.30);
+
+  /* The big "68" counter inside the Watch alert rolls up alongside */
+  const alertCounter = document.querySelector('#alertWatch [data-counter]');
+  if (alertCounter){
+    const obj = { v: 0 };
+    tl.to(obj, {
+      v: parseFloat(alertCounter.dataset.end),
+      duration: 0.60, ease: 'power2.out',
+      onUpdate: () => { alertCounter.textContent = Math.round(obj.v); }
+    }, 2.45);
+  }
+
+  /* === Phase E (b6): subtle attention pull on the Watch row ===
+     A brief intensified clay tint ramp so the eye registers the highlight. */
+  tl.fromTo('#rowWatch',
+    { backgroundColor: 'rgba(200,184,155,0.05)' },
+    { backgroundColor: 'rgba(200,184,155,0.28)', duration: 0.45, ease: 'sine.inOut' },
+    2.85
+  );
+
+  /* === Phase F (b8): Brief hold (≈0.7s, not the previous 1.4s) === */
+
+  /* === Phase G (b10): Luminous bloom bridge into Scene 13 ===
+     Two stacked radial-gradient bloom layers (no hard borders) ramp UP
+     opacity fast then expand outward, simulating a real glow ripple.
+     Cream paper wash crossfades behind. Dashboard fades cleanly out. */
+  const bridgeT = 4.00;
+
+  /* Inner bright core — punches in fast (eye-catch), expands outward */
+  tl.to('#bloomCore', {
+    opacity: 1,
+    duration: 0.20, ease: 'power2.out'
+  }, bridgeT);
+  tl.to('#bloomCore', {
+    scale: 3.2,
+    duration: 1.05, ease: 'power2.out'
+  }, bridgeT);
+  tl.to('#bloomCore', {
+    opacity: 0.7,
+    duration: 0.55, ease: 'power2.inOut'
+  }, bridgeT + 0.55);
+
+  /* Outer halo — slower, larger, sage-tinted, very blurred */
+  tl.to('#bloomOuter', {
+    opacity: 1,
+    duration: 0.30, ease: 'power2.out'
+  }, bridgeT + 0.05);
+  tl.to('#bloomOuter', {
+    scale: 1.7,
+    duration: 1.00, ease: 'power2.out'
+  }, bridgeT + 0.05);
+
+  /* Cream wash takes over — replaces the dark stage with paper bg */
+  tl.to('#creamFade', {
+    opacity: 1,
+    duration: 0.85, ease: 'power2.inOut'
+  }, bridgeT + 0.30);
+
+  /* Dashboard softens out cleanly — opacity + tiny scale */
+  tl.to('#browser', {
+    opacity: 0.0,
+    scale: 1.06,
+    duration: 0.70, ease: 'power2.in'
+  }, bridgeT + 0.30);
+}
+
+function play(){
+  if (!tl) build();
+  tl.restart();
+  tl.play();
+}
+
+document.getElementById('replay').addEventListener('click', play);
+
+// IFRAME-AWARE BOOTSTRAP — patched by shared/patch-scenes.mjs
+window.addEventListener('load', () => {
+  const start = () => { build(); if (window.parent === window) play(); };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+  } else {
+    start();
+  }
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === 'play'  && typeof play === 'function')                          play();
+  if (t === 'pause' && typeof tl   !== 'undefined' && tl)                    tl.pause();
+  if (t === 'reset' && typeof tl   !== 'undefined' && tl) { tl.seek(0); tl.pause(); }
+});
+</script>
+</body>
+</html>

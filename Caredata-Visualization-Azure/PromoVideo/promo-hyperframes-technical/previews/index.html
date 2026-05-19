@@ -1,0 +1,1291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CareData Technical Film — 8-Min Presentation Structure</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --paper:        #FBF8F2;
+  --paper-warm:   #F6F2EB;
+  --paper-edge:   #ECE7DC;
+  --ink-900:      #1F2622;
+  --ink-700:      #3D4743;
+  --ink-500:      #6B7570;
+  --ink-300:      #A4ABA4;
+  --sage:         #9FB4A0;
+  --sage-ink:     #4B6A55;
+  --sage-tint:    #EEF1EC;
+  --clay:         #C8B89B;
+  --clay-ink:     #836B47;
+  --dusty-blue:   #A6B6C4;
+
+  --win-bg:       #FFFFFF;
+  --win-border:   #E2DCCC;
+  --win-chrome:   #F2EEE4;
+}
+
+html { font-size: 16px; }
+
+body {
+  min-height: 100vh;
+  font-family: "Geist", system-ui, sans-serif;
+  color: var(--ink-900);
+  background:
+    radial-gradient(60vw 50vw at 50% 0%, rgba(159,180,160,0.10), transparent 70%),
+    radial-gradient(50vw 50vw at 8% 100%, rgba(200,184,155,0.08), transparent 65%),
+    radial-gradient(45vw 45vw at 100% 30%, rgba(166,182,196,0.06), transparent 65%),
+    linear-gradient(180deg, #FBF8F2 0%, #F6F2EB 60%, #F1ECDF 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+  z-index: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.74 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' /></svg>");
+  background-size: 420px 420px;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 64px 56px 96px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Geist Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--sage-ink);
+  margin-bottom: 18px;
+}
+.eyebrow .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--sage);
+}
+
+h1 {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-size: 64px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink-900);
+  margin-bottom: 12px;
+}
+h1 em {
+  font-style: italic;
+  color: var(--sage-ink);
+}
+
+.lede {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink-700);
+  max-width: 780px;
+  margin-bottom: 18px;
+}
+
+.meta-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  font-family: "Geist Mono", monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--ink-500);
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--paper-edge);
+}
+.meta-row span { display: inline-flex; align-items: center; gap: 8px; }
+.meta-row b { color: var(--ink-900); font-weight: 600; }
+
+.note {
+  margin: 8px 0 48px;
+  padding: 14px 18px;
+  background: var(--sage-tint);
+  border-left: 3px solid var(--sage);
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-700);
+}
+.note b { color: var(--sage-ink); }
+.note code {
+  background: rgba(75,106,85,0.12);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: "Geist Mono", monospace;
+  font-size: 12px;
+  color: var(--sage-ink);
+}
+
+/* ===== Section blocks ===== */
+.act {
+  margin-bottom: 56px;
+}
+.act-head {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--paper-edge);
+}
+.act-head .act-tag {
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--sage-ink);
+  background: var(--sage-tint);
+  border: 1px solid rgba(75,106,85,0.18);
+  border-radius: 4px;
+  padding: 3px 9px;
+}
+.act-head h2 {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-size: 36px;
+  letter-spacing: -0.015em;
+  color: var(--ink-900);
+}
+.act-head h2 em { font-style: italic; color: var(--sage-ink); }
+.act-head .act-meta {
+  margin-left: auto;
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-500);
+  letter-spacing: 0.08em;
+}
+.act-head .act-meta b { color: var(--ink-900); font-weight: 600; }
+
+/* ===== Grid of scene cards ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--win-bg);
+  border: 1px solid var(--win-border);
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.18s cubic-bezier(.22,.85,.30,1),
+              box-shadow 0.18s cubic-bezier(.22,.85,.30,1),
+              border-color 0.18s ease;
+  box-shadow:
+    0 1px 0 #FFFFFF inset,
+    0 8px 22px rgba(60,55,40,0.06),
+    0 2px 4px rgba(60,55,40,0.04);
+  cursor: pointer;
+}
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--sage);
+  box-shadow:
+    0 1px 0 #FFFFFF inset,
+    0 14px 32px rgba(60,55,40,0.12),
+    0 3px 8px rgba(75,106,85,0.10);
+}
+.card:focus-visible {
+  outline: 2px solid var(--sage-ink);
+  outline-offset: 3px;
+}
+
+/* Deleted / honesty-cut style */
+.card.deleted {
+  background: rgba(232,225,210,0.55);
+  border-style: dashed;
+  border-color: var(--clay);
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.7;
+}
+.card.deleted:hover { transform: none; box-shadow: none; }
+.card.deleted .card-chrome .lights span { background: #CFC5B0; }
+.card.deleted .scene-tag,
+.card.deleted .card-cta { color: var(--clay-ink); }
+.card.deleted .scene-tag .num {
+  background: rgba(200,184,155,0.20);
+  border-color: rgba(131,107,71,0.25);
+  color: var(--clay-ink);
+}
+.card.deleted .card-cta::after { content: "✕"; }
+
+/* Pending (new scene, not yet built) style */
+.card.pending {
+  background: var(--sage-tint);
+  border-style: dashed;
+  border-color: var(--sage);
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.85;
+}
+.card.pending:hover { transform: none; box-shadow: none; }
+.card.pending .card-chrome { background: rgba(159,180,160,0.15); border-color: rgba(159,180,160,0.35); }
+.card.pending .card-chrome .lights span { background: rgba(159,180,160,0.55); }
+.card.pending .scene-tag { color: var(--sage-ink); }
+.card.pending .scene-tag .num {
+  background: rgba(159,180,160,0.25);
+  border-color: rgba(75,106,85,0.22);
+  color: var(--sage-ink);
+}
+.card.pending .card-cta { color: var(--sage-ink); }
+.card.pending .card-cta::after { content: "◌ to build"; }
+
+/* Repurpose badge */
+.badge-repurpose {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "Geist Mono", monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--clay-ink);
+  background: rgba(200,184,155,0.20);
+  border: 1px solid rgba(131,107,71,0.22);
+  border-radius: 4px;
+  padding: 2px 7px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.card-chrome {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 30px;
+  background: var(--win-chrome);
+  border-bottom: 1px solid var(--win-border);
+  padding: 0 14px;
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-500);
+  letter-spacing: 0.04em;
+}
+.card-chrome .lights { display: inline-flex; gap: 5px; }
+.card-chrome .lights span {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #D9D3C4;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+.card-chrome .lights span:nth-child(1) { background: #D8B0A4; }
+.card-chrome .lights span:nth-child(2) { background: #D9CDA4; }
+.card-chrome .lights span:nth-child(3) { background: #B0C5B2; }
+.card-chrome .filename { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.card-body {
+  padding: 22px 22px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.scene-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--sage-ink);
+  margin-bottom: 12px;
+}
+.scene-tag .num {
+  background: var(--sage-tint);
+  border: 1px solid rgba(75,106,85,0.18);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--sage-ink);
+}
+
+.card-title {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--ink-900);
+  margin-bottom: 8px;
+}
+.card-title em { font-style: italic; color: var(--sage-ink); }
+
+.card-desc {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-700);
+  margin-bottom: 16px;
+  flex: 1;
+}
+
+.card-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-500);
+  letter-spacing: 0.04em;
+  padding-top: 14px;
+  border-top: 1px dashed var(--paper-edge);
+}
+.card-meta b { color: var(--ink-900); font-weight: 600; }
+
+.card-cta {
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Geist", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sage-ink);
+  letter-spacing: 0.01em;
+}
+.card-cta::after {
+  content: "→";
+  display: inline-block;
+  transition: transform 0.18s ease;
+}
+.card:hover .card-cta::after { transform: translateX(4px); }
+
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--paper-edge);
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  color: var(--ink-500);
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+footer .right { color: var(--ink-300); }
+
+/* ===== Tab navigation ===== */
+.tab-nav {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 40px;
+  border-bottom: 2px solid var(--paper-edge);
+  padding-bottom: 0;
+}
+.tab-btn {
+  padding: 10px 22px 12px;
+  border: none;
+  background: none;
+  font-family: "Geist", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-500);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.tab-btn:hover { color: var(--ink-900); }
+.tab-btn.active {
+  color: var(--sage-ink);
+  border-bottom-color: var(--sage-ink);
+  font-weight: 600;
+}
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ===== Voice-Over Scripts ===== */
+.vo-list { display: flex; flex-direction: column; gap: 12px; }
+
+.vo-card {
+  background: var(--win-bg);
+  border: 1px solid var(--win-border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(60,55,40,0.05);
+}
+.vo-card.pending-scene {
+  background: var(--sage-tint);
+  border-style: dashed;
+  border-color: var(--sage);
+  opacity: 0.85;
+}
+
+.vo-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  cursor: pointer;
+  user-select: none;
+}
+.vo-head:hover { background: var(--sage-tint); }
+
+.vo-num {
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  color: var(--sage-ink);
+  background: var(--sage-tint);
+  border: 1px solid rgba(75,106,85,0.18);
+  border-radius: 4px;
+  padding: 2px 8px;
+  flex-shrink: 0;
+  min-width: 42px;
+  text-align: center;
+}
+.pending-scene .vo-num {
+  color: var(--sage-ink);
+  background: rgba(159,180,160,0.25);
+  border-color: rgba(75,106,85,0.22);
+}
+
+.vo-title-row { flex: 1; }
+.vo-title-row .vo-scene-title {
+  font-family: "Geist", sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink-900);
+}
+.vo-title-row .vo-meta {
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  color: var(--ink-500);
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+.vo-chevron {
+  font-size: 13px;
+  color: var(--ink-300);
+  transition: transform 0.18s ease;
+  flex-shrink: 0;
+}
+.vo-card.open .vo-chevron { transform: rotate(90deg); }
+
+.vo-body {
+  display: none;
+  padding: 0 20px 20px 78px;
+  font-family: "Geist", sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-700);
+  border-top: 1px solid var(--paper-edge);
+  padding-top: 16px;
+}
+.vo-card.open .vo-body { display: block; }
+
+.vo-body em {
+  font-style: italic;
+  color: var(--sage-ink);
+}
+.vo-body code {
+  background: rgba(75,106,85,0.10);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: "Geist Mono", monospace;
+  font-size: 13px;
+  color: var(--sage-ink);
+}
+
+.vo-note {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--sage-tint);
+  border-left: 3px solid var(--sage);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--ink-700);
+  line-height: 1.55;
+}
+.vo-note b { color: var(--sage-ink); }
+
+@media (max-width: 720px) {
+  main { padding: 40px 24px 64px; }
+  h1 { font-size: 44px; }
+  .meta-row { gap: 14px; }
+  .act-head { flex-wrap: wrap; }
+  .act-head .act-meta { margin-left: 0; }
+}
+</style>
+</head>
+
+<body>
+<main>
+
+  <div class="eyebrow"><span class="dot"></span>CSIT321 CAPSTONE / TECHNICAL FILM / REVISED STRUCTURE</div>
+
+  <h1>CareData, <em>8 minutes</em>.</h1>
+
+  <p class="lede">
+    Eighteen scene slots across nine presentation sections. Restructured from the three-act 10:06 technical film to match the revised 8-minute capstone presentation outline. All scenes are now built and link to previews below.
+  </p>
+
+  <div class="meta-row">
+    <span>Target runtime <b>~8:00</b></span>
+    <span>Scenes <b>18</b> slots</span>
+    <span>Existing <b>11</b> repurposed</span>
+    <span>New built <b>7</b></span>
+    <span>Sections <b>9</b></span>
+    <span>Stack <b>Hyperframes + GSAP + Three.js</b></span>
+  </div>
+
+  <div class="note">
+    <b>Restructure note (2026-05-17).</b> Original three-act structure (Architecture / Data Pipeline / Voice Biomarker) replaced with nine presentation sections to match the revised capstone outline: Introduction, Problem, Target Market, Marketing Mix, Architecture + Technologies, Development Process, System Demo, Code Walkthrough, Conclusion. Act-break transition scenes (07, 13) and deep-dives (05 auth-storage, 16 feature-vector, 17 quality-gates) are dropped. Seven new scenes are pending build: <code>02</code> team intro, <code>03</code> problem, <code>04</code> target market, <code>05</code> marketing mix, <code>08</code> dev process, <code>09</code> login demo, <code>12</code> QI reports.
+  </div>
+
+  <!-- ===== Tab navigation ===== -->
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="scenes">Scene Previews</button>
+    <button class="tab-btn" data-tab="voiceover">Voice-Over Scripts</button>
+  </div>
+
+  <!-- ===== VOICE-OVER TAB ===== -->
+  <div id="tab-voiceover" class="tab-pane">
+    <div class="vo-list">
+
+      <!-- S1: Introduction -->
+
+      <div class="vo-card">
+        <div class="vo-head">
+          <span class="vo-num">01</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Hook + Brand Reveal</div>
+            <div class="vo-meta">0:00 · 15 s · Introduction</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "Welcome to CareData, the clinical governance platform for aged care quality indicators. Built by Group W08 as a CSIT321 capstone at the University of Wollongong."
+          <div class="vo-note"><b>Visual:</b> Two-stack IDE split-screen cuts to brand lockup. FastAPI left, React right, sage divider, EKG mark resolves. Condense existing scenes 01 and 02 into a single 15-second open.</div>
+        </div>
+      </div>
+
+      <div class="vo-card pending-scene">
+        <div class="vo-head">
+          <span class="vo-num">02</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Team Introduction — Group W08</div>
+            <div class="vo-meta">0:15 · 15 s · Introduction</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "[Team member names, roles]. Twelve weeks, agile sprints, one shared repository."
+          <div class="vo-note"><b>Visual (NEW):</b> Name cards cascade in on cream paper. Five slots for team members. Sage accent bars. University of Wollongong crest small in corner. Placeholder names to be confirmed before build.</div>
+        </div>
+      </div>
+
+      <!-- S2: Problem -->
+
+      <div class="vo-card pending-scene">
+        <div class="vo-head">
+          <span class="vo-num">03</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">The Problem -- Scattered QI Records</div>
+            <div class="vo-meta">0:30 · 30 s · Problem and Client Needs</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "Aged care facilities submit quarterly Quality Indicator data to the Department of Health and Aged Care. Today that means broken spreadsheet formulas, 13-section GPMS paper forms, manual cross-referencing, and missed deadlines. Directors of Nursing spend hours on data entry instead of care."
+          <div class="vo-note"><b>Visual (NEW):</b> Repurpose the paper-chaos fragment layout from scene 01-hook-tech -- Excel snippet with #VALUE! error, GPMS PDF Section 1, audit clipboard, email reminder from DoH. Dark stage, fragments settle in orbit. Copy replaces the rhetorical question with a direct problem statement.</div>
+        </div>
+      </div>
+
+      <!-- S3: Target Market -->
+
+      <div class="vo-card pending-scene">
+        <div class="vo-head">
+          <span class="vo-num">04</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Target Market + System Advantages</div>
+            <div class="vo-meta">1:00 · 30 s · Target Market</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "Primary users: Directors of Nursing, quality managers, and ACQSC auditors in Australian residential aged care. CareData delivers three advantages: dashboard analytics across 14 AIHW QI categories, one-click CSV upload with validation, and government-format reporting from any browser."
+          <div class="vo-note"><b>Visual (NEW):</b> Three user-type cards slide in from left (DON, Quality Manager, ACQSC Auditor) with role badges. Then three advantage pills pop in below: Dashboard Analytics, CSV Upload, Government-Format Reports. Cream paper background.</div>
+        </div>
+      </div>
+
+      <!-- S4: Marketing Mix -->
+
+      <div class="vo-card pending-scene">
+        <div class="vo-head">
+          <span class="vo-num">05</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Marketing Mix -- The 7Ps</div>
+            <div class="vo-meta">1:30 · 30 s · Marketing Mix</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "Product: web-based clinical governance platform. Price: SaaS subscription, facility-volume pricing. Place: cloud-hosted, browser-native, no install. Promotion: AIHW-aligned positioning and peer benchmarking. People: clinical governance specialists. Process: one upload, automated indicators. Physical evidence: GPMS-format PDF reports."
+          <div class="vo-note"><b>Visual (NEW):</b> Seven P-cards cascade onto a sage grid, one per beat. Each card: large letter P, label, one-line description. Fast stagger, no dwell. Ink-900 background, cream cards.</div>
+        </div>
+      </div>
+
+      <!-- S5: Architecture -->
+
+      <div class="vo-card">
+        <div class="vo-head">
+          <span class="vo-num">06</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">System Diagram -- How the Bytes Move</div>
+            <div class="vo-meta">2:00 · 20 s · Architecture + Technologies</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "React calls FastAPI over HTTPS. The backend writes structured data to Azure Tables and audio to Azure Blob. If the connection string is absent, the system falls back to in-memory -- same 200 OK either way."
+          <div class="vo-note"><b>Visual:</b> Condensed from scene 03. Five nodes on dot-grid paper: Frontend, Backend, Azure Tables, Azure Blob, In-Memory fallback. Trace dot rides happy path then fallback in 20 s. Cut the extended voice-path detail.</div>
+        </div>
+      </div>
+
+      <div class="vo-card">
+        <div class="vo-head">
+          <span class="vo-num">07</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Tech Stack -- FastAPI, React, Azure</div>
+            <div class="vo-meta">2:20 · 40 s · Architecture + Technologies</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "Backend: FastAPI on port 8000 with six routers -- auth, voice version 2, health scan, my data, upload CSV, and users. JWT authentication via python-jose. Frontend: React plus Vite on port 5173, styled with Tailwind CSS using seven design tokens. Azure Table Storage for structured records, Azure Blob for audio."
+          <div class="vo-note"><b>Visual:</b> Based on scene 04 backend tour and scene 06 frontend tour merged and condensed. Split panel: left shows <code>app/main.py</code> include_router calls typing in, right shows Tailwind token swatches building. Total 40 s.</div>
+        </div>
+      </div>
+
+      <!-- S6: Dev Process -->
+
+      <div class="vo-card pending-scene">
+        <div class="vo-head">
+          <span class="vo-num">08</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Development Process -- Requirements to Deployment</div>
+            <div class="vo-meta">3:00 · 60 s · Development Process</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "Four phases. Phase one: requirements gathered from the AIHW QI Program Manual 4.0 -- 14 categories, 44 indicators. Phase two: UI design in Figma, validated against DON and auditor user flows. Phase three: FastAPI backend built first, React frontend integrated against the Swagger spec. Phase four: pytest suite, Git feature branches, Azure deployment. Main challenge -- keeping 44 indicator definitions honest against the AIHW specification throughout."
+          <div class="vo-note"><b>Visual (NEW):</b> Four phase cards on a horizontal timeline, each with an icon and two-line description. Agile sprint markers below the timeline. Git branch diagram as a subtle background. Challenges card slides in at the end with a clay accent.</div>
+        </div>
+      </div>
+
+      <!-- S7: System Demo -->
+
+      <div class="vo-card pending-scene">
+        <div class="vo-head">
+          <span class="vo-num">09</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Demo: Login and Register</div>
+            <div class="vo-meta">4:00 · 20 s · System Demo</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "Users authenticate via Google OAuth. The backend issues a JWT. From here the full platform is accessible."
+          <div class="vo-note"><b>Visual (NEW):</b> Browser chrome with CareData login page. Google OAuth button click (SFX). JWT issued chip flashes. Top nav appears: Dashboard, Data Entry, QI Reports, Benchmarking, Voice Screening, Settings.</div>
+        </div>
+      </div>
+
+      <div class="vo-card">
+        <div class="vo-head">
+          <span class="vo-num">10</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Demo: CSV Upload and Data Entry</div>
+            <div class="vo-meta">4:20 · 30 s · System Demo</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "Every quarter starts here. Drop a CSV or fill the 13-section GPMS form. Residents assessed, pressure injury counts, stage breakdowns. One save -- one POST to the upload pipeline."
+          <div class="vo-note"><b>Visual:</b> Condensed from scene 08 and scene 09. CSV drag-drop, whip-pan to GPMS form, counters animate, save toast. Drop the full 5-stage pipeline diagram -- just the outcome chip "Saved to Azure Tables".</div>
+        </div>
+      </div>
+
+      <div class="vo-card">
+        <div class="vo-head">
+          <span class="vo-num">11</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Demo: QI Dashboard</div>
+            <div class="vo-meta">4:50 · 25 s · System Demo</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "The dashboard shows 47 indicators across 14 categories. KPI cards summarise the quarter. A 70-cell heatmap flags which indicators are outside target."
+          <div class="vo-note"><b>Visual:</b> Condensed from scene 10. KPI counter roll-ups, heatmap stagger. Cut the Axios implementation detail -- keep the visual only.</div>
+        </div>
+      </div>
+
+      <div class="vo-card pending-scene">
+        <div class="vo-head">
+          <span class="vo-num">12</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Demo: QI Reports</div>
+            <div class="vo-meta">5:15 · 25 s · System Demo</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "The reports module generates quarterly summaries formatted to AIHW submission standards. Trend lines, severity distributions, and radar charts for ADL domains. Export as PDF for the board paper or Commission audit."
+          <div class="vo-note"><b>Visual (NEW):</b> QI Reports page reproduction. Sidebar with indicator categories, centre trend chart drawing, radar chart for ADL. PDF export button with click SFX. This slot was the honesty-cut scene in the three-act film -- the real ReportsPage.jsx is in scope for this presentation.</div>
+        </div>
+      </div>
+
+      <div class="vo-card">
+        <div class="vo-head">
+          <span class="vo-num">13</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Demo: Benchmarking</div>
+            <div class="vo-meta">5:40 · 20 s · System Demo</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "Facility rates against AIHW national medians. Polypharmacy at 38% -- nearly double the national rate. Three indicators pulse amber. Bayside sits at the 62nd percentile nationally."
+          <div class="vo-note"><b>Visual:</b> Condensed from scene 11. Bar chart with 14 indicators, national tick lines, three clay-pulsing flagged bars. Percentile badge slides in. Drop the useMemo implementation detail.</div>
+        </div>
+      </div>
+
+      <div class="vo-card">
+        <div class="vo-head">
+          <span class="vo-num">14</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Demo: Voice Screening</div>
+            <div class="vo-meta">6:00 · 30 s · System Demo</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "The voice biomarker module adds a daily signal. The nurse generates a UUID link -- valid 36 hours, no app required. The resident records four stages. Audio is decoded server-side into a 108-dimensional feature vector. The nightly loop flags drift from the 14-day baseline."
+          <div class="vo-note"><b>Visual:</b> Condense scenes 14 and 15. Link generation (10 s), then cut straight to recording battery with waveform (15 s), score resolves with Watch pill (5 s). Drop the CPD loop technical detail.</div>
+        </div>
+      </div>
+
+      <!-- S8: Code Walkthrough -->
+
+      <div class="vo-card">
+        <div class="vo-head">
+          <span class="vo-num">15</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Code: Frontend -- Components and Pages</div>
+            <div class="vo-meta">6:30 · 20 s · Code Walkthrough</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "Pages live in <code>src/pages</code>: QIDashboardPage, BenchmarkingPage, UploadCSVPage, ReportsPage. Shared components in <code>src/components</code>. Tailwind with seven design tokens. Vite proxies port 5173 to 8000."
+          <div class="vo-note"><b>Visual:</b> Condensed from scene 06 frontend tour. File-tree view slides in showing the pages folder, then Tailwind config with colour swatches. 20 s -- fast directory tour only.</div>
+        </div>
+      </div>
+
+      <div class="vo-card">
+        <div class="vo-head">
+          <span class="vo-num">16</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Code: Backend API -- Routers and Endpoints</div>
+            <div class="vo-meta">6:50 · 20 s · Code Walkthrough</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "The entire backend mounts from <code>app/main.py</code>. Six <code>include_router</code> calls. FastAPI auto-generates Swagger at <code>/docs</code>. Each router: Pydantic schema, Azure Table read or write, JSON response."
+          <div class="vo-note"><b>Visual:</b> Condensed from scene 04. <code>app/main.py</code> with six router mounts highlighted. Swagger UI panel slides up. 20 s -- structure only, no line-by-line typing.</div>
+        </div>
+      </div>
+
+      <div class="vo-card">
+        <div class="vo-head">
+          <span class="vo-num">17</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Code: API Data Flow -- Upload Pipeline</div>
+            <div class="vo-meta">7:10 · 20 s · Code Walkthrough</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "The upload pipeline runs five pure functions: extract quarter labels, parse rows, validate indicators, compute dashboard metrics, persist. No event bus, no background task -- functions calling functions."
+          <div class="vo-note"><b>Visual:</b> Condensed from scene 09 CSV pipeline. Five-card pipeline diagram with arc completions. Real function names: <code>_extract_quarter_labels_from_csv</code>, <code>_compute_dashboard_from_csv</code>. 20 s fast pass.</div>
+        </div>
+      </div>
+
+      <!-- S9: Conclusion -->
+
+      <div class="vo-card">
+        <div class="vo-head">
+          <span class="vo-num">18</span>
+          <div class="vo-title-row">
+            <div class="vo-scene-title">Conclusion and Future Improvements</div>
+            <div class="vo-meta">7:30 · 30 s · Conclusion</div>
+          </div>
+          <span class="vo-chevron">&#9654;</span>
+        </div>
+        <div class="vo-body">
+          "CareData turns fragmented facility records into audit-ready government indicators. Future improvements: direct AIHW API submission, mobile-first resident recording, multi-facility rollup dashboards, and automated benchmark alerts. Built for the way clinicians actually work."
+          <div class="vo-note"><b>Visual:</b> Revise scene 18 outro. Add a "Future Features" card panel before the final lockup -- four future-feature chips slide in. Then resolved CareData lockup on cream paper. Total 30 s.</div>
+        </div>
+      </div>
+
+    </div><!-- .vo-list -->
+  </div><!-- #tab-voiceover -->
+
+  <!-- ===== SCENES TAB wrapper start ===== -->
+  <div id="tab-scenes" class="tab-pane active">
+
+  <!-- ============================================================ -->
+  <!-- SECTION 1: INTRODUCTION -->
+  <!-- ============================================================ -->
+  <section class="act">
+    <div class="act-head">
+      <span class="act-tag">INTRO</span>
+      <h2>The <em>Introduction</em>.</h2>
+      <span class="act-meta">0:00 &ndash; 0:30 · 2 SCENES · <b>30 s</b></span>
+    </div>
+    <div class="grid">
+
+      <a class="card" href="scene-01-hook-tech.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-01-hook-tech.html <span class="badge-repurpose">CONDENSE</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">01</span>HOOK + BRAND</div>
+          <div class="card-title">Welcome to <em>CareData</em>.</div>
+          <div class="card-desc">Two-stack split-screen cuts to brand lockup. Condense original scenes 01 and 02 into one 15-second open: IDE split, sage divider, EKG mark resolves, wordmark lands.</div>
+          <div class="card-meta"><span><b>15 s</b></span><span>FastAPI · React</span><span>EKG mark</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+      <a class="card" href="scene-02-team-intro.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-02-team-intro.html</span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">02</span>TEAM INTRO</div>
+          <div class="card-title">Group <em>W08</em>.</div>
+          <div class="card-desc">Name cards cascade in for each team member. University of Wollongong crest. Twelve weeks, agile sprints. Cream paper background, sage accents.</div>
+          <div class="card-meta"><span><b>15 s</b></span><span>5 name cards</span><span>NEW</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 2: PROBLEM -->
+  <!-- ============================================================ -->
+  <section class="act">
+    <div class="act-head">
+      <span class="act-tag">PROBLEM</span>
+      <h2>The <em>Client Needs</em>.</h2>
+      <span class="act-meta">0:30 &ndash; 1:00 · 1 SCENE · <b>30 s</b></span>
+    </div>
+    <div class="grid">
+
+      <a class="card" href="scene-03-problem.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-03-problem.html</span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">03</span>PROBLEM</div>
+          <div class="card-title">Scattered records, <em>broken formulas</em>.</div>
+          <div class="card-desc">Paper-chaos visual: Excel snippet with #VALUE! error, 13-section GPMS form, audit clipboard, DoH email. Problem statement typed over the orbiting fragments. Dark stage.</div>
+          <div class="card-meta"><span><b>30 s</b></span><span>6 fragments</span><span>NEW (repurposes visual from 01)</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 3: TARGET MARKET -->
+  <!-- ============================================================ -->
+  <section class="act">
+    <div class="act-head">
+      <span class="act-tag">MARKET</span>
+      <h2>Target Market and <em>Advantages</em>.</h2>
+      <span class="act-meta">1:00 &ndash; 1:30 · 1 SCENE · <b>30 s</b></span>
+    </div>
+    <div class="grid">
+
+      <a class="card" href="scene-04-target-market.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-04-target-market.html</span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">04</span>TARGET MARKET</div>
+          <div class="card-title">Directors of Nursing, <em>auditors, quality teams</em>.</div>
+          <div class="card-desc">Three user-type cards (DON, Quality Manager, ACQSC Auditor) slide in left-to-right. Below, three advantage pills pop in: Dashboard Analytics, CSV Upload, Government-Format Reports. Cream paper.</div>
+          <div class="card-meta"><span><b>30 s</b></span><span>3 user types</span><span>3 advantages</span><span>NEW</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 4: MARKETING MIX -->
+  <!-- ============================================================ -->
+  <section class="act">
+    <div class="act-head">
+      <span class="act-tag">7PS</span>
+      <h2>The <em>Marketing Mix</em>.</h2>
+      <span class="act-meta">1:30 &ndash; 2:00 · 1 SCENE · <b>30 s</b></span>
+    </div>
+    <div class="grid">
+
+      <a class="card" href="scene-05-marketing-mix.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-05-marketing-mix.html</span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">05</span>MARKETING MIX</div>
+          <div class="card-title">Seven Ps, <em>one system</em>.</div>
+          <div class="card-desc">Seven cards cascade onto a grid, one per beat: Product, Price, Place, Promotion, People, Process, Physical Evidence. Each: large P letter, label, one-line description. Ink-900 background, cream cards.</div>
+          <div class="card-meta"><span><b>30 s</b></span><span>7 P-cards</span><span>NEW</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 5: ARCHITECTURE + TECHNOLOGIES -->
+  <!-- ============================================================ -->
+  <section class="act">
+    <div class="act-head">
+      <span class="act-tag">ARCHITECTURE</span>
+      <h2>Architecture and <em>Technologies</em>.</h2>
+      <span class="act-meta">2:00 &ndash; 3:00 · 2 SCENES · <b>60 s</b></span>
+    </div>
+    <div class="grid">
+
+      <a class="card" href="scene-05b-architecture-intro.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-05b-architecture-intro.html <span class="badge-repurpose">TRANSITION</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">05b</span>SECTION BREAK</div>
+          <div class="card-title"><em>Architecture + Technologies</em> headline.</div>
+          <div class="card-desc">12-second section break card that signals the transition from marketing content to technical architecture. Cream paper background with sage accent.</div>
+          <div class="card-meta"><span><b>12 s</b></span><span>Section break</span><span>NEW</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+      <a class="card" href="scene-06-system-diagram.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-06-system-diagram.html <span class="badge-repurpose">CONDENSE</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">06</span>SYSTEM DIAGRAM</div>
+          <div class="card-title">How the <em>bytes move</em>.</div>
+          <div class="card-desc">Five nodes on dot-grid paper: Frontend, Backend, Azure Tables, Azure Blob, In-Memory fallback. Trace dot rides happy path then fallback. Cut to 20 s (drop voice-path detail).</div>
+          <div class="card-meta"><span><b>20 s</b></span><span>5 nodes</span><span>2 traces</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+      <a class="card" href="scene-07-tech-stack.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-07-tech-stack.html <span class="badge-repurpose">CONDENSE</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">07</span>TECH STACK</div>
+          <div class="card-title">FastAPI, React, <em>Azure</em>.</div>
+          <div class="card-desc">Split panel: <code>app/main.py</code> six routers on the left, Tailwind token swatches building on the right. Condenses scenes 04 and 06. JWT and Azure storage called out in captions. 40 s.</div>
+          <div class="card-meta"><span><b>40 s</b></span><span>FastAPI · React+Vite</span><span>Azure Tables · Blob</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 6: DEVELOPMENT PROCESS -->
+  <!-- ============================================================ -->
+  <section class="act">
+    <div class="act-head">
+      <span class="act-tag">DEV PROCESS</span>
+      <h2>The <em>Development Process</em>.</h2>
+      <span class="act-meta">3:00 &ndash; 4:00 · 1 SCENE · <b>60 s</b></span>
+    </div>
+    <div class="grid">
+
+      <a class="card" href="scene-08-dev-process.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-08-dev-process.html</span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">08</span>DEV PROCESS</div>
+          <div class="card-title">Requirements to <em>deployment</em>.</div>
+          <div class="card-desc">Four-phase timeline: Requirements (AIHW QI Manual 4.0, 14 categories, 44 indicators), UI Design (Figma, DON and auditor personas), Backend + Frontend integration, Testing and deployment. Agile sprint markers, Git branch diagram background. Challenges card in clay at the end.</div>
+          <div class="card-meta"><span><b>60 s</b></span><span>4 phases</span><span>Git · pytest</span><span>NEW</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 7: SYSTEM DEMO -->
+  <!-- ============================================================ -->
+  <section class="act">
+    <div class="act-head">
+      <span class="act-tag">DEMO</span>
+      <h2>The <em>System Demo</em>.</h2>
+      <span class="act-meta">4:00 &ndash; 6:30 · 6 SCENES · <b>2:30</b></span>
+    </div>
+    <div class="grid">
+
+      <a class="card" href="scene-08b-demo-intro.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-08b-demo-intro.html <span class="badge-repurpose">TRANSITION</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">08b</span>SECTION BREAK</div>
+          <div class="card-title"><em>System Demo</em> headline.</div>
+          <div class="card-desc">12-second section break announcing the system demo. Dark stage background.</div>
+          <div class="card-meta"><span><b>12 s</b></span><span>Section break</span><span>NEW</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+      <a class="card" href="scene-09-login-demo.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-09-login-demo.html</span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">09</span>LOGIN</div>
+          <div class="card-title">Google OAuth, <em>JWT issued</em>.</div>
+          <div class="card-desc">Browser chrome with CareData login page. Google OAuth button click. JWT chip flashes in the response panel. Top nav appears: Dashboard, Data Entry, QI Reports, Benchmarking, Voice Screening, Settings.</div>
+          <div class="card-meta"><span><b>20 s</b></span><span>OAuth flow</span><span>JWT</span><span>NEW</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+      <a class="card" href="scene-10-data-entry-gpms.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-10-data-entry-gpms.html <span class="badge-repurpose">CONDENSE</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">10</span>UPLOAD + DATA ENTRY</div>
+          <div class="card-title">One upload, <em>one quarter</em>.</div>
+          <div class="card-desc">CSV drag-drop into sage drop zone, whip-pan reveals GPMS form, counters animate (residents_assessed 0 to 60, prevalence 0.0 to 2.1%), save toast with "Saved to Azure Tables" chip. Drop the five-stage pipeline diagram.</div>
+          <div class="card-meta"><span><b>30 s</b></span><span>13 sections</span><span>POST /upload-csv/analyze</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+      <a class="card" href="scene-11-qi-dashboard-tech.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-11-qi-dashboard-tech.html <span class="badge-repurpose">CONDENSE</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">11</span>QI DASHBOARD</div>
+          <div class="card-title">47 indicators, <em>one view</em>.</div>
+          <div class="card-desc">KPI counter roll-ups (47 indicators, 3 variance flags, audit-ready check), 70-cell heatmap stagger. Cut Axios implementation detail -- visuals only. 25 s.</div>
+          <div class="card-meta"><span><b>25 s</b></span><span>14 categories</span><span>47 indicators</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+      <a class="card" href="scene-12-qi-reports.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-12-qi-reports.html</span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">12</span>QI REPORTS</div>
+          <div class="card-title">Government-format <em>reports</em>.</div>
+          <div class="card-desc">QI Reports page: sidebar indicator list, centre trend chart drawing, radar chart for 10 ADL Barthel sub-scores, PDF export button with click SFX. This slot replaces the three-act film's honesty cut -- the real ReportsPage.jsx is in scope here.</div>
+          <div class="card-meta"><span><b>25 s</b></span><span>Trend · Radar · PDF</span><span>NEW</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+      <a class="card" href="scene-13-benchmarking.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-13-benchmarking.html <span class="badge-repurpose">CONDENSE</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">13</span>BENCHMARKING</div>
+          <div class="card-title">Facility vs <em>AIHW national medians</em>.</div>
+          <div class="card-desc">14 indicator bars vs national tick lines. Three flagged bars pulse clay: Polypharmacy 38%, Antipsychotic without diagnosis 8.2%, Allied Health gap 22%. Percentile badge "62nd nationally" slides in. Drop useMemo detail. 20 s.</div>
+          <div class="card-meta"><span><b>20 s</b></span><span>62nd percentile</span><span>3 flags</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+      <a class="card" href="scene-14-voice-link.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-14-voice-link.html <span class="badge-repurpose">CONDENSE</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">14</span>VOICE SCREENING</div>
+          <div class="card-title">Daily link, <em>daily signal</em>.</div>
+          <div class="card-desc">Link generation (10 s) cuts to recording battery with waveform (15 s), resolves to Watch score pill (5 s). Condenses scenes 14 and 15 plus the score resolve. Drop CPD loop and 108-d feature vector detail.</div>
+          <div class="card-meta"><span><b>30 s</b></span><span>UUID link</span><span>4-stage battery</span><span>Score 68 Watch</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 8: CODE WALKTHROUGH -->
+  <!-- ============================================================ -->
+  <section class="act">
+    <div class="act-head">
+      <span class="act-tag">CODE</span>
+      <h2>The <em>Code Walkthrough</em>.</h2>
+      <span class="act-meta">6:30 &ndash; 7:30 · 3 SCENES · <b>60 s</b></span>
+    </div>
+    <div class="grid">
+
+      <a class="card" href="scene-14b-code-intro.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-14b-code-intro.html <span class="badge-repurpose">TRANSITION</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">14b</span>SECTION BREAK</div>
+          <div class="card-title"><em>Code Walkthrough</em> headline.</div>
+          <div class="card-desc">12-second section break announcing the code walkthrough section. Cream paper background.</div>
+          <div class="card-meta"><span><b>12 s</b></span><span>Section break</span><span>NEW</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+      <a class="card" href="scene-15-frontend-code.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-15-frontend-code.html <span class="badge-repurpose">CONDENSE</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">15</span>FRONTEND CODE</div>
+          <div class="card-title">Pages, components, <em>seven tokens</em>.</div>
+          <div class="card-desc">File-tree view: <code>src/pages/</code> then <code>src/components/</code>. Tailwind config with colour swatches building. Vite proxy noted. 20 s fast directory tour -- no BrandMark drawing sequence.</div>
+          <div class="card-meta"><span><b>20 s</b></span><span>src/pages</span><span>Tailwind tokens</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+      <a class="card" href="scene-07-tech-stack.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-07-tech-stack.html <span class="badge-repurpose">CONDENSE</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">16</span>BACKEND CODE</div>
+          <div class="card-title">Six routers, <em>one file</em>.</div>
+          <div class="card-desc"><code>app/main.py</code> with six include_router calls highlighted. Swagger UI panel slides up at <code>/docs</code>. Pattern: Pydantic schema, Azure Table read or write, JSON response. 20 s -- structure only.</div>
+          <div class="card-meta"><span><b>20 s</b></span><span>6 routers</span><span>Swagger /docs</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+      <a class="card" href="scene-17-api-data-flow.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-17-api-data-flow.html <span class="badge-repurpose">CONDENSE</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">17</span>API DATA FLOW</div>
+          <div class="card-title">Parse, validate, <em>persist</em>.</div>
+          <div class="card-desc">Five-card pipeline with arc completions. Real names: <code>_extract_quarter_labels_from_csv</code>, <code>_compute_dashboard_from_csv</code>. No event bus, no background task. 20 s fast pass.</div>
+          <div class="card-meta"><span><b>20 s</b></span><span>5 stages</span><span>No event bus</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 9: CONCLUSION + FUTURE -->
+  <!-- ============================================================ -->
+  <section class="act">
+    <div class="act-head">
+      <span class="act-tag">CONCLUSION</span>
+      <h2>Benefits and <em>Future Improvements</em>.</h2>
+      <span class="act-meta">7:30 &ndash; 8:00 · 1 SCENE · <b>30 s</b></span>
+    </div>
+    <div class="grid">
+
+      <a class="card" href="scene-18-outro.html">
+        <div class="card-chrome"><span class="lights"><span></span><span></span><span></span></span><span class="filename">scene-18-outro.html <span class="badge-repurpose">REVISE</span></span></div>
+        <div class="card-body">
+          <div class="scene-tag"><span class="num">18</span>CONCLUSION</div>
+          <div class="card-title">One system, <em>end to end</em>.</div>
+          <div class="card-desc">Add a "Future Features" panel before the final lockup: four chips slide in (Direct AIHW API submission, Mobile-first recording, Multi-facility rollup, Automated benchmark alerts). Then resolved CareData lockup. "Built for the way clinicians actually work."</div>
+          <div class="card-meta"><span><b>30 s</b></span><span>4 future features</span><span>Final lockup</span></div>
+          <div class="card-cta">Open preview</div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <footer>
+    <span>REPO · CARE-DATA / CSIT321 CAPSTONE · GROUP W08</span>
+    <span class="right">REVISED 2026-05-17 · 8-MIN PRESENTATION STRUCTURE · 9 SECTIONS</span>
+  </footer>
+
+  </div><!-- #tab-scenes -->
+
+</main>
+
+<script>
+  /* ===== Tab switching ===== */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ===== Voice-over accordion ===== */
+  document.querySelectorAll('.vo-head').forEach(head => {
+    head.addEventListener('click', () => {
+      const card = head.closest('.vo-card');
+      const isOpen = card.classList.contains('open');
+      document.querySelectorAll('.vo-card').forEach(c => c.classList.remove('open'));
+      if (!isOpen) card.classList.add('open');
+    });
+  });
+
+  /* ===== Keyboard: type a number to jump to a scene card ===== */
+  /* Gaps at slots 02 and 16 share scene-07-tech-stack.html; keyboard nav skips missing hrefs */
+  let buffer = "";
+  let bufferTimer = null;
+  document.addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    if (/^[0-9]$/.test(e.key)) {
+      buffer += e.key;
+      clearTimeout(bufferTimer);
+      bufferTimer = setTimeout(() => {
+        const n = parseInt(buffer, 10);
+        buffer = "";
+        if (!isNaN(n) && n >= 1 && n <= 18) {
+          const target = document.querySelector(`a.card[href*="scene-${String(n).padStart(2,"0")}-"]`);
+          if (target) window.location.href = target.getAttribute('href');
+        }
+      }, 700);
+    } else if (e.key === "Escape") {
+      buffer = ""; clearTimeout(bufferTimer);
+    }
+  });
+</script>
+</body>
+</html>

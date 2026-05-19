@@ -1,0 +1,43 @@
+# Source: app/api/auth.py  (JWT layer lives in app/services/jwt_auth.py)
+# The router delegates token creation/validation to jwt_auth helpers.
+
+from app.services.jwt_auth import get_current_user, create_access_token
+
+# --- jwt_auth constants & helpers (app/services/jwt_auth.py) ---
+
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7   # 7 days
+
+
+def create_access_token(data: dict) -> str:
+    """Sign a JWT with the app SECRET_KEY and a fixed expiry window."""
+    from datetime import datetime, timedelta, timezone
+    from jose import jwt
+    from app.core.config import settings
+
+    payload = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    payload.update({"exp": expire})
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=ALGORITHM)
+
+
+def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
+    """FastAPI dependency — decode Bearer JWT, raise 401 on any failure."""
+    from jose import JWTError, jwt
+    from app.core.config import settings
+
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+        sub: str = payload.get("sub")
+        if sub is None:
+            raise credentials_exception
+        return payload
+    except JWTError:
+        raise credentials_exception
+
+# end excerpt

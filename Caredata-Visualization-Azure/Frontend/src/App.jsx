@@ -24,7 +24,6 @@ import AboutPage from "./components/footerPages/AboutUs";
 import SetupAccountPage from "./pages/SetupAccountPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import VoiceRecordPage from "./pages/VoiceRecordPage";
-import ResidentPortalPage from "./pages/ResidentPortalPage";
 import VoiceDashboardPage from "./pages/VoiceDashboardPage";
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
@@ -135,7 +134,6 @@ export default function App() {
 
         {/* Voice Biomarker — Public (resident-facing) */}
         <Route path="/voice/record/:token" element={<VoiceRecordPage />} />
-        <Route path="/voice/portal" element={<ResidentPortalPage />} />
 
         {/* Voice Biomarker — Nurse Auth */}
         <Route path="/voice/dashboard" element={<RequireAuth><VoiceDashboardPage /></RequireAuth>} />
