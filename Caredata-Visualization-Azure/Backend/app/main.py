@@ -19,7 +19,7 @@ logging.basicConfig(
 # don't get duplicate request rows.
 logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
-from app.api import auth, health_scan, mydata, upload_csv, qi, gpms, voice_v2
+from app.api import auth, mydata, upload_csv, qi, gpms, voice_v2
 from app.services.voice_changepoint import cpd_loop_forever
 from app.services.voice_seed_v2 import seed_v2_demo_data
 
@@ -34,6 +34,10 @@ origins = [
     "https://caredataportal.com",
     "https://ashy-sky-00ee6c400.7.azurestaticapps.net",
 ]
+# Azure App Settings: CORS_ORIGINS=https://www.example.com,https://example.com
+_extra = os.environ.get("CORS_ORIGINS", "")
+if _extra:
+    origins.extend(o.strip() for o in _extra.split(",") if o.strip())
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -44,7 +48,6 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
-app.include_router(health_scan.router)
 app.include_router(mydata.router)
 app.include_router(upload_csv.router)
 app.include_router(qi.router)
@@ -54,9 +57,9 @@ app.include_router(voice_v2.router)
 
 @app.on_event("startup")
 async def startup_event():
-    seed_v2_demo_data()
-    # Schedule the nightly change-point scan unless explicitly disabled
-    # (tests set VOICE_DISABLE_CPD_LOOP=1 to keep test runs deterministic).
+    # Do not block HTTP startup on Azure seed/CPD (avoids 504 Gateway Timeout).
+    if not os.environ.get("VOICE_SKIP_SEED"):
+        asyncio.create_task(asyncio.to_thread(seed_v2_demo_data))
     if not os.environ.get("VOICE_DISABLE_CPD_LOOP"):
         asyncio.create_task(cpd_loop_forever())
 

@@ -1,6 +1,5 @@
-# Docs: https://github.com/Azure/webapps-deploy
-# Build uses Caredata-Visualization-Azure/Backend. Deploy package is "." because
-# upload-artifact uploads directory *contents*; download lands app + requirements at workspace root.
+# Deploy Caredata-Visualization-Azure/Backend to Azure App Service caredata-api-uow.
+# Site root must contain app/main.py and requirements.txt (flat layout).
 
 name: Build and deploy Python app to Azure Web App - caredata-api-uow
 
@@ -8,6 +7,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "Caredata-Visualization-Azure/Backend/**"
+      - ".github/workflows/main_caredata-api-uow.yml"
   workflow_dispatch:
 
 jobs:
@@ -24,26 +26,35 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Create and Start virtual environment and Install dependencies
+      - name: Install dependencies (smoke test)
         shell: bash
         run: |
           set -euo pipefail
           BACKEND="${GITHUB_WORKSPACE}/Caredata-Visualization-Azure/Backend"
-          echo "Repo root:" && ls -la "${GITHUB_WORKSPACE}"
-          echo "Backend:" && ls -la "${BACKEND}"
           test -f "${BACKEND}/requirements.txt"
+          test -f "${BACKEND}/app/main.py"
           cd "${BACKEND}"
-          python -m venv antenv
-          source antenv/bin/activate
-          pip install -r requirements.txt
+          python -m pip install -r requirements.txt
+
+      - name: Prepare flat deploy package
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="${GITHUB_WORKSPACE}/Caredata-Visualization-Azure/Backend"
+          DEST="${GITHUB_WORKSPACE}/deploy"
+          rm -rf "${DEST}"
+          mkdir -p "${DEST}"
+          cp -r "${SRC}/app" "${SRC}/requirements.txt" "${SRC}/startup.sh" "${DEST}/"
+          cp "${SRC}/.deployment" "${DEST}/" 2>/dev/null || true
+          ls -la "${DEST}"
+          test -f "${DEST}/app/main.py"
+          test -f "${DEST}/requirements.txt"
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: |
-            Caredata-Visualization-Azure/Backend
-            !Caredata-Visualization-Azure/Backend/antenv/
+          path: deploy
 
   deploy:
     runs-on: ubuntu-latest
@@ -58,6 +69,12 @@ jobs:
         with:
           name: python-app
 
+      - name: Verify deploy layout (flat wwwroot)
+        run: |
+          test -f app/main.py
+          test -f requirements.txt
+          ls -la
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -67,7 +84,6 @@ jobs:
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
-        id: deploy-to-webapp
         with:
           app-name: "caredata-api-uow"
           slot-name: "Production"
