@@ -21,21 +21,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python version
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Build deploy package
+      - name: Build deploy package (Docker = Azure-compatible native wheels)
         shell: bash
         run: |
           set -euo pipefail
           BACKEND="${GITHUB_WORKSPACE}/Caredata-Visualization-Azure/Backend"
           DEST="${GITHUB_WORKSPACE}/deploy"
-          # NOT .python_packages — GitHub upload-artifact skips hidden dot-folders by default.
-          PKG="${DEST}/python_packages/lib/site-packages"
           rm -rf "${DEST}"
-          mkdir -p "${PKG}"
+          mkdir -p "${DEST}/python_packages/lib/site-packages"
           cp -r "${BACKEND}/app" "${DEST}/"
           cp "${BACKEND}/requirements-azure.txt" "${DEST}/requirements.txt"
           cp "${BACKEND}/requirements-azure.txt" "${DEST}/requirements-azure.txt"
@@ -43,11 +36,22 @@ jobs:
           cp "${BACKEND}/.deployment" "${DEST}/" 2>/dev/null || true
           chmod +x "${DEST}/startup.sh"
           test -f "${DEST}/app/main.py"
-          test -f "${DEST}/requirements-azure.txt"
           ! grep -qE '^(faster-whisper|torch|opensmile|spacy)' "${DEST}/requirements.txt"
-          python -m pip install --upgrade pip
-          python -m pip install -r "${BACKEND}/requirements-azure.txt" -t "${PKG}"
-          PYTHONPATH="${PKG}" python -c "import uvicorn, gunicorn, fastapi; print('deps ok')"
+          # GitHub ubuntu-latest has glibc ~2.39; Azure App Service ~2.31.
+          # Install inside Debian bullseye so bcrypt/scipy/sklearn match Azure.
+          docker run --rm \
+            -v "${BACKEND}/requirements-azure.txt:/req.txt:ro" \
+            -v "${DEST}/python_packages:/out" \
+            python:3.12-slim-bullseye \
+            bash -c "
+              set -euo pipefail
+              pip install -q -U pip
+              pip install -r /req.txt -t /out/lib/site-packages
+              PYTHONPATH=/out/lib/site-packages python -c \"
+import bcrypt, uvicorn, gunicorn, fastapi, scipy, sklearn
+print('deps ok')
+\"
+            "
           du -sh "${DEST}/python_packages"
           ls -la "${DEST}"
 
@@ -99,7 +103,7 @@ jobs:
           test -f requirements-azure.txt
           test -d python_packages/lib/site-packages
           ! grep -qE '^(faster-whisper|torch|opensmile|spacy)' requirements.txt
-          PYTHONPATH="$(pwd)/python_packages/lib/site-packages" python3 -c "import gunicorn, uvicorn; print('imports ok')"
+          PYTHONPATH="$(pwd)/python_packages/lib/site-packages" python3 -c "import gunicorn, uvicorn; from passlib.context import CryptContext; print('imports ok')"
           du -sh python_packages
 
       - name: Login to Azure
