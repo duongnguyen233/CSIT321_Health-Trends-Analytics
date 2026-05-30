@@ -61,6 +61,18 @@ GET https://caredata-api-uow.azurewebsites.net/
 → {"message":"API is running"}
 ```
 
+## Log shows torch / faster-whisper / 25+ minutes with no output
+
+The server is installing the **full** `requirements.txt` (~2 GB PyTorch + CUDA), not the slim Azure list.
+
+**Fix:** Push and run GitHub workflow `main_caredata-api-uow.yml` (deploys `requirements-azure.txt` + pre-built `.python_packages`).
+
+**Do not restart repeatedly** — each restart may restart a huge pip install.
+
+**Optional (Kudu SSH):** delete `/home/site/packages` if a partial install exists, then redeploy.
+
+**App setting:** `WEBSITES_CONTAINER_START_TIME_LIMIT` = `1800` (30 min) if you must pip-install on the server.
+
 ## Local full dependencies
 
 For voice ML on a dev machine:
