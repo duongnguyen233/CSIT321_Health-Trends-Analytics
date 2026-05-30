@@ -58,7 +58,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: deploy
+          path: deploy/
+          if-no-files-found: error
 
   deploy:
     runs-on: ubuntu-latest
@@ -72,16 +73,38 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: python-app
+          path: pkg
+
+      - name: Normalize package layout (flat wwwroot)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd pkg
+          # Artifact may be flat (app/) or nested (deploy/app/) depending on runner version.
+          if [[ -f deploy/app/main.py ]]; then
+            shopt -s dotglob
+            mv deploy/* .
+            rmdir deploy
+          fi
+          if [[ ! -f app/main.py ]]; then
+            echo "Unexpected artifact layout:"
+            find . -maxdepth 4 \( -name main.py -o -name requirements.txt \) 2>/dev/null || true
+            ls -laR | head -80
+            exit 1
+          fi
+          echo "Package root:"
+          ls -la
 
       - name: Verify deploy layout
+        working-directory: pkg
         run: |
+          set -euo pipefail
           test -f app/main.py
           test -f startup.sh
           test -f requirements-azure.txt
           test -d .python_packages/lib/site-packages
           ! grep -qE '^(faster-whisper|torch|opensmile|spacy)' requirements.txt
           PYTHONPATH="$(pwd)/.python_packages/lib/site-packages" python3 -c "import gunicorn, uvicorn"
-          ls -la
           du -sh .python_packages
 
       - name: Login to Azure
@@ -96,7 +119,7 @@ jobs:
         with:
           app-name: "caredata-api-uow"
           slot-name: "Production"
-          package: .
+          package: pkg
 
       - name: Force startup command and restart (fixes stuck gunicorn line in Portal)
         run: |
