@@ -1,5 +1,10 @@
 # Deploy Caredata-Visualization-Azure/Backend to Azure App Service caredata-api-uow.
-# Site root must contain app/main.py and requirements.txt (flat layout).
+#
+# REQUIRED in Azure Portal → Configuration → General settings → Startup Command:
+#   bash startup.sh
+# (Delete the old "gunicorn app.main:app ..." line — it skips installed packages.)
+#
+# App settings (recommended): VOICE_SKIP_SEED=1, VOICE_DISABLE_CPD_LOOP=1
 
 name: Build and deploy Python app to Azure Web App - caredata-api-uow
 
@@ -26,29 +31,28 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies (smoke test)
+      - name: Build deploy package (.python_packages — no venv symlinks)
         shell: bash
         run: |
           set -euo pipefail
           BACKEND="${GITHUB_WORKSPACE}/Caredata-Visualization-Azure/Backend"
-          test -f "${BACKEND}/requirements.txt"
-          test -f "${BACKEND}/app/main.py"
-          cd "${BACKEND}"
-          python -m pip install -r requirements.txt
-
-      - name: Prepare flat deploy package
-        shell: bash
-        run: |
-          set -euo pipefail
-          SRC="${GITHUB_WORKSPACE}/Caredata-Visualization-Azure/Backend"
           DEST="${GITHUB_WORKSPACE}/deploy"
+          PKG="${DEST}/.python_packages/lib/site-packages"
           rm -rf "${DEST}"
-          mkdir -p "${DEST}"
-          cp -r "${SRC}/app" "${SRC}/requirements.txt" "${SRC}/startup.sh" "${DEST}/"
-          cp "${SRC}/.deployment" "${DEST}/" 2>/dev/null || true
-          ls -la "${DEST}"
+          mkdir -p "${PKG}"
+          cp -r "${BACKEND}/app" "${DEST}/"
+          cp "${BACKEND}/requirements-azure.txt" "${DEST}/requirements.txt"
+          cp "${BACKEND}/requirements-azure.txt" "${DEST}/requirements-azure.txt"
+          cp "${BACKEND}/startup.sh" "${DEST}/"
+          ! grep -qE '^(faster-whisper|torch|opensmile|spacy)' "${DEST}/requirements.txt"
+          cp "${BACKEND}/.deployment" "${DEST}/" 2>/dev/null || true
+          chmod +x "${DEST}/startup.sh"
           test -f "${DEST}/app/main.py"
-          test -f "${DEST}/requirements.txt"
+          python -m pip install --upgrade pip
+          python -m pip install -r "${BACKEND}/requirements-azure.txt" -t "${PKG}"
+          PYTHONPATH="${PKG}" python -c "import uvicorn, gunicorn, fastapi; print('deps ok')"
+          du -sh "${DEST}/.python_packages"
+          ls -la "${DEST}"
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
@@ -69,11 +73,16 @@ jobs:
         with:
           name: python-app
 
-      - name: Verify deploy layout (flat wwwroot)
+      - name: Verify deploy layout
         run: |
           test -f app/main.py
-          test -f requirements.txt
+          test -f startup.sh
+          test -f requirements-azure.txt
+          test -d .python_packages/lib/site-packages
+          ! grep -qE '^(faster-whisper|torch|opensmile|spacy)' requirements.txt
+          PYTHONPATH="$(pwd)/.python_packages/lib/site-packages" python3 -c "import gunicorn, uvicorn"
           ls -la
+          du -sh .python_packages
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -88,3 +97,14 @@ jobs:
           app-name: "caredata-api-uow"
           slot-name: "Production"
           package: .
+
+      - name: Force startup command and restart (fixes stuck gunicorn line in Portal)
+        run: |
+          RG="$(az webapp list --query "[?name=='caredata-api-uow'].resourceGroup | [0]" -o tsv)"
+          test -n "$RG"
+          az webapp config set \
+            --name caredata-api-uow \
+            --resource-group "$RG" \
+            --startup-file "bash startup.sh"
+          az webapp restart --name caredata-api-uow --resource-group "$RG"
+          echo "Startup command set to: bash startup.sh (resource group: $RG)"
