@@ -43,15 +43,7 @@ jobs:
             -v "${BACKEND}/requirements-azure.txt:/req.txt:ro" \
             -v "${DEST}/python_packages:/out" \
             python:3.12-slim-bullseye \
-            bash -c "
-              set -euo pipefail
-              pip install -q -U pip
-              pip install -r /req.txt -t /out/lib/site-packages
-              PYTHONPATH=/out/lib/site-packages python -c \"
-import bcrypt, uvicorn, gunicorn, fastapi, scipy, sklearn
-print('deps ok')
-\"
-            "
+            bash -c 'set -euo pipefail && pip install -q -U pip && pip install -r /req.txt -t /out/lib/site-packages && PYTHONPATH=/out/lib/site-packages python -c "import uvicorn, gunicorn, fastapi, scipy, sklearn; from passlib.context import CryptContext; print(\"deps ok\")"'
           du -sh "${DEST}/python_packages"
           ls -la "${DEST}"
 
