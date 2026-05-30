@@ -28,7 +28,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const url = error.config?.url || "";
-    const isAuthEndpoint = url.startsWith("/auth/login") || url.startsWith("/auth/register") || url.startsWith("/auth/google") || url.startsWith("/auth/verify-email") || url.startsWith("/auth/resend");
+    const isAuthEndpoint =
+      url.startsWith("/auth/login") ||
+      url.startsWith("/auth/register") ||
+      url.startsWith("/auth/google") ||
+      url.startsWith("/auth/verify-email") ||
+      url.startsWith("/auth/resend") ||
+      url.startsWith("/auth/forgot-password") ||
+      url.startsWith("/auth/reset-password");
     if (error.response?.status === 401 && !isAuthEndpoint) {
       clearAuthAndRedirect();
     }
@@ -53,6 +60,24 @@ export const verifyEmail = async (token) => {
 
 export const resendVerification = async (email) => {
   const response = await api.post("/auth/resend-verification", { email });
+  return response.data;
+};
+
+export const requestPasswordReset = async (email) => {
+  const response = await api.post("/auth/forgot-password", { email });
+  return response.data;
+};
+
+export const resetPassword = async ({ token, password }) => {
+  const response = await api.post("/auth/reset-password", { token, password });
+  return response.data;
+};
+
+export const changePassword = async ({ currentPassword, newPassword }) => {
+  const response = await api.post("/auth/change-password", {
+    current_password: currentPassword,
+    new_password: newPassword,
+  });
   return response.data;
 };
 

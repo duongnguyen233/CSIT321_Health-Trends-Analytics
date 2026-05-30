@@ -23,6 +23,8 @@ import ScrollToTop from "./components/common/ScrollToTop";
 import AboutPage from "./components/footerPages/AboutUs";
 import SetupAccountPage from "./pages/SetupAccountPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import VoiceRecordPage from "./pages/VoiceRecordPage";
 import VoiceDashboardPage from "./pages/VoiceDashboardPage";
 import { useContext } from "react";
@@ -64,6 +66,8 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/setup-account" element={<SetupAccountPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Protected Routes */}
         <Route

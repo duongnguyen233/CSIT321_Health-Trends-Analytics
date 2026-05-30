@@ -8,7 +8,8 @@ from app.core.security import hash_password, verify_password
 from app.services.jwt_auth import get_current_user, create_access_token
 from app.services import user_store
 from app.services import verification_store
-from app.services.email_service import send_verification_email
+from app.services.email_service import send_verification_email, send_password_reset_email
+from app.services import password_reset_store
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -32,6 +33,20 @@ class GoogleBody(BaseModel):
 
 class ResendBody(BaseModel):
     email: str
+
+
+class ForgotPasswordBody(BaseModel):
+    email: str
+
+
+class ResetPasswordBody(BaseModel):
+    token: str
+    password: str
+
+
+class ChangePasswordBody(BaseModel):
+    current_password: str
+    new_password: str
 
 
 @router.get("/me")
@@ -134,6 +149,58 @@ def resend_verification(body: ResendBody):
     token = verification_store.create_token(email)
     send_verification_email(email, token, first_name=user.get("first_name", ""))
     return {"message": "If an account exists with this email, a verification link has been sent."}
+
+
+@router.post("/forgot-password")
+def forgot_password(body: ForgotPasswordBody):
+    """Request a password reset link by email."""
+    email = (body.email or "").strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="Email is required")
+    user = user_store.get_user_by_email(email)
+    if user:
+        token = password_reset_store.create_token(email)
+        send_password_reset_email(email, token, first_name=user.get("first_name", ""))
+    return {
+        "message": "If an account exists with this email, a password reset link has been sent.",
+    }
+
+
+@router.post("/reset-password")
+def reset_password(body: ResetPasswordBody):
+    """Set a new password using a valid reset token."""
+    token = (body.token or "").strip()
+    password = body.password or ""
+    if not token:
+        raise HTTPException(status_code=400, detail="Reset token is required")
+    if not password or len(password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    email = password_reset_store.consume_token(token)
+    if not email:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset link")
+    if not user_store.update_password(email, hash_password(password)):
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "Password updated. You can now sign in."}
+
+
+@router.post("/change-password")
+def change_password(body: ChangePasswordBody, current_user: dict = Depends(get_current_user)):
+    """Change password for the logged-in user."""
+    email = (current_user.get("email") or "").strip().lower()
+    current = body.current_password or ""
+    new_password = body.new_password or ""
+    if not current or not new_password:
+        raise HTTPException(status_code=400, detail="Current and new password are required")
+    if len(new_password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    user = user_store.get_user_by_email(email)
+    if not user or not verify_password(current, user.get("password_hash", "")):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if verify_password(new_password, user.get("password_hash", "")):
+        raise HTTPException(status_code=400, detail="New password must be different from your current password")
+    if not user_store.update_password(email, hash_password(new_password)):
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "Password updated successfully."}
 
 
 @router.post("/login")

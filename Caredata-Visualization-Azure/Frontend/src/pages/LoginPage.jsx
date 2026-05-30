@@ -3,7 +3,7 @@ import { useState } from "react";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import BrandMark from "../components/common/BrandMark";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { API_BASE_URL, loginUser, getCurrentUser, resendVerification } from "../services/api";
 
@@ -14,11 +14,13 @@ async function setUserFromApi(token) {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
   const [unverified, setUnverified] = useState(false);
+  const passwordResetSuccess = location.state?.passwordReset;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -184,6 +186,21 @@ export default function LoginPage() {
                 </button>
               </div>
 
+              {passwordResetSuccess && (
+                <div
+                  className="text-center p-3 mb-4"
+                  style={{
+                    background: "var(--bg-sage-tint)",
+                    border: "1px solid var(--line)",
+                    borderRadius: 10,
+                  }}
+                >
+                  <p className="text-sm" style={{ color: "var(--sage-ink)" }}>
+                    Password updated. You can sign in with your new password.
+                  </p>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--ink-700)" }}>Email</label>
@@ -220,13 +237,13 @@ export default function LoginPage() {
                     />
                     Remember me
                   </label>
-                  <a
-                    href="/forgot-password"
+                  <Link
+                    to="/forgot-password"
                     className="hover:underline"
                     style={{ color: "var(--sage-ink)", fontWeight: 500 }}
                   >
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
 
                 {error && (

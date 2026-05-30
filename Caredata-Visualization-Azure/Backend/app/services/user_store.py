@@ -152,6 +152,28 @@ def create_user(email: str, password_hash: str, first_name: str = "", last_name:
     return user
 
 
+def update_password(email: str, password_hash: str) -> bool:
+    """Set a new password hash for the user. Returns True on success."""
+    email = (email or "").strip().lower()
+    if not email or not password_hash:
+        return False
+    table = _get_table_client()
+    if table:
+        try:
+            entity = table.get_entity(partition_key="user", row_key=email)
+            entity["password_hash"] = password_hash
+            table.upsert_entity(entity)
+            return True
+        except Exception as e:
+            logger.warning("user_store update_password: %s", e)
+            return False
+    user = _in_memory_users.get(email)
+    if user:
+        user["password_hash"] = password_hash
+        return True
+    return False
+
+
 def mark_email_verified(email: str) -> bool:
     """Mark a user's email as verified. Returns True on success."""
     email = (email or "").strip().lower()

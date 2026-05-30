@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../common/Navbar";
 import Footer from "../common/Footer";
-import { getSettings, saveSettings } from "../../services/api";
+import { getSettings, saveSettings, changePassword } from "../../services/api";
 
 const SETTINGS_STORAGE_KEY = "caredata_facility_settings";
 
@@ -46,6 +47,7 @@ const SIDEBAR_ITEMS = [
   { id: "benchmarks", label: "National benchmarks", icon: "benchmarks" },
   { id: "data", label: "Data retention", icon: "data" },
   { id: "about", label: "About", icon: "about" },
+  { id: "password", label: "Change password", icon: "password" },
 ];
 
 const DEFAULT_FACILITY = {
@@ -109,6 +111,12 @@ export default function SettingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [restSettings, setRestSettings] = useState({});
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -215,6 +223,34 @@ export default function SettingPage() {
   const handleSaveBenchmarks = () => {
     setSavedMsg((prev) => ({ ...prev, benchmarks: true }));
     setTimeout(() => setSavedMsg((p) => ({ ...p, benchmarks: false })), 2500);
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess(false);
+    if (newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match.");
+      return;
+    }
+    setPasswordLoading(true);
+    try {
+      await changePassword({ currentPassword, newPassword });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordSuccess(true);
+      setTimeout(() => setPasswordSuccess(false), 3000);
+    } catch (err) {
+      const detail = err.response?.data?.detail || err.message || "Failed to update password.";
+      setPasswordError(typeof detail === "string" ? detail : "Failed to update password.");
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
   return (
@@ -658,6 +694,93 @@ export default function SettingPage() {
                   ))}
                 </div>
               </div>
+            </>
+          )}
+
+          {/* Change password */}
+          {activeSection === "password" && (
+            <>
+              <h1 className="mb-2" style={{ fontFamily: "var(--font-serif)", fontSize: 30, color: "var(--ink-900)", letterSpacing: "-0.01em" }}>
+                <strong>Change</strong> password
+              </h1>
+              <p className="mb-7" style={{ fontSize: 13, color: "var(--ink-500)" }}>
+                Update your account password. You will stay signed in after saving.
+              </p>
+
+              <form onSubmit={handleChangePassword} className="cd-surface p-6 max-w-lg">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block mb-1.5" style={{ fontSize: 13, fontWeight: 500, color: "var(--ink-700)" }}>
+                      Current password
+                    </label>
+                    <input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      style={inputStyle}
+                      required
+                      autoComplete="current-password"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1.5" style={{ fontSize: 13, fontWeight: 500, color: "var(--ink-700)" }}>
+                      New password
+                    </label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      style={inputStyle}
+                      required
+                      minLength={8}
+                      autoComplete="new-password"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1.5" style={{ fontSize: 13, fontWeight: 500, color: "var(--ink-700)" }}>
+                      Confirm new password
+                    </label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      style={inputStyle}
+                      required
+                      minLength={8}
+                      autoComplete="new-password"
+                    />
+                  </div>
+                </div>
+
+                {passwordError && (
+                  <p className="mt-4 text-sm" style={{ color: "var(--clay-ink)" }}>
+                    {passwordError}
+                  </p>
+                )}
+                {passwordSuccess && (
+                  <p className="mt-4 text-sm font-medium" style={{ color: "var(--sage-ink)" }}>
+                    Password updated successfully.
+                  </p>
+                )}
+
+                <div className="flex items-center gap-3 mt-6">
+                  <button
+                    type="submit"
+                    disabled={passwordLoading}
+                    className="cd-btn cd-btn-primary disabled:opacity-50"
+                  >
+                    {passwordLoading ? "Updating…" : "Update password"}
+                  </button>
+                </div>
+
+                <p className="mt-5 text-xs" style={{ color: "var(--ink-500)" }}>
+                  Signed in with Google only? Use{" "}
+                  <Link to="/forgot-password" className="hover:underline" style={{ color: "var(--sage-ink)", fontWeight: 500 }}>
+                    Forgot password
+                  </Link>{" "}
+                  on the login page to set a password.
+                </p>
+              </form>
             </>
           )}
 
