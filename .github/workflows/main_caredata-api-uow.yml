@@ -37,15 +37,15 @@ jobs:
           chmod +x "${DEST}/startup.sh"
           test -f "${DEST}/app/main.py"
           grep -q "passlib.context" "${BACKEND}/app/core/security.py"
-          ! grep -qE '^import bcrypt' "${BACKEND}/app/core/security.py"
-          ! grep -qE '^(faster-whisper|torch|opensmile|spacy)' "${DEST}/requirements.txt"
+          ! grep -rE '^\s*(import bcrypt|from bcrypt)' "${BACKEND}/app"
+          ! grep -qE '^(faster-whisper|torch|opensmile|spacy|bcrypt)' "${DEST}/requirements.txt"
           # GitHub ubuntu-latest has glibc ~2.39; Azure App Service ~2.31.
-          # Install inside Debian bullseye so bcrypt/scipy/sklearn match Azure.
+          # Install inside Debian bullseye so scipy/sklearn wheels match Azure.
           docker run --rm \
             -v "${BACKEND}/requirements-azure.txt:/req.txt:ro" \
             -v "${DEST}/python_packages:/out" \
             python:3.12-slim-bullseye \
-            bash -c 'set -euo pipefail && pip install -q -U pip && pip install -r /req.txt -t /out/lib/site-packages && PYTHONPATH=/out/lib/site-packages python -c "import uvicorn, gunicorn, fastapi, scipy, sklearn; from passlib.context import CryptContext; print(\"deps ok\")"'
+            bash -c 'set -euo pipefail && pip install -q -U pip && pip install -r /req.txt -t /out/lib/site-packages && test ! -d /out/lib/site-packages/bcrypt && PYTHONPATH=/out/lib/site-packages python -c "import uvicorn, gunicorn, fastapi, scipy, sklearn; from passlib.context import CryptContext; print(\"deps ok\")"'
           du -sh "${DEST}/python_packages"
           ls -la "${DEST}"
 
@@ -97,8 +97,9 @@ jobs:
           test -f requirements-azure.txt
           test -d python_packages/lib/site-packages
           grep -q "passlib.context" app/core/security.py
-          ! grep -qE '^import bcrypt' app/core/security.py
-          ! grep -qE '^(faster-whisper|torch|opensmile|spacy)' requirements.txt
+          ! grep -rE '^\s*(import bcrypt|from bcrypt)' app
+          ! grep -qE '^(faster-whisper|torch|opensmile|spacy|bcrypt)' requirements.txt
+          test ! -d python_packages/lib/site-packages/bcrypt
           PYTHONPATH="$(pwd)/python_packages/lib/site-packages" python3 -c "import gunicorn, uvicorn; from passlib.context import CryptContext; print('imports ok')"
           du -sh python_packages
 

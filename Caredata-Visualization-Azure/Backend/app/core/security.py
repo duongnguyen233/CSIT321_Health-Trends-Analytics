@@ -16,14 +16,12 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     if not hashed_password:
         return False
-    # Legacy bcrypt hashes (local dev / older deploys)
-    if hashed_password.startswith(("$2a$", "$2b$", "$2y$")):
-        try:
-            import bcrypt
 
-            return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
-        except Exception:
-            return False
+    # Azure deploy does not support old bcrypt hashes.
+    # Existing users with bcrypt passwords must reset password or use Google login.
+    if hashed_password.startswith(("$2a$", "$2b$", "$2y$")):
+        return False
+
     return _pwd.verify(plain_password, hashed_password)
 
 
