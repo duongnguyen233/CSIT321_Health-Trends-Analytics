@@ -1,2 +1,3 @@
 [config]
-SCM_DO_BUILD_DURING_DEPLOYMENT=true
+# Dependencies are installed in GitHub Actions into antenv/; do not rely on Oryx at runtime.
+SCM_DO_BUILD_DURING_DEPLOYMENT=false
