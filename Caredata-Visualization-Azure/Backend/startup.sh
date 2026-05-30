@@ -57,6 +57,12 @@ fi
 echo "Installing from $REQ into /home/site/packages (~2-4 min)..."
 rm -rf "$HOME_PKG"
 mkdir -p "$HOME_PKG"
+python3 -m pip install -r "$REQ" -t "$HOME_PKG" --no-cache-dir \
+  --platform manylinux2014_x86_64 \
+  --python-version 3.12 \
+  --implementation cp \
+  --abi cp312 \
+  --only-binary=:all: || \
 python3 -m pip install -r "$REQ" -t "$HOME_PKG" --no-cache-dir
 export PYTHONPATH="$HOME_PKG"
 python3 -c "import uvicorn, gunicorn, fastapi; print('dependencies ready')"
