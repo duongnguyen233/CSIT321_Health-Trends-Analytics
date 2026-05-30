@@ -1,0 +1,22 @@
+# Slim install for Azure App Service (CI + zip deploy).
+# Full voice ML (openSMILE, Praat, faster-whisper, etc.) is optional on server;
+# those import lazily — API starts without them; voice uploads may fail until added.
+
+fastapi==0.119.0
+uvicorn==0.37.0
+gunicorn==23.0.0
+pydantic>=2.0
+pydantic-settings>=2.0
+python-dotenv==1.1.1
+python-jose[cryptography]==3.3.0
+python-multipart==0.0.20
+passlib[bcrypt]>=1.7.4
+azure-data-tables>=12.4.0
+azure-storage-blob>=12.23.0
+openai>=1.0.0
+numpy>=1.26,<3.0
+scipy>=1.13
+joblib>=1.4
+scikit-learn>=1.5
+soundfile>=0.12
+ruptures>=1.1
