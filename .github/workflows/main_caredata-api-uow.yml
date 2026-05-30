@@ -36,6 +36,8 @@ jobs:
           cp "${BACKEND}/.deployment" "${DEST}/" 2>/dev/null || true
           chmod +x "${DEST}/startup.sh"
           test -f "${DEST}/app/main.py"
+          grep -q "passlib.context" "${BACKEND}/app/core/security.py"
+          ! grep -qE '^import bcrypt' "${BACKEND}/app/core/security.py"
           ! grep -qE '^(faster-whisper|torch|opensmile|spacy)' "${DEST}/requirements.txt"
           # GitHub ubuntu-latest has glibc ~2.39; Azure App Service ~2.31.
           # Install inside Debian bullseye so bcrypt/scipy/sklearn match Azure.
@@ -94,6 +96,8 @@ jobs:
           test -f startup.sh
           test -f requirements-azure.txt
           test -d python_packages/lib/site-packages
+          grep -q "passlib.context" app/core/security.py
+          ! grep -qE '^import bcrypt' app/core/security.py
           ! grep -qE '^(faster-whisper|torch|opensmile|spacy)' requirements.txt
           PYTHONPATH="$(pwd)/python_packages/lib/site-packages" python3 -c "import gunicorn, uvicorn; from passlib.context import CryptContext; print('imports ok')"
           du -sh python_packages

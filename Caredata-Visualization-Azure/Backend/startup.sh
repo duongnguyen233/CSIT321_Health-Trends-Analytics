@@ -1,7 +1,9 @@
 #!/bin/bash
 # Azure App Service (Linux) — Portal Startup Command:  bash startup.sh
+# Deploy bundle: 2026-05-30-v3 (passlib pbkdf2, python_packages, slim requirements)
 set -euo pipefail
 cd /home/site/wwwroot
+echo "CareData API startup bundle 2026-05-30-v3"
 
 # CI deploy uses python_packages/ (visible). Legacy zips may use .python_packages/.
 for SITE_PKG in \
