@@ -11,6 +11,33 @@ const NAV_ITEMS = [
   { name: "Benchmarking", path: "/benchmarking" },
 ];
 
+function MenuIcon({ open }) {
+  return (
+    <svg
+      className="w-6 h-6"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      aria-hidden
+    >
+      {open ? (
+        <>
+          <path d="M6 6l12 12" />
+          <path d="M18 6L6 18" />
+        </>
+      ) : (
+        <>
+          <path d="M4 7h16" />
+          <path d="M4 12h16" />
+          <path d="M4 17h16" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -81,6 +108,13 @@ export default function Navbar() {
     setIsOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   const isActive = (path) => {
     if (path === "/dashboard") return location.pathname === "/dashboard";
     if (path === "/upload-csv") return location.pathname.startsWith("/upload-csv");
@@ -93,6 +127,17 @@ export default function Navbar() {
 
   const initial = user?.firstName?.charAt(0)?.toUpperCase() || "U";
 
+  const navLinkClass = (active, mobile = false) =>
+    [
+      "text-sm font-medium transition-all rounded-md",
+      mobile ? "block w-full px-4 py-3 text-left" : "px-3 py-1.5 whitespace-nowrap",
+    ].join(" ");
+
+  const navLinkStyle = (active) =>
+    active
+      ? { background: "var(--ink-900)", color: "var(--bg-paper)" }
+      : { color: "var(--ink-700)" };
+
   return (
     <nav
       className="fixed top-0 left-0 w-full z-50"
@@ -101,72 +146,67 @@ export default function Navbar() {
         borderBottom: "1px solid var(--line)",
       }}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16 relative">
-        {/* Left, brand */}
-        <Link to="/" className="flex items-center gap-2.5 shrink-0 hover:opacity-90 transition">
-          <BrandMark size={28} />
-          <span className="flex flex-col leading-none">
-            <span className="text-[15px] font-semibold tracking-tight" style={{ color: "var(--ink-900)" }}>
+      {/* Top bar: brand + desktop nav OR mobile menu button */}
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 px-4 sm:px-6 h-16">
+        <Link
+          to="/"
+          className="flex items-center gap-2 min-w-0 hover:opacity-90 transition"
+          onClick={() => setIsOpen(false)}
+        >
+          <BrandMark size={28} className="shrink-0" />
+          <span className="flex flex-col leading-none min-w-0">
+            <span
+              className="text-[15px] font-semibold tracking-tight truncate"
+              style={{ color: "var(--ink-900)" }}
+            >
               CareData
             </span>
-            <span className="text-[11px] font-normal mt-[2px]" style={{ color: "var(--ink-500)" }}>
+            <span
+              className="text-[11px] font-normal mt-[2px] truncate hidden sm:block"
+              style={{ color: "var(--ink-500)" }}
+            >
               Health Analytics Portal
             </span>
           </span>
         </Link>
 
-        {/* Mobile hamburger */}
-        {user && (
-          <button
-            type="button"
-            className="sm:hidden focus:outline-none p-2 shrink-0"
-            style={{ color: "var(--ink-900)" }}
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label="Menu"
-          >
-            {isOpen ? "✕" : "☰"}
-          </button>
-        )}
+        {/* Desktop: centered nav + user */}
+        {user ? (
+          <div className="hidden lg:flex flex-1 items-center justify-center min-w-0">
+            <div className="flex items-center gap-1">
+              {NAV_ITEMS.map((item) => {
+                const active = isActive(item.path);
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={navLinkClass(active)}
+                    style={navLinkStyle(active)}
+                    onMouseEnter={(e) => {
+                      if (!active) e.currentTarget.style.background = "var(--bg-cream)";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active) e.currentTarget.style.background = "transparent";
+                    }}
+                  >
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
 
-        <div
-          className={`${user ? (isOpen ? "flex" : "hidden") : "flex"} sm:flex flex-col sm:flex-row sm:items-center sm:ml-auto gap-4 sm:gap-0`}
-        >
+        <div className="flex items-center gap-2 shrink-0">
           {user ? (
             <>
-              {/* Center, nav links */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1 sm:absolute sm:left-1/2 sm:-translate-x-1/2">
-                {NAV_ITEMS.map((item) => {
-                  const active = isActive(item.path);
-                  return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setIsOpen(false)}
-                      className="px-3 py-1.5 text-sm font-medium transition-all whitespace-nowrap rounded-md"
-                      style={
-                        active
-                          ? { background: "var(--ink-900)", color: "var(--bg-paper)" }
-                          : { color: "var(--ink-700)" }
-                      }
-                      onMouseEnter={(e) => {
-                        if (!active) e.currentTarget.style.background = "var(--bg-cream)";
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!active) e.currentTarget.style.background = "transparent";
-                      }}
-                    >
-                      {item.name}
-                    </Link>
-                  );
-                })}
-              </div>
-
-              {/* Right, user dropdown */}
-              <div className="relative shrink-0" ref={userMenuRef}>
+              <div className="hidden lg:block relative" ref={userMenuRef}>
                 <button
                   type="button"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="flex items-center gap-2 hover:opacity-80 transition"
+                  aria-expanded={userMenuOpen}
+                  aria-haspopup="true"
                 >
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center"
@@ -178,11 +218,14 @@ export default function Navbar() {
                   >
                     <span className="text-xs font-semibold">{initial}</span>
                   </div>
-                  <span className="text-sm font-medium whitespace-nowrap" style={{ color: "var(--ink-700)" }}>
+                  <span
+                    className="text-sm font-medium whitespace-nowrap max-w-[120px] truncate"
+                    style={{ color: "var(--ink-700)" }}
+                  >
                     {user.firstName || "User"}
                   </span>
                   <svg
-                    className={`w-3.5 h-3.5 transition-transform ${userMenuOpen ? "rotate-180" : ""}`}
+                    className={`w-3.5 h-3.5 shrink-0 transition-transform ${userMenuOpen ? "rotate-180" : ""}`}
                     style={{ color: "var(--ink-500)" }}
                     fill="none"
                     viewBox="0 0 24 24"
@@ -203,6 +246,7 @@ export default function Navbar() {
                     }}
                   >
                     <button
+                      type="button"
                       onClick={() => {
                         navigate("/settings");
                         setUserMenuOpen(false);
@@ -213,6 +257,7 @@ export default function Navbar() {
                       Settings
                     </button>
                     <button
+                      type="button"
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm font-medium transition"
                       style={{ color: "var(--ink-500)" }}
@@ -222,21 +267,108 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
+
+              <button
+                type="button"
+                className="lg:hidden p-2 -mr-1 rounded-md"
+                style={{ color: "var(--ink-900)" }}
+                onClick={() => setIsOpen((v) => !v)}
+                aria-label={isOpen ? "Close menu" : "Open menu"}
+                aria-expanded={isOpen}
+              >
+                <MenuIcon open={isOpen} />
+              </button>
             </>
           ) : (
-            <div className="sm:flex-1 flex sm:justify-end">
-              <Link
-                to="/login"
-                onClick={() => setIsOpen(false)}
-                className="text-sm font-semibold transition whitespace-nowrap"
-                style={{ color: "var(--ink-900)" }}
-              >
-                Sign In
-              </Link>
-            </div>
+            <Link
+              to="/login"
+              className="text-sm font-semibold transition whitespace-nowrap px-2 py-1"
+              style={{ color: "var(--ink-900)" }}
+            >
+              Sign In
+            </Link>
           )}
         </div>
       </div>
+
+      {/* Mobile menu: full-width panel below header */}
+      {user && isOpen && (
+        <>
+          <button
+            type="button"
+            className="lg:hidden fixed inset-0 top-16 z-40 bg-black/20"
+            aria-label="Close menu"
+            onClick={() => setIsOpen(false)}
+          />
+          <div
+            className="lg:hidden relative z-50 border-t px-4 py-4 max-h-[calc(100vh-4rem)] overflow-y-auto"
+            style={{
+              background: "var(--bg-paper)",
+              borderColor: "var(--line)",
+            }}
+          >
+            <nav className="flex flex-col gap-1" aria-label="Main">
+              {NAV_ITEMS.map((item) => {
+                const active = isActive(item.path);
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setIsOpen(false)}
+                    className={navLinkClass(active, true)}
+                    style={navLinkStyle(active)}
+                  >
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <div
+              className="mt-4 pt-4 flex flex-col gap-1"
+              style={{ borderTop: "1px solid var(--line-soft)" }}
+            >
+              <div className="flex items-center gap-3 px-4 py-2 mb-1">
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                  style={{
+                    background: "var(--bg-sage-tint)",
+                    color: "var(--sage-ink)",
+                    border: "1px solid var(--line)",
+                  }}
+                >
+                  <span className="text-sm font-semibold">{initial}</span>
+                </div>
+                <span className="text-sm font-medium truncate" style={{ color: "var(--ink-900)" }}>
+                  {user.firstName || "User"} {user.lastName || ""}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  navigate("/settings");
+                  setIsOpen(false);
+                }}
+                className="w-full text-left px-4 py-3 text-sm font-medium rounded-md transition"
+                style={{ color: "var(--ink-700)" }}
+              >
+                Settings
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  handleLogout();
+                }}
+                className="w-full text-left px-4 py-3 text-sm font-medium rounded-md transition"
+                style={{ color: "var(--ink-500)" }}
+              >
+                Log out
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </nav>
   );
 }

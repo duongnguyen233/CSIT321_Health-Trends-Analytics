@@ -4,6 +4,7 @@ import { jsPDF } from "jspdf";
 import Navbar from "../common/Navbar";
 import Footer from "../common/Footer";
 import MyDataSidebar from "./MyDataSidebar";
+import MobileSidebarPanel, { PAGE_MAIN_ROW } from "../common/MobileSidebarPanel";
 import {
   getMyData,
   getRecommendations,
@@ -446,10 +447,12 @@ export default function DocumentationPage() {
     <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-cream)" }}>
       <Navbar active="My Data" />
 
-      <main className="flex flex-grow pt-32 pb-12 px-4 sm:px-6 max-w-7xl mx-auto gap-6">
-        <MyDataSidebar activePage="Documentation" />
+      <main className={`${PAGE_MAIN_ROW} pt-32 max-w-7xl`}>
+        <MobileSidebarPanel menuLabel="Workspace">
+          <MyDataSidebar activePage="Documentation" />
+        </MobileSidebarPanel>
 
-        <div className="flex-1 cd-surface p-8">
+        <div className="flex-1 min-w-0 w-full cd-surface p-4 sm:p-8">
           <span className="cd-chip mb-3" style={{ display: "inline-flex" }}>
             <span className="dot" /> Reports
           </span>

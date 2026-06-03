@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
+import MobileSidebarPanel from "../components/common/MobileSidebarPanel";
 import ResidentDetailPanel from "../components/voice/ResidentDetailPanel";
 import VoiceAlertsFeed from "../components/voice/VoiceAlertsFeed";
 import IssueLinksDialog from "../components/voice/IssueLinksDialog";
@@ -137,17 +138,18 @@ export default function VoiceDashboardPage() {
       style={{ background: "var(--bg-cream)" }}
     >
       <Navbar />
-      <main className="flex flex-grow pt-24 pb-12 px-4 sm:px-8 max-w-[1440px] mx-auto gap-6 w-full">
-        {/* Sidebar */}
-        <Sidebar
-          activeView={activeView}
-          setActiveView={setActiveView}
-          summary={summary}
-          onIssueLinks={() => setIssueDialogOpen(true)}
-        />
+      <main className="flex flex-col xl:flex-row flex-grow pt-24 pb-12 px-4 sm:px-8 max-w-[1440px] mx-auto gap-6 w-full items-start">
+        <MobileSidebarPanel menuLabel="Voice screening">
+          <Sidebar
+            activeView={activeView}
+            setActiveView={setActiveView}
+            summary={summary}
+            onIssueLinks={() => setIssueDialogOpen(true)}
+          />
+        </MobileSidebarPanel>
 
         {/* Main column */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-full">
           <PageHeader
             quarterLabel={`${residents.length} resident${
               residents.length === 1 ? "" : "s"
@@ -240,7 +242,7 @@ function Sidebar({ activeView, setActiveView, summary, onIssueLinks }) {
   };
   return (
     <aside
-      className="shrink-0 w-60 self-start sticky top-24"
+      className="shrink-0 w-full lg:w-60 self-start static lg:sticky lg:top-24"
       style={{
         background: "var(--bg-white)",
         border: "1px solid var(--line)",

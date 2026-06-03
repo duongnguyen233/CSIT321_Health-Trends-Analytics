@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
+import MobileSidebarPanel, { PAGE_MAIN_ROW } from "../components/common/MobileSidebarPanel";
 import { getQIAggregates, getQIResidents } from "../services/api";
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
@@ -449,10 +450,10 @@ export default function ReportsPage() {
     <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-cream)" }}>
       <Navbar />
 
-      <main className="flex flex-grow pt-28 pb-12 px-4 sm:px-8 max-w-[1280px] mx-auto gap-6 w-full">
-        {/* Sidebar */}
+      <main className={`${PAGE_MAIN_ROW} pt-28 max-w-[1280px]`}>
+        <MobileSidebarPanel menuLabel="QI indicators">
         <aside
-          className="p-4 overflow-y-auto w-56 md:w-60 lg:w-64 max-h-[85vh] shrink-0 self-start sticky top-24"
+          className="p-4 overflow-y-auto w-full lg:w-60 max-h-[70vh] lg:max-h-[85vh] shrink-0 self-start static lg:sticky lg:top-24"
           style={{
             background: "var(--bg-white)",
             border: "1px solid var(--line)",
@@ -495,9 +496,10 @@ export default function ReportsPage() {
             })}
           </ul>
         </aside>
+        </MobileSidebarPanel>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 cd-surface p-8">
+        <div className="flex-1 min-w-0 w-full cd-surface p-4 sm:p-8">
 
           {/* Header */}
           <div className="flex flex-wrap items-start justify-between gap-4 mb-5">

@@ -2,6 +2,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../common/Navbar";
 import Footer from "../common/Footer";
 import MyDataSidebar from "./MyDataSidebar";
+import MobileSidebarPanel, { PAGE_MAIN_ROW } from "../common/MobileSidebarPanel";
 import {
   LineChart,
   Line,
@@ -67,10 +68,12 @@ export default function DomainDetailsPage() {
     <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-cream)" }}>
       <Navbar active="My Data" />
 
-      <main className="flex flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto gap-6 w-full">
-        <MyDataSidebar activePage="My Data" />
+      <main className={`${PAGE_MAIN_ROW} max-w-[1280px]`}>
+        <MobileSidebarPanel menuLabel="Workspace">
+          <MyDataSidebar activePage="My Data" />
+        </MobileSidebarPanel>
 
-        <div className="flex-1 cd-surface p-8">
+        <div className="flex-1 min-w-0 w-full cd-surface p-4 sm:p-8">
           <div className="flex justify-between items-center mb-6">
             <div>
               <span className="cd-chip mb-2" style={{ display: "inline-flex" }}>

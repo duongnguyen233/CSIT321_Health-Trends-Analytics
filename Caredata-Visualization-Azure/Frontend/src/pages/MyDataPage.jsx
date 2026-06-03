@@ -1,6 +1,7 @@
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import MyDataSidebar from "../components/mydata/MyDataSidebar";
+import MobileSidebarPanel, { PAGE_MAIN_ROW } from "../components/common/MobileSidebarPanel";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
@@ -319,15 +320,13 @@ export default function MyDataPage() {
       <Navbar />
 
       <main
-        className="flex gap-6 mx-auto"
-        style={{
-          maxWidth: 1400,
-          padding: "88px 32px 48px",
-        }}
+        className={`${PAGE_MAIN_ROW} max-w-[1400px] pt-[88px]`}
       >
-        <MyDataSidebar activePage="My Data" />
+        <MobileSidebarPanel menuLabel="Workspace">
+          <MyDataSidebar activePage="My Data" />
+        </MobileSidebarPanel>
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-full">
           {/* Header */}
           <div className="mb-6">
             <div className="cd-chip mb-3">

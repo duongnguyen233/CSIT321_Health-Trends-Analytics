@@ -4,6 +4,7 @@ import { ChevronDown, Search, Sparkles, ArrowUpFromLine } from "../../icons/luci
 import Navbar from "../common/Navbar";
 import Footer from "../common/Footer";
 import MyDataSidebar from "./MyDataSidebar";
+import MobileSidebarPanel, { PAGE_MAIN_ROW } from "../common/MobileSidebarPanel";
 import { getMyData, getHealthScanHistory } from "../../services/api";
 import { HEALTH_SCAN_RESULT_KEY } from "../../constants";
 import {
@@ -292,13 +293,12 @@ export default function Dashboard() {
     <div style={{ background: "var(--bg-cream)", minHeight: "100vh" }}>
       <Navbar />
 
-      <main
-        className="flex gap-6 mx-auto"
-        style={{ maxWidth: 1400, padding: "88px 32px 48px" }}
-      >
-        <MyDataSidebar activePage="Dashboard" />
+      <main className={`${PAGE_MAIN_ROW} max-w-[1400px] pt-[88px]`}>
+        <MobileSidebarPanel menuLabel="Workspace">
+          <MyDataSidebar activePage="Dashboard" />
+        </MobileSidebarPanel>
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-full">
           {/* Header */}
           <div className="flex flex-wrap justify-between items-end gap-6 mb-6">
             <div>

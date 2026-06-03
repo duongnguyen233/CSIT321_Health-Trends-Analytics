@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
+import MobileSidebarPanel, { PAGE_MAIN_ROW } from "../components/common/MobileSidebarPanel";
 import { getQIAggregates, getGPMSList, getGPMSByDate } from "../services/api";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -683,7 +684,7 @@ export default function QIDashboardPage() {
 
   const sidebar = (
     <aside
-      className="shrink-0 w-60 self-start sticky top-24"
+      className="shrink-0 w-full lg:w-60 self-start static lg:sticky lg:top-24"
       style={{
         background: "var(--bg-white)",
         border: "1px solid var(--line)",
@@ -1820,12 +1821,14 @@ export default function QIDashboardPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-cream)" }}>
       <Navbar />
-      <main className="flex flex-grow pt-24 pb-12 px-4 sm:px-8 max-w-[1440px] mx-auto gap-6 w-full">
-        {sidebar}
-        {activePage === "overview" && overviewTab}
-        {activePage === "visualization" && visualizationTab}
-        {activePage === "trends" && trendsTab}
-        {activePage === "risk" && riskTab}
+      <main className={`${PAGE_MAIN_ROW} max-w-[1440px]`}>
+        <MobileSidebarPanel menuLabel="Facility view">{sidebar}</MobileSidebarPanel>
+        <div className="flex-1 min-w-0 w-full">
+          {activePage === "overview" && overviewTab}
+          {activePage === "visualization" && visualizationTab}
+          {activePage === "trends" && trendsTab}
+          {activePage === "risk" && riskTab}
+        </div>
       </main>
       <Footer />
       <style>{`

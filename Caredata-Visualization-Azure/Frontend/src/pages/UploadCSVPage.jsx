@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
+import MobileSidebarPanel, { PAGE_MAIN_ROW } from "../components/common/MobileSidebarPanel";
 import { uploadAndAnalyzeCSV, getUploadHistory, downloadUploadCSV, deleteUpload, api, getGPMSList, getGPMSByDate, saveGPMS } from "../services/api";
 import * as XLSX from "xlsx";
 
@@ -593,7 +594,7 @@ export default function UploadCSVPage() {
 
   const sidebar = (
     <aside
-      className="shrink-0 w-60 self-start sticky top-24"
+      className="shrink-0 w-full lg:w-60 self-start static lg:sticky lg:top-24"
       style={{
         background: "var(--bg-white)",
         border: "1px solid var(--line)",
@@ -1443,11 +1444,13 @@ export default function UploadCSVPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-cream)" }}>
       <Navbar />
-      <main className="flex flex-grow pt-24 pb-12 px-4 sm:px-8 max-w-[1440px] mx-auto gap-6 w-full items-start">
-        {sidebar}
-        {activeTab === "upload" && uploadTab}
-        {activeTab === "manual" && manualEntryTab}
-        {activeTab === "download" && downloadTab}
+      <main className={`${PAGE_MAIN_ROW} max-w-[1440px]`}>
+        <MobileSidebarPanel menuLabel="Data entry">{sidebar}</MobileSidebarPanel>
+        <div className="flex-1 min-w-0 w-full">
+          {activeTab === "upload" && uploadTab}
+          {activeTab === "manual" && manualEntryTab}
+          {activeTab === "download" && downloadTab}
+        </div>
       </main>
       <Footer />
     </div>

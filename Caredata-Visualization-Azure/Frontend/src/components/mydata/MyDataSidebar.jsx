@@ -31,15 +31,12 @@ export default function MyDataSidebar({ activePage = "Dashboard" }) {
 
   return (
     <aside
-      className="shrink-0 self-start"
+      className="shrink-0 self-start w-full lg:w-60 static lg:sticky lg:top-24"
       style={{
         background: "var(--bg-white)",
         border: "1px solid var(--line)",
         borderRadius: "var(--r-lg)",
         padding: "18px 14px",
-        width: 240,
-        position: "sticky",
-        top: 88,
       }}
     >
       {SECTIONS.map((section, sIdx) => (

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Navbar from "../common/Navbar";
 import Footer from "../common/Footer";
 import MyDataSidebar from "./MyDataSidebar";
+import MobileSidebarPanel, { PAGE_MAIN_ROW } from "../common/MobileSidebarPanel";
 import {
   getUploadHistory,
   deleteUpload,
@@ -108,10 +109,12 @@ export default function UploadedHistoryPage() {
     <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-cream)" }}>
       <Navbar active="My Data" />
 
-      <main className="flex flex-grow pt-32 pb-12 px-4 sm:px-6 max-w-[1280px] mx-auto gap-6">
-        <MyDataSidebar activePage="Uploaded History" />
+      <main className={`${PAGE_MAIN_ROW} pt-32 max-w-[1280px]`}>
+        <MobileSidebarPanel menuLabel="Workspace">
+          <MyDataSidebar activePage="Uploaded History" />
+        </MobileSidebarPanel>
 
-        <div className="flex-1 cd-surface p-8">
+        <div className="flex-1 min-w-0 w-full cd-surface p-4 sm:p-8">
           <span className="cd-chip mb-3" style={{ display: "inline-flex" }}>
             <span className="dot" /> History
           </span>
