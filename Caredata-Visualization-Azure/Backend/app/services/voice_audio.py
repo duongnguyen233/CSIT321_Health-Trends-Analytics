@@ -120,8 +120,21 @@ def transcode_to_wav(input_bytes: bytes, target_sr: int = TARGET_SR) -> bytes:
         sf.write(buf, data, target_sr, subtype="PCM_16", format="WAV")
         return buf.getvalue()
     except Exception as e:
+        missing = []
+        if not ffmpeg_available():
+            missing.append("ffmpeg on PATH, or pip install av")
+        try:
+            import av as _av  # noqa: F401
+        except ImportError:
+            if "pip install av" not in " ".join(missing):
+                missing.append("pip install av")
+        try:
+            import librosa as _lib  # noqa: F401
+        except ImportError:
+            missing.append("pip install librosa")
+        hint = f" Install: {'; '.join(missing)}." if missing else ""
         raise FFmpegError(
-            f"all transcode tiers failed (final soundfile error: {e!r})"
+            f"all transcode tiers failed (final soundfile error: {e!r}).{hint}"
         ) from e
 
 

@@ -82,6 +82,25 @@ def _subscore_for_dimension(
     return float(math.tanh(peak / 3.0) * 100.0)
 
 
+def score_enrolment_preview(features: Mapping) -> dict:
+    """Pre-baseline display scores from raw features (not vs personal baseline).
+
+    Lets the nurse dashboard show meaningful sub-scores while the resident
+    is still in the enrolment window (before lock-baseline). concern_score
+    stays 0 until a baseline exists.
+    """
+    deltas = {name: float(v) for name, v in zip(FEATURE_NAMES, build_full_vector(features))}
+    subscores = {dim: _subscore_for_dimension(dim, deltas) for dim in DIMENSIONS}
+    return {
+        "concern_score": 0.0,
+        "mahalanobis": None,
+        "iforest": None,
+        "subscores": {k: float(v) for k, v in subscores.items()},
+        "feature_deltas": {},
+        "enrolment_preview": True,
+    }
+
+
 def score_recording(
     features: Mapping,
     baseline: Mapping,

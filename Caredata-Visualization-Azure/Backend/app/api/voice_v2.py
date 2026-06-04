@@ -57,7 +57,7 @@ from app.services import (
 from app.services.jwt_auth import get_current_user
 from app.services.voice_alerts import evaluate_alerts
 from app.services.voice_processor_v2 import LowSnrError, extract_all
-from app.services.voice_score import score_recording
+from app.services.voice_score import score_enrolment_preview, score_recording
 
 
 router = APIRouter(prefix="/api/voice/v2", tags=["Voice Biomarker v2"])
@@ -91,9 +91,22 @@ def _link_is_consumed(link: dict) -> bool:
 
 
 def _validation_400(prefix: str, errors):
+    """Return 400 with JSON-serializable pydantic error details (avoids 500 on HTTPException)."""
+    safe_errors = []
+    for err in errors:
+        if isinstance(err, dict):
+            safe_errors.append(
+                {
+                    "type": err.get("type"),
+                    "loc": err.get("loc"),
+                    "msg": err.get("msg"),
+                }
+            )
+        else:
+            safe_errors.append(str(err))
     raise HTTPException(
         status_code=400,
-        detail={"code": "VALIDATION", "where": prefix, "errors": list(errors)},
+        detail={"code": "VALIDATION", "where": prefix, "errors": safe_errors},
     )
 
 
@@ -363,9 +376,7 @@ def _process_recording_v2(recording_id: str, profile_id: str) -> None:
             profile_id, recording_id, snr_db=features.get("snr_db"),
         )
 
-        # Score against baseline if locked. Without a baseline we still
-        # write a placeholder Score row with concern_score=0 so the
-        # time-series charts on the dashboard have continuity.
+        # Score against baseline when locked; otherwise enrolment preview sub-scores.
         profile = voice_profile_db.get_by_id(profile_id) or {}
         baseline_uri = profile.get("baseline_blob_uri")
         if baseline_uri:
@@ -402,16 +413,23 @@ def _process_recording_v2(recording_id: str, profile_id: str) -> None:
                     recording_id, profile_id,
                 )
         else:
-            # Pre-baseline enrolment recording — placeholder zero score
+            # Pre-baseline: show raw dimension strengths (not anomaly vs baseline).
+            preview = score_enrolment_preview(features)
             voice_score_db.create_score(
                 profile_id=profile_id,
                 recording_id=recording_id,
-                concern_score=0.0,
-                subscores={
-                    "phonatory": 0.0, "articulatory": 0.0, "prosodic": 0.0,
-                    "respiratory": 0.0, "linguistic": 0.0,
-                },
+                concern_score=preview["concern_score"],
+                subscores=preview["subscores"],
             )
+
+        enrolment_count = len(voice_features_db.list_features(profile_id))
+        voice_profile_db.update_profile(
+            profile_id,
+            {
+                "last_recording_date": datetime.now(timezone.utc).isoformat(),
+                "baseline_recording_count": enrolment_count,
+            },
+        )
 
         voice_recording_db.update_status(profile_id, recording_id, "done")
         logger.info(
@@ -658,12 +676,15 @@ def list_residents_for_nurse(
             )
             if rid else None
         )
+        enrolment_count = len(voice_features_db.list_features(p["profile_id"]))
         out.append({
             "profile_id": p["profile_id"],
             "resident_id": rid,
             "display_name": p.get("display_name"),
             "baseline_locked_at": p.get("baseline_locked_at"),
             "baseline_version": p.get("baseline_version", 0),
+            "enrolment_recording_count": enrolment_count,
+            "enrolment_recordings_required": BASELINE_RECORDINGS_REQUIRED,
             "last_recording_date": p.get("last_recording_date"),
             "latest_concern_score": (
                 latest_score.get("concern_score") if latest_score else None

@@ -31,6 +31,9 @@ const AUDIO_CONSTRAINTS = {
   },
 };
 
+/** Minimum clip length when the resident taps "Stop early" (seconds). */
+const MIN_EARLY_STOP_S = 10;
+
 
 function stageColor(idx, total) {
   const palette = ["#8AA791", "#95A8BD", "#B7A07F", "#A4ACA6"];
@@ -56,6 +59,7 @@ export default function RecordingWidget({ token, stages, onComplete, onError }) 
   const chunksRef = useRef([]);
   const tickRef = useRef(null);
   const startTsRef = useRef(0);
+  const stageIdxRef = useRef(0);
   const stageTimestampsRef = useRef([]);
 
   const totalTarget = useMemo(
@@ -97,6 +101,7 @@ export default function RecordingWidget({ token, stages, onComplete, onError }) 
 
       startTsRef.current = performance.now();
       stageTimestampsRef.current[0].start = 0;
+      stageIdxRef.current = 0;
       setStageIdx(0);
       setElapsed(0);
       setPhase("recording");
@@ -116,10 +121,12 @@ export default function RecordingWidget({ token, stages, onComplete, onError }) 
     const now = (performance.now() - startTsRef.current) / 1000;
     setElapsed(now);
     const idx = stageIdxFromElapsed(now);
-    if (idx !== stageIdx) {
+    if (idx !== stageIdxRef.current) {
       const ts = stageTimestampsRef.current;
-      if (ts[stageIdx]) ts[stageIdx].end = now;
+      const prev = stageIdxRef.current;
+      if (ts[prev]) ts[prev].end = now;
       if (idx < stages.length && ts[idx]) ts[idx].start = now;
+      stageIdxRef.current = idx;
       setStageIdx(idx);
       if (idx >= stages.length) finishRecording();
     }
@@ -139,9 +146,14 @@ export default function RecordingWidget({ token, stages, onComplete, onError }) 
       clearInterval(tickRef.current);
       tickRef.current = null;
     }
+    const now = (performance.now() - startTsRef.current) / 1000;
     const ts = stageTimestampsRef.current;
+    const idx = Math.min(stageIdxRef.current, stages.length - 1);
+    if (ts[idx] && ts[idx].end == null) {
+      ts[idx].end = now;
+    }
     if (ts[stages.length - 1] && ts[stages.length - 1].end == null) {
-      ts[stages.length - 1].end = (performance.now() - startTsRef.current) / 1000;
+      ts[stages.length - 1].end = now;
     }
     const rec = mediaRecorderRef.current;
     if (rec && rec.state !== "inactive") rec.stop();
@@ -158,12 +170,21 @@ export default function RecordingWidget({ token, stages, onComplete, onError }) 
       return;
     }
 
+    const recordedSeconds = (performance.now() - startTsRef.current) / 1000;
+    if (recordedSeconds < MIN_EARLY_STOP_S) {
+      setErrorMsg(
+        `Please record at least ${MIN_EARLY_STOP_S} seconds before stopping.`
+      );
+      setPhase("error");
+      return;
+    }
+
     setPhase("uploading");
     try {
       const blob = new Blob(chunksRef.current, {
         type: chunksRef.current[0].type || "audio/webm",
       });
-      const stageOffsets = buildStageOffsetsFromTimestamps();
+      const stageOffsets = buildStageOffsetsFromTimestamps(recordedSeconds);
       const clientMeta = {
         ua: navigator.userAgent || "unknown",
         sample_rate: trackSettings.sampleRate || 48000,
@@ -218,7 +239,7 @@ export default function RecordingWidget({ token, stages, onComplete, onError }) 
         code === "AUDIO_CONSTRAINTS_VIOLATED"
           ? "Your browser is preprocessing the audio. Please try a different browser, or check your microphone settings."
           : code === "VALIDATION"
-          ? "The recording could not be validated by the server. Please try again."
+          ? "The recording could not be validated. Please try again."
           : `Upload failed: ${e?.message || "unknown error"}`;
       setErrorMsg(msg);
       setPhase("error");
@@ -226,14 +247,53 @@ export default function RecordingWidget({ token, stages, onComplete, onError }) 
     }
   }
 
-  function buildStageOffsetsFromTimestamps() {
+  /** Split [0, total] across the four script stages (valid for early stop uploads). */
+  function buildProportionalStageOffsets(total) {
+    const MIN_STAGE_S = 0.1;
+    const weights = stages.map((s) => s.target_duration_s || 1);
+    const weightSum = weights.reduce((a, b) => a + b, 0);
+    const out = {};
+    let start = 0;
+    for (let i = 0; i < stages.length; i++) {
+      const isLast = i === stages.length - 1;
+      let end = isLast ? total : start + (total * weights[i]) / weightSum;
+      if (!isLast && end - start < MIN_STAGE_S) end = start + MIN_STAGE_S;
+      if (end > total) end = total;
+      if (end <= start) end = Math.min(total, start + MIN_STAGE_S);
+      out[stages[i].id] = [Number(start.toFixed(2)), Number(end.toFixed(2))];
+      start = end;
+    }
+    const lastId = stages[stages.length - 1].id;
+    out[lastId][1] = Number(total.toFixed(2));
+    return out;
+  }
+
+  function buildStageOffsetsFromTimestamps(recordedSeconds) {
+    const total = Math.max(0.1, recordedSeconds);
+    const earlyStop = total < totalTarget * 0.85;
+
+    if (earlyStop) {
+      return buildProportionalStageOffsets(total);
+    }
+
     const ts = stageTimestampsRef.current;
-    const total = (performance.now() - startTsRef.current) / 1000;
+    const MIN_STAGE_S = 0.15;
     const out = {};
     for (let i = 0; i < stages.length; i++) {
-      const s = ts[i];
-      const start = s?.start ?? 0;
-      const end = s?.end ?? Math.min(total, start + (stages[i].target_duration_s || 0));
+      let start = ts[i]?.start;
+      let end = ts[i]?.end;
+      if (start == null) {
+        start = Math.max(0, total - MIN_STAGE_S);
+      }
+      if (end == null) {
+        end = Math.min(total, start + (stages[i].target_duration_s || MIN_STAGE_S));
+      }
+      if (end <= start) {
+        end = Math.min(total, start + MIN_STAGE_S);
+      }
+      if (end <= start) {
+        start = Math.max(0, end - MIN_STAGE_S);
+      }
       out[stages[i].id] = [Number(start.toFixed(2)), Number(end.toFixed(2))];
     }
     return out;
@@ -442,7 +502,7 @@ function RecordingPanel({ stages, stageIdx, elapsed, totalTarget, onStop }) {
           onClick={onStop}
           className="text-sm font-semibold text-gray-700 underline hover:text-gray-900"
         >
-          Stop early
+          Stop early (min {MIN_EARLY_STOP_S}s)
         </button>
       </div>
     </motion.div>

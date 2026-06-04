@@ -604,6 +604,21 @@ function ResidentsTable({ rows, alertsByProfile, loading, onOpen, onIssueLink })
                   </div>
                   <div style={{ fontSize: 11, color: "var(--ink-500)", marginTop: 2 }}>
                     {r.resident_id}
+                    {!r.baseline_locked_at && (
+                      <span
+                        style={{
+                          marginLeft: 8,
+                          padding: "1px 6px",
+                          borderRadius: 999,
+                          background: "var(--bg-cream)",
+                          color: "var(--ink-700)",
+                          fontSize: 10,
+                        }}
+                      >
+                        enrolling {r.enrolment_recording_count ?? 0}/
+                        {r.enrolment_recordings_required ?? 10}
+                      </span>
+                    )}
                     {r.baseline_locked_at && (
                       <span
                         style={{
@@ -621,7 +636,10 @@ function ResidentsTable({ rows, alertsByProfile, loading, onOpen, onIssueLink })
                   </div>
                 </td>
                 <td style={cellBody(12, 14)}>
-                  <ConcernBadge value={concern} />
+                  <ConcernBadge
+                    value={concern}
+                    enrolling={!r.baseline_locked_at}
+                  />
                 </td>
                 <td style={cellBody(12, 14)}>
                   <div className="flex flex-wrap gap-1">
@@ -725,7 +743,24 @@ function CopyLinkButton({ resident }) {
 }
 
 
-function ConcernBadge({ value }) {
+function ConcernBadge({ value, enrolling = false }) {
+  if (enrolling && (value == null || value === 0)) {
+    return (
+      <span
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          padding: "3px 9px",
+          borderRadius: 6,
+          background: "var(--bg-cream)",
+          color: "var(--ink-600)",
+        }}
+        title="Concern score is available after baseline is locked (10 recordings)"
+      >
+        Enrolling
+      </span>
+    );
+  }
   if (value == null)
     return <span style={{ fontSize: 12, color: "var(--ink-300)" }}>—</span>;
   const v = Math.round(value);
