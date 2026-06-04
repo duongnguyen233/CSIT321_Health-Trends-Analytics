@@ -1,6 +1,6 @@
-# Slim install for Azure App Service (CI + zip deploy).
-# Full voice ML (openSMILE, Praat, faster-whisper, etc.) is optional on server;
-# those import lazily — API starts without them; voice uploads may fail until added.
+# Azure App Service deploy bundle (built in CI via Docker python:3.12-slim-bullseye).
+# NOT the full requirements.txt (torch+whisper+spacy are ~2GB+ and omitted here).
+# Voice screening: av/onnxruntime/opensmile/praat/torch CPU — required for /api/voice/v2/upload processing.
 
 fastapi==0.119.0
 uvicorn==0.37.0
@@ -20,3 +20,11 @@ joblib>=1.4
 scikit-learn>=1.5
 soundfile>=0.12
 ruptures>=1.1
+# Voice pipeline (resident record link + nurse dashboard)
+av>=12.0.0
+librosa>=0.10
+onnxruntime>=1.16
+silero-vad>=5.1
+opensmile>=2.5
+praat-parselmouth>=0.4.4
+torch>=2.0

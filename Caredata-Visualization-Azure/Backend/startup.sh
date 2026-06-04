@@ -1,9 +1,9 @@
 #!/bin/bash
 # Azure App Service (Linux) — Portal Startup Command:  bash startup.sh
-# Deploy bundle: 2026-05-31-v4 (no bcrypt in app or python_packages)
+# Deploy bundle: 2026-06-04-v5 (voice: av/onnxruntime/opensmile/torch in python_packages)
 set -euo pipefail
 cd /home/site/wwwroot
-echo "CareData API startup bundle 2026-05-31-v4"
+echo "CareData API startup bundle 2026-06-04-v5"
 
 # CI deploy uses python_packages/ (visible). Legacy zips may use .python_packages/.
 for SITE_PKG in \
@@ -42,7 +42,7 @@ _pick_requirements() {
     echo "requirements-azure.txt"
     return
   fi
-  if [[ -f requirements.txt ]] && ! grep -qE '^(faster-whisper|torch|opensmile|spacy)' requirements.txt 2>/dev/null; then
+  if [[ -f requirements.txt ]] && ! grep -qE '^(faster-whisper|spacy)' requirements.txt 2>/dev/null; then
     echo "requirements.txt"
     return
   fi
